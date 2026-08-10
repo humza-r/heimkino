@@ -19,8 +19,8 @@ window.CONFIG = {
      Once your Google Web App URL is ready (see README, step 6),
      paste it into endpoint below, THEN change backend to
      "appsscript". That single switch makes the site live.        */
-  backend: "demo",         // "demo" while testing, "appsscript" when live
-  endpoint: "",            // paste your Apps Script /exec URL here, in quotes
+  backend: "appsscript",         // "demo" while testing, "appsscript" when live
+  endpoint: "https://script.google.com/macros/s/AKfycbyeUbzH9B0IoJViZs3v-SxTsG7TxznFjIs_My3Oe2-hlky_ridbLAa9oK-raKBlh3ZA/exec",            // paste your Apps Script /exec URL here, in quotes
   inviteCode: "",          // "" = the director's name, hyphenated (ridley-scott). Or set your own word.
 
   /* ---- house defaults (rarely change) ---- */
