@@ -460,7 +460,7 @@
             <label>Leave this empty</label>
             <input id="website" type="text" tabindex="-1" autocomplete="off">
           </div>
-          <button class="cta" type="submit" id="res-go" ${full?'disabled':''}>${full?'Full':'Reserve'}</button>
+          <button class="cta" type="submit" id="res-go" ${full?'disabled':''}>${full?'Full':'Confirm'}</button>
           <div class="msg" id="rsvp-msg" role="status" aria-live="polite"></div>
         </form>`;
     }
@@ -489,10 +489,10 @@
         const fd = new FormData();
         fd.append('names', names.join(', ')); fd.append('code', code); fd.append('date', C.next.date);
         const r = await fetch(C.endpoint, { method:'POST', headers:{'Accept':'application/json'}, body:fd });
-        if (!r.ok) throw new Error('Could not reserve, try again.');
+        if (!r.ok) throw new Error('Could not confirm, try again.');
       }
       myRes = { id, names }; saveMine(); renderRsvp();
-      rsvpMsg('Reserved for ' + names.join(', ') + '.', 'ok');
+      rsvpMsg('Confirmed Attending' + names.join(', ') + '.', 'ok');
     }catch(err){ rsvpMsg(err.message || 'Something went wrong.', 'err'); go.disabled = false; }
   }
 
