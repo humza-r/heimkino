@@ -63,13 +63,18 @@
   section{ padding-top:calc(var(--u)*9); }
   .sec-label{ font-family:var(--mono); font-size:11px; letter-spacing:0.24em; text-transform:uppercase; color:var(--muted); }
 
-  /* ---- current screening (compact) ---- */
-  .cur-date{ font-family:var(--mono); font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); margin-top:calc(var(--u)*1.5); }
-  .cur-title{ font-family:var(--serif); font-weight:400; font-size:clamp(30px,5.5vw,52px); line-height:1.02;
-    letter-spacing:-0.01em; margin-top:calc(var(--u)*1); }
-  .cur-meta{ font-family:var(--mono); font-size:12px; letter-spacing:0.06em; color:var(--muted); margin-top:calc(var(--u)*1.5); }
-  .cur-syn{ font-family:var(--serif); font-size:20px; line-height:1.5; color:#d8d7d0; margin-top:calc(var(--u)*2.5); max-width:46ch; }
-  .cur-run{ font-family:var(--mono); font-size:12px; letter-spacing:0.08em; color:var(--muted); margin-top:calc(var(--u)*2.5); }
+  /* ---- current screening (margin + afterimage) ---- */
+  .sec-label .cd{ color:var(--light); }
+  .next-grid{ margin-top:calc(var(--u)*2.5); display:grid; grid-template-columns:116px 1fr; gap:calc(var(--u)*3); }
+  .margin{ font-family:var(--mono); font-size:12px; color:var(--muted); line-height:1.95; padding-top:calc(var(--u)*1.5); }
+  .margin b{ color:var(--light); font-weight:400; }
+  .margin .run{ display:inline-block; margin-top:8px; padding-top:9px; border-top:1px solid var(--line); color:var(--light); }
+  .cur-title{ font-family:var(--serif); font-weight:400; font-size:clamp(44px,9vw,84px); line-height:0.94;
+    letter-spacing:-0.01em; }
+  .cur-meta{ font-family:var(--mono); font-size:12px; letter-spacing:0.06em; color:var(--muted); margin-top:calc(var(--u)*2); }
+  .cur-syn{ font-family:var(--serif); font-size:20px; line-height:1.5; color:#d8d7d0; margin-top:calc(var(--u)*2.5); max-width:44ch; }
+  @keyframes afterimage{ from{ filter:invert(1); } to{ filter:invert(0); } }
+  .cur-title.flash{ animation:afterimage .9s ease forwards; }
 
   /* gated blocks: redacted until the invitation is entered (fetched from backend) */
   .gated{ margin-top:calc(var(--u)*3); display:grid; gap:calc(var(--u)*2.5); max-width:440px; }
@@ -189,6 +194,8 @@
 
   @media (max-width:560px){
     .prow{ grid-template-columns:1fr; gap:6px; }
+    .next-grid{ grid-template-columns:1fr; gap:calc(var(--u)*1.5); }
+    .margin{ padding-top:0; }
   }
   @media (prefers-reduced-motion:reduce){
     *{ transition:none !important; animation:none !important; }
@@ -251,6 +258,7 @@
   let agg   = null;            // { confirmed, capacity }
   let sessionCode = null;      // the invitation code, held in memory once unlocked (not persisted)
   let roster = null;           // [names] of who is coming - only after unlock
+  let flashed = false;         // afterimage flash plays once, on first render
 
   async function post(action, payload){
     if (!EP) throw new Error('Reservations are not connected yet.');
@@ -288,30 +296,37 @@
   }
   function renderCurrent(){
     const n = C.next, sch = C.schedule || {};
-    const meta = [n.director, n.year, n.edition, n.runtime].filter(Boolean).join(' / ');
+    const meta = [n.director, n.year, n.edition].filter(Boolean).join(', ');
     const filmStart = n.time || sch.film || '';
     const unlocked = !!gated;
-    const run = [ ['Doors', sch.doors], ['Trailers', sch.trailers], ['Film', filmStart] ]
-      .filter(x => x[1]).map(x => x[0] + ' ' + esc(x[1])).join('  \u00b7  ');
+    const marginRun = [
+      sch.doors ? 'Doors ' + esc(sch.doors) : '',
+      sch.trailers ? 'Trailers ' + esc(sch.trailers) : '',
+      filmStart ? 'Film ' + esc(filmStart) : ''
+    ].filter(Boolean).join('<br>') + (n.runtime ? '<br><span class="run">' + esc(n.runtime) + '</span>' : '');
     const attendance = (gated && roster && roster.length)
       ? `<div class="coming"><div class="k">Coming, ${roster.length}</div><div class="coming-names">${roster.map(esc).join(' \u00b7 ')}</div></div>`
       : `<div class="count">${countText()}</div>`;
+    const flashCls = flashed ? '' : ' flash'; flashed = true;
 
     $('#current').innerHTML = `
-      <div class="sec-label">Next screening</div>
-      <div class="cur-date">${esc(fmt(n.date,{weekday:'short',day:'2-digit',month:'short',year:'numeric'}))}</div>
-      <h1 class="cur-title">${esc(n.title || 'To be announced')}</h1>
-      <div class="cur-meta">${esc(meta)}</div>
-      ${n.synopsis ? `<p class="cur-syn">${esc(n.synopsis)}</p>` : ''}
-      <div class="cur-run">${run}</div>
-      <div class="gated">
-        <div class="g-item ${unlocked?'':'locked'}" id="g-note">
-          <div class="k">House note</div>
-          <span class="redact" style="width:300px"></span>
-          <div class="v hnote">${esc(gated?gated.houseNote:'')}</div>
+      <div class="sec-label">Next screening &nbsp;/&nbsp; <span class="cd">${esc(fmt(n.date,{weekday:'short',day:'2-digit',month:'short',year:'numeric'}))}</span></div>
+      <div class="next-grid">
+        <div class="margin">${marginRun}</div>
+        <div>
+          <h1 class="cur-title${flashCls}">${esc(n.title || 'To be announced')}</h1>
+          <div class="cur-meta">${esc(meta)}</div>
+          ${n.synopsis ? `<p class="cur-syn">${esc(n.synopsis)}</p>` : ''}
+          <div class="gated">
+            <div class="g-item ${unlocked?'':'locked'}" id="g-note">
+              <div class="k">House note</div>
+              <span class="redact" style="width:300px"></span>
+              <div class="v hnote">${esc(gated?gated.houseNote:'')}</div>
+            </div>
+          </div>
+          ${attendance}
         </div>
-      </div>
-      ${attendance}`;
+      </div>`;
   }
 
   // ---------- admission ----------
