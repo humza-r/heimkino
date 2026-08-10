@@ -52,31 +52,27 @@
   .label{ font-family:var(--mono); font-size:11px; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); }
 
   /* ---- masthead ---- */
-  header{ display:flex; justify-content:space-between; align-items:flex-start;
-    padding-bottom:calc(var(--u)*4); border-bottom:1px solid var(--line); gap:16px; }
+  header{ padding-bottom:calc(var(--u)*4); border-bottom:1px solid var(--line); }
   .mark{ font-family:var(--mono); font-weight:700; font-size:15px; letter-spacing:0.42em; }
   .mark small{ display:block; font-weight:400; font-size:11px; letter-spacing:0.22em; color:var(--muted); margin-top:9px; }
-  .issue{ font-family:var(--mono); font-weight:700; font-size:15px; letter-spacing:0.14em; color:var(--accent); text-align:right; }
-  .issue small{ display:block; font-weight:400; font-size:11px; letter-spacing:0.22em; color:var(--muted); margin-top:9px; }
+  .head-loc{ margin-top:calc(var(--u)*1.75); min-height:14px; }
+  .head-loc .head-loc-v{ display:none; font-family:var(--mono); font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); }
+  .head-loc.revealed .head-loc-v{ display:inline; }
+  .head-loc.revealed .redact{ display:none; }
 
   section{ padding-top:calc(var(--u)*9); }
   .sec-label{ font-family:var(--mono); font-size:11px; letter-spacing:0.24em; text-transform:uppercase; color:var(--muted); }
 
-  /* ---- current screening ---- */
-  .cur-date{ font-family:var(--mono); font-size:12px; letter-spacing:0.14em; color:var(--muted); margin-top:calc(var(--u)*2); }
-  .cur-title{ font-family:var(--serif); font-weight:400; font-size:clamp(48px,11vw,96px); line-height:0.92;
-    letter-spacing:-0.01em; margin-top:calc(var(--u)*2); }
-  .cur-meta{ font-family:var(--mono); font-size:12px; letter-spacing:0.06em; color:var(--muted); margin-top:calc(var(--u)*3); line-height:1.9; }
-  .cur-syn{ font-family:var(--serif); font-size:22px; line-height:1.5; color:#d8d7d0; margin-top:calc(var(--u)*3.5); max-width:42ch; }
-
-  /* running order */
-  .run{ display:flex; gap:calc(var(--u)*4); margin-top:calc(var(--u)*5); font-family:var(--mono); flex-wrap:wrap; }
-  .run div{ min-width:64px; }
-  .run .k{ font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color:var(--muted); }
-  .run .v{ font-size:15px; margin-top:6px; color:var(--light); }
+  /* ---- current screening (compact) ---- */
+  .cur-date{ font-family:var(--mono); font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); margin-top:calc(var(--u)*1.5); }
+  .cur-title{ font-family:var(--serif); font-weight:400; font-size:clamp(30px,5.5vw,52px); line-height:1.02;
+    letter-spacing:-0.01em; margin-top:calc(var(--u)*1); }
+  .cur-meta{ font-family:var(--mono); font-size:12px; letter-spacing:0.06em; color:var(--muted); margin-top:calc(var(--u)*1.5); }
+  .cur-syn{ font-family:var(--serif); font-size:20px; line-height:1.5; color:#d8d7d0; margin-top:calc(var(--u)*2.5); max-width:46ch; }
+  .cur-run{ font-family:var(--mono); font-size:12px; letter-spacing:0.08em; color:var(--muted); margin-top:calc(var(--u)*2.5); }
 
   /* gated blocks: redacted until the invitation is entered (fetched from backend) */
-  .gated{ margin-top:calc(var(--u)*5); display:grid; gap:calc(var(--u)*2.5); max-width:440px; }
+  .gated{ margin-top:calc(var(--u)*3); display:grid; gap:calc(var(--u)*2.5); max-width:440px; }
   .g-item .k{ font-family:var(--mono); font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
   .redact{ display:inline-block; height:15px; border-radius:1px; background:repeating-linear-gradient(90deg,var(--faint) 0 10px,transparent 10px 13px); opacity:.65; }
   .g-item .v{ font-family:var(--serif); font-size:19px; color:var(--light); }
@@ -84,8 +80,11 @@
   .g-item:not(.locked) .redact{ display:none; }
 
   /* count */
-  .count{ margin-top:calc(var(--u)*4); font-family:var(--mono); font-size:12px; letter-spacing:0.08em; color:var(--muted); }
+  .count{ margin-top:calc(var(--u)*3); font-family:var(--mono); font-size:12px; letter-spacing:0.08em; color:var(--muted); }
   .count b{ color:var(--accent); font-weight:700; font-size:14px; }
+  .coming{ margin-top:calc(var(--u)*3); max-width:460px; }
+  .coming .k{ font-family:var(--mono); font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); margin-bottom:9px; }
+  .coming-names{ font-family:var(--serif); font-size:19px; line-height:1.5; color:var(--light); }
 
   /* ---- admission ---- */
   .admit{ margin-top:calc(var(--u)*3); max-width:440px; }
@@ -200,13 +199,16 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="mark" id="mark">HEIMKINO<small id="mark-sub"></small></div>
+    <div class="mark" id="mark">HEIMKINO</div>
+    <div class="head-loc" id="head-loc">
+      <span class="redact" style="width:200px"></span>
+      <span class="head-loc-v" id="head-loc-v"></span>
+    </div>
   </header>
 
   <section id="current"></section>
 
   <section id="admission">
-    <div class="sec-label">Admission</div>
     <div id="admit-body"></div>
   </section>
 
@@ -247,6 +249,8 @@
   let slip  = null;            // { names[], party, date } - this user's reservation
   let gated = null;            // { venue, houseNote } - from backend only, never persisted
   let agg   = null;            // { confirmed, capacity }
+  let sessionCode = null;      // the invitation code, held in memory once unlocked (not persisted)
+  let roster = null;           // [names] of who is coming - only after unlock
 
   async function post(action, payload){
     if (!EP) throw new Error('Reservations are not connected yet.');
@@ -260,17 +264,19 @@
   // ---------- masthead + footer ----------
   function renderChrome(){
     $('#mark').firstChild.nodeValue = C.wordmark;
-    $('#mark-sub').textContent = (C.city || '').toUpperCase();
-    $('#foot-left').textContent = C.wordmark + ' / ' + (C.city || '');
-    $('#foot-right').textContent = 'Invitation only';
+    $('#foot-left').textContent = C.wordmark;
+    $('#foot-right').textContent = '';
     document.title = C.wordmark + ' \u00b7 ' + C.next.title;
   }
 
-  // label-free redacted location banner in the footer; revealed only when unlocked
+  // label-free redacted location banners (header + footer); revealed only when unlocked
   function renderVenue(){
-    const el = $('#foot-loc'); if(!el) return;
-    if (gated && gated.venue){ el.classList.add('revealed'); $('#foot-loc-v').textContent = gated.venue; }
-    else { el.classList.remove('revealed'); $('#foot-loc-v').textContent = ''; }
+    const v = (gated && gated.venue) ? gated.venue : '';
+    [['#head-loc','#head-loc-v'], ['#foot-loc','#foot-loc-v']].forEach(([b,val])=>{
+      const el = $(b); if(!el) return;
+      if (v){ el.classList.add('revealed'); $(val).textContent = v; }
+      else { el.classList.remove('revealed'); $(val).textContent = ''; }
+    });
   }
 
   // ---------- current screening ----------
@@ -282,20 +288,22 @@
   }
   function renderCurrent(){
     const n = C.next, sch = C.schedule || {};
-    const meta = [ [n.director, n.year].filter(Boolean).join(' / '),
-                   [n.edition, n.runtime].filter(Boolean).join(' / ') ].filter(Boolean);
+    const meta = [n.director, n.year, n.edition, n.runtime].filter(Boolean).join(' / ');
     const filmStart = n.time || sch.film || '';
     const unlocked = !!gated;
     const run = [ ['Doors', sch.doors], ['Trailers', sch.trailers], ['Film', filmStart] ]
-      .filter(x => x[1]).map(x => `<div><div class="k">${x[0]}</div><div class="v">${esc(x[1])}</div></div>`).join('');
+      .filter(x => x[1]).map(x => x[0] + ' ' + esc(x[1])).join('  \u00b7  ');
+    const attendance = (gated && roster && roster.length)
+      ? `<div class="coming"><div class="k">Coming, ${roster.length}</div><div class="coming-names">${roster.map(esc).join(' \u00b7 ')}</div></div>`
+      : `<div class="count">${countText()}</div>`;
 
     $('#current').innerHTML = `
       <div class="sec-label">Next screening</div>
-      <div class="cur-date">${esc(fmt(n.date,{weekday:'long',day:'2-digit',month:'long',year:'numeric'}))}</div>
+      <div class="cur-date">${esc(fmt(n.date,{weekday:'short',day:'2-digit',month:'short',year:'numeric'}))}</div>
       <h1 class="cur-title">${esc(n.title || 'To be announced')}</h1>
-      <div class="cur-meta">${meta.map(esc).join('<br>')}</div>
+      <div class="cur-meta">${esc(meta)}</div>
       ${n.synopsis ? `<p class="cur-syn">${esc(n.synopsis)}</p>` : ''}
-      <div class="run">${run}</div>
+      <div class="cur-run">${run}</div>
       <div class="gated">
         <div class="g-item ${unlocked?'':'locked'}" id="g-note">
           <div class="k">House note</div>
@@ -303,7 +311,7 @@
           <div class="v hnote">${esc(gated?gated.houseNote:'')}</div>
         </div>
       </div>
-      <div class="count">${countText()}</div>`;
+      ${attendance}`;
   }
 
   // ---------- admission ----------
@@ -317,6 +325,7 @@
       return;
     }
 
+    // has a reservation -> admission slip
     if (slip){
       body.innerHTML = `
         <div class="slip">
@@ -338,66 +347,82 @@
       return;
     }
 
+    // unlocked for this session -> RSVP form (no code field; the session is already open)
+    if (sessionCode){
+      body.innerHTML = `
+        <form id="admit-form" autocomplete="off">
+          <div class="field">
+            <label>Who is coming</label>
+            <div id="name-rows"><div class="namerow"><input class="rn" type="text" placeholder="name" required aria-label="Name"></div></div>
+            <button type="button" class="ghost" id="add-row" style="margin-top:6px">Add someone</button>
+          </div>
+          <div class="hp" aria-hidden="true"><label>Leave empty</label><input id="website" type="text" tabindex="-1" autocomplete="off"></div>
+          <div class="actions"><button class="btn" type="submit" id="confirm-go">Confirm attendance</button></div>
+          <div class="msg" id="admit-msg" role="status" aria-live="polite"></div>
+        </form>`;
+      return;
+    }
+
+    // locked -> invitation entry; a valid code opens the session
     body.innerHTML = `
-      <form id="admit-form" autocomplete="off">
-        <div class="field">
-          <label>Who is coming</label>
-          <div id="name-rows"><div class="namerow"><input class="rn" type="text" placeholder="name" required aria-label="Name"></div></div>
-          <button type="button" class="ghost" id="add-row" style="margin-top:6px">Add someone</button>
-        </div>
+      <form id="unlock-form" autocomplete="off">
         <div class="field">
           <label for="code">Invitation</label>
-          <input id="code" type="text" placeholder="from your invitation" required aria-label="Invitation code">
+          <input id="code" type="text" placeholder="required" required aria-label="Invitation code">
         </div>
-        <div class="hp" aria-hidden="true"><label>Leave empty</label><input id="website" type="text" tabindex="-1" autocomplete="off"></div>
-        <div class="actions">
-          <button class="btn" type="submit" id="confirm-go">Confirm attendance</button>
-          <button type="button" class="textbtn" id="reveal-only">Reveal details only</button>
-        </div>
+        <div class="hp" aria-hidden="true"><label>Leave empty</label><input id="u-hp" type="text" tabindex="-1" autocomplete="off"></div>
+        <div class="actions"><button class="btn" type="submit" id="unlock-go">Enter</button></div>
         <div class="msg" id="admit-msg" role="status" aria-live="polite"></div>
       </form>`;
   }
 
-  function reveal(g){ gated = g; renderCurrent(); renderVenue(); }
+  function reveal(g){ gated = g; renderVenue(); renderCurrent(); }
 
-  async function confirmAttend(form){
-    const names = [...form.querySelectorAll('.rn')].map(i=>i.value.trim()).filter(Boolean);
+  // the invitation opens the session: reveals location, house note and roster, and enables RSVP
+  async function unlockSession(form){
     const code = form.querySelector('#code').value.trim();
-    const hp = form.querySelector('#website').value;
-    if (hp) return;                                            // honeypot
-    if (Date.now() - startedAt < 1500) return admitMsg('One moment, then try again.', 'err');
-    if (!names.length) return admitMsg('Add at least one name.', 'err');
-    if (names.length > 6) return admitMsg('Up to 6 per reservation.', 'err');
-    if (!code) return admitMsg('The invitation is required.', 'err');
-
-    const go = form.querySelector('#confirm-go'); go.disabled = true; admitMsg('Confirming\u2026', 'ok');
+    const hp = form.querySelector('#u-hp').value;
+    if (hp) return;
+    if (!code) return admitMsg('Enter your invitation.', 'err');
+    const go = form.querySelector('#unlock-go'); go.disabled = true; admitMsg('Checking\u2026', 'ok');
     try{
-      const d = await post('create', { names, code, website:hp, date:C.next.date, title:C.next.title });
-      mine = { reservationId:d.reservationId, editToken:d.editToken }; store.set(mine);
-      slip = { names:d.names, party:d.party, date:C.next.date };
-      agg = { confirmed:d.confirmed, capacity:d.capacity };
+      const d = await post('unlock', { code, website:hp });
+      sessionCode = code;
+      roster = d.coming || [];
       reveal({ venue:d.venue, houseNote:d.houseNote });
       renderAdmission();
-      admitMsg('Confirmed. The address is above.', 'ok');
+      admitMsg('Welcome in. RSVP is open below and the address is shown.', 'ok');
     }catch(err){ admitMsg(err.message, 'err'); go.disabled = false; }
   }
 
-  async function revealOnly(form){
-    const code = form.querySelector('#code').value.trim();
-    if (!code) return admitMsg('Enter your invitation to reveal the details.', 'err');
-    admitMsg('Checking\u2026', 'ok');
+  async function confirmAttend(form){
+    const names = [...form.querySelectorAll('.rn')].map(i=>i.value.trim()).filter(Boolean);
+    const hp = form.querySelector('#website').value;
+    if (hp) return;
+    if (Date.now() - startedAt < 1500) return admitMsg('One moment, then try again.', 'err');
+    if (!names.length) return admitMsg('Add at least one name.', 'err');
+    if (names.length > 6) return admitMsg('Up to 6 per reservation.', 'err');
+    if (!sessionCode) return admitMsg('Enter your invitation first.', 'err');
+
+    const go = form.querySelector('#confirm-go'); go.disabled = true; admitMsg('Confirming\u2026', 'ok');
     try{
-      const d = await post('unlock', { code });
+      const d = await post('create', { names, code:sessionCode, website:hp, date:C.next.date, title:C.next.title });
+      mine = { reservationId:d.reservationId, editToken:d.editToken }; store.set(mine);
+      slip = { names:d.names, party:d.party, date:C.next.date };
+      agg = { confirmed:d.confirmed, capacity:d.capacity };
+      roster = d.coming || roster;
       reveal({ venue:d.venue, houseNote:d.houseNote });
-      admitMsg('Details revealed above.', 'ok');
-    }catch(err){ admitMsg(err.message, 'err'); }
+      renderAdmission();
+      admitMsg('Confirmed.', 'ok');
+    }catch(err){ admitMsg(err.message, 'err'); go.disabled = false; }
   }
 
   async function saveNames(names){
     const d = await post('update', { reservationId:mine.reservationId, editToken:mine.editToken, names });
-    if (d.cancelled){ mine=null; slip=null; store.clear(); }
+    if (d.cancelled){ mine=null; slip=null; store.clear(); if(!sessionCode){ gated=null; roster=null; renderVenue(); } }
     else { slip.names = d.names; slip.party = d.party; }
     if (typeof d.confirmed === 'number') agg = { confirmed:d.confirmed, capacity:d.capacity };
+    if (d.coming) roster = d.coming;
     renderAdmission(); renderCurrent();
   }
   async function addName(raw){
@@ -414,20 +439,25 @@
     try{
       const d = await post('cancel', { reservationId:mine.reservationId, editToken:mine.editToken });
       agg = { confirmed:d.confirmed, capacity:d.capacity };
-      mine=null; slip=null; store.clear(); renderAdmission(); renderCurrent(); admitMsg('Your reservation is cancelled.','ok');
+      if (typeof d !== 'undefined' && d.coming) roster = d.coming;
+      mine=null; slip=null; store.clear();
+      if (!sessionCode){ gated=null; roster=null; renderVenue(); }   // re-lock if the session was opened only by a stored reservation
+      renderAdmission(); renderCurrent(); admitMsg('Your reservation is cancelled.','ok');
     }catch(err){ admitMsg(err.message,'err'); }
   }
 
   function wireAdmission(){
     const root = $('#admission');
-    root.addEventListener('submit', e => { if (e.target.id==='admit-form'){ e.preventDefault(); confirmAttend(e.target); } });
+    root.addEventListener('submit', e => {
+      if (e.target.id==='unlock-form'){ e.preventDefault(); unlockSession(e.target); }
+      else if (e.target.id==='admit-form'){ e.preventDefault(); confirmAttend(e.target); }
+    });
     root.addEventListener('click', e => {
       const t = e.target;
       if (t.id === 'add-row'){ const row=document.createElement('div'); row.className='namerow';
         row.innerHTML='<input class="rn" type="text" placeholder="name" autocomplete="off" aria-label="Name"><button type="button" class="rm ghost" data-rmrow="1">remove</button>';
         $('#name-rows').appendChild(row); row.querySelector('.rn').focus(); }
       else if (t.dataset.rmrow){ t.closest('.namerow').remove(); }
-      else if (t.id === 'reveal-only'){ revealOnly($('#admit-form')); }
       else if (t.id === 'add-go'){ addName($('#add-name').value); }
       else if (t.dataset.rm !== undefined){ removeName(parseInt(t.dataset.rm,10)); }
       else if (t.id === 'cancel-res'){ cancelRes(); }
@@ -574,9 +604,10 @@
       const d = await post('mine', { reservationId:mine.reservationId, editToken:mine.editToken });
       slip = { names:d.names, party:d.party, date:d.date };
       if (typeof d.confirmed==='number') agg={confirmed:d.confirmed, capacity:d.capacity};
+      roster = d.coming || null;
       reveal({ venue:d.venue, houseNote:d.houseNote });
       renderAdmission();
-    }catch(_){ mine=null; store.clear(); renderAdmission(); }   // reservation gone → reset quietly
+    }catch(_){ mine=null; store.clear(); renderAdmission(); }   // reservation gone -> reset quietly
   }
 
   // ---------- init ----------
