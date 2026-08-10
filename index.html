@@ -3,18 +3,16 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Heimkino &#183; Kingdom of Heaven</title>
-<meta name="description" content="Heimkino is a small, invitation-only screening programme in Berlin. Kingdom of Heaven, Director's Cut. 10 August, doors 19:15.">
+<title>Heimkino</title>
+<meta name="description" content="Heimkino is a small, invitation-only screening programme in Berlin.">
 <meta name="theme-color" content="#0d0d0f">
 <meta property="og:site_name" content="Heimkino">
-<meta property="og:title" content="Heimkino &#183; Kingdom of Heaven">
-<meta property="og:description" content="Director's Cut. 10 August &#183; Doors 19:15 &#183; Film 20:25. Invitation only.">
+<meta property="og:title" content="Heimkino">
+<meta property="og:description" content="An invitation-only screening programme in Berlin.">
 <meta property="og:type" content="website">
-<meta property="og:image" content="og-card.png">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Heimkino &#183; Kingdom of Heaven">
-<meta name="twitter:description" content="Director's Cut. 10 August &#183; Doors 19:15 &#183; Film 20:25. Invitation only.">
-<meta name="twitter:image" content="og-card.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Heimkino">
+<meta name="twitter:description" content="An invitation-only screening programme in Berlin.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
@@ -56,8 +54,8 @@
   /* ---- masthead ---- */
   header{ display:flex; justify-content:space-between; align-items:flex-start;
     padding-bottom:calc(var(--u)*4); border-bottom:1px solid var(--line); gap:16px; }
-  .mark{ font-family:var(--mono); font-weight:700; font-size:15px; letter-spacing:0.42em; text-indent:0.42em; }
-  .mark small{ display:block; font-weight:400; font-size:11px; letter-spacing:0.22em; text-indent:0.22em; color:var(--muted); margin-top:9px; }
+  .mark{ font-family:var(--mono); font-weight:700; font-size:15px; letter-spacing:0.42em; }
+  .mark small{ display:block; font-weight:400; font-size:11px; letter-spacing:0.22em; color:var(--muted); margin-top:9px; }
   .issue{ font-family:var(--mono); font-weight:700; font-size:15px; letter-spacing:0.14em; color:var(--accent); text-align:right; }
   .issue small{ display:block; font-weight:400; font-size:11px; letter-spacing:0.22em; color:var(--muted); margin-top:9px; }
 
@@ -183,8 +181,12 @@
   .att.revealed .att-names{ display:inline; }
 
   footer{ margin-top:calc(var(--u)*16); padding-top:calc(var(--u)*3); border-top:1px solid var(--line);
-    font-family:var(--mono); font-size:11px; letter-spacing:0.1em; color:var(--muted);
-    display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; }
+    font-family:var(--mono); font-size:11px; letter-spacing:0.1em; color:var(--muted); }
+  .foot-loc{ margin-bottom:calc(var(--u)*2.5); min-height:15px; }
+  .foot-loc .foot-loc-v{ display:none; color:var(--light); letter-spacing:0.08em; text-transform:uppercase; }
+  .foot-loc.revealed .foot-loc-v{ display:inline; }
+  .foot-loc.revealed .redact{ display:none; }
+  .foot-row{ display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; }
 
   @media (max-width:560px){
     .prow{ grid-template-columns:1fr; gap:6px; }
@@ -212,8 +214,14 @@
   <section id="past"></section>
 
   <footer>
-    <span id="foot-left"></span>
-    <span id="foot-right"></span>
+    <div class="foot-loc" id="foot-loc">
+      <span class="redact" style="width:240px"></span>
+      <span class="foot-loc-v" id="foot-loc-v"></span>
+    </div>
+    <div class="foot-row">
+      <span id="foot-left"></span>
+      <span id="foot-right"></span>
+    </div>
   </footer>
 </div>
 
@@ -258,6 +266,13 @@
     document.title = C.wordmark + ' \u00b7 ' + C.next.title;
   }
 
+  // label-free redacted location banner in the footer; revealed only when unlocked
+  function renderVenue(){
+    const el = $('#foot-loc'); if(!el) return;
+    if (gated && gated.venue){ el.classList.add('revealed'); $('#foot-loc-v').textContent = gated.venue; }
+    else { el.classList.remove('revealed'); $('#foot-loc-v').textContent = ''; }
+  }
+
   // ---------- current screening ----------
   function countText(){
     if (!EP) return '';
@@ -282,11 +297,6 @@
       ${n.synopsis ? `<p class="cur-syn">${esc(n.synopsis)}</p>` : ''}
       <div class="run">${run}</div>
       <div class="gated">
-        <div class="g-item ${unlocked?'':'locked'}" id="g-venue">
-          <div class="k">Location</div>
-          <span class="redact" style="width:220px"></span>
-          <div class="v">${esc(gated?gated.venue:'')}</div>
-        </div>
         <div class="g-item ${unlocked?'':'locked'}" id="g-note">
           <div class="k">House note</div>
           <span class="redact" style="width:300px"></span>
@@ -348,7 +358,7 @@
       </form>`;
   }
 
-  function reveal(g){ gated = g; renderCurrent(); }
+  function reveal(g){ gated = g; renderCurrent(); renderVenue(); }
 
   async function confirmAttend(form){
     const names = [...form.querySelectorAll('.rn')].map(i=>i.value.trim()).filter(Boolean);
@@ -448,20 +458,6 @@
             </div>
           </div>`).join('')
         : `<div class="prow"><div class="idx"></div><div class="m">Nothing provisional yet.</div></div>`}
-      </div>
-      <div class="wish">
-        <button class="notify" id="wish-toggle" aria-expanded="false">Wish for a film</button>
-        <form class="wform" id="wish-form" hidden>
-          <div class="wrow">
-            <input id="w-film" type="text" placeholder="film" autocomplete="off" aria-label="Film" required>
-            <input id="w-dir" type="text" placeholder="director" autocomplete="off" aria-label="Director" required>
-          </div>
-          <input id="w-by" type="text" placeholder="your name (optional)" autocomplete="off" aria-label="Your name">
-          <input id="w-note" type="text" placeholder="a line on why (optional)" autocomplete="off" aria-label="Why">
-          <div class="whp" aria-hidden="true"><input id="w-hp" type="text" tabindex="-1" autocomplete="off"></div>
-          <div class="actions"><button class="ghost" type="submit" id="wish-go">Send wish</button></div>
-          <div class="nmsg" id="wish-msg" aria-live="polite"></div>
-        </form>
       </div>`;
   }
   async function sendInterest(form, film){
@@ -482,15 +478,10 @@
   }
   function wireUpcoming(){
     const root = $('#upcoming');
-    root.addEventListener('click', e => {
-      if (e.target.id === 'wish-toggle'){ const f=$('#wish-form'); const open=f.hidden; f.hidden=!open;
-        e.target.setAttribute('aria-expanded', String(open)); if(open) $('#w-film').focus(); return; }
-      const t=e.target.closest('.notify'); if(!t || t.id==='wish-toggle') return;
+    root.addEventListener('click', e => { const t=e.target.closest('.notify'); if(!t) return;
       const f=document.getElementById('nf-'+t.dataset.i); const open=f.hidden; f.hidden=!open;
       t.setAttribute('aria-expanded', String(open)); if(open) f.querySelector('.ni-name').focus(); });
-    root.addEventListener('submit', e => {
-      if (e.target.id === 'wish-form'){ e.preventDefault(); sendWish(e.target); return; }
-      if (!e.target.classList.contains('nform')) return;
+    root.addEventListener('submit', e => { if(!e.target.classList.contains('nform')) return;
       e.preventDefault(); sendInterest(e.target, e.target.querySelector('.ni-go').dataset.film); });
   }
 
@@ -536,6 +527,20 @@
             ${present}
           </article>`;
         }).join('')}
+      </div>
+      <div class="wish">
+        <button class="notify" id="wish-toggle" aria-expanded="false">Wish for a film</button>
+        <form class="wform" id="wish-form" hidden>
+          <div class="wrow">
+            <input id="w-film" type="text" placeholder="film" autocomplete="off" aria-label="Film" required>
+            <input id="w-dir" type="text" placeholder="director" autocomplete="off" aria-label="Director" required>
+          </div>
+          <input id="w-by" type="text" placeholder="your name (optional)" autocomplete="off" aria-label="Your name">
+          <input id="w-note" type="text" placeholder="a line on why (optional)" autocomplete="off" aria-label="Why">
+          <div class="whp" aria-hidden="true"><input id="w-hp" type="text" tabindex="-1" autocomplete="off"></div>
+          <div class="actions"><button class="ghost" type="submit" id="wish-go">Send wish</button></div>
+          <div class="nmsg" id="wish-msg" aria-live="polite"></div>
+        </form>
       </div>`;
   }
 
@@ -549,6 +554,12 @@
     past.addEventListener('keydown', e => { const b=e.target.closest('.peek'); if(!b) return; if(e.key===' '||e.key==='Enter'){ e.preventDefault(); b.closest('.att').classList.add('revealed'); } });
     past.addEventListener('keyup', e => { const b=e.target.closest('.peek'); if(!b) return; if(e.key===' '||e.key==='Enter'){ b.closest('.att').classList.remove('revealed'); } });
     past.addEventListener('focusout', e => { const b=e.target.closest&&e.target.closest('.peek'); if(b) b.closest('.att').classList.remove('revealed'); });
+    past.addEventListener('click', e => {
+      if (e.target.id !== 'wish-toggle') return;
+      const f=$('#wish-form'); const open=f.hidden; f.hidden=!open;
+      e.target.setAttribute('aria-expanded', String(open)); if(open) $('#w-film').focus();
+    });
+    past.addEventListener('submit', e => { if (e.target.id !== 'wish-form') return; e.preventDefault(); sendWish(e.target); });
   }
 
   // ---------- live aggregate + restore own reservation ----------
@@ -569,7 +580,7 @@
   }
 
   // ---------- init ----------
-  renderChrome(); renderCurrent(); renderAdmission(); renderUpcoming(); renderPast();
+  renderChrome(); renderVenue(); renderCurrent(); renderAdmission(); renderUpcoming(); renderPast();
   wireAdmission(); wireUpcoming(); wirePeek();
   loadState(); restoreMine();
 })();
