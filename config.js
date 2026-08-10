@@ -44,7 +44,7 @@ window.CONFIG = {
   upcoming: [
     { title: "Teorema", director: "Pier Paolo Pasolini", year: 1968 },
     { title: "Ken Park", director: "Larry Clark & Edward Lachman", year: 2002 },
-    { title: "The Gospel According to St. Matthew", director: "Pier Paolo Pasolini", year: 1964 }
+    { title: "The Gospel According to St. Matthew", director: "Pier Paolo Pasolini", year: 1964 },
    { title: "Irréversible", director: "Gaspar Noé", year: 2002 }
   ],
 
