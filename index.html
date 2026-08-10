@@ -430,7 +430,7 @@
     if (myRes){
       body.innerHTML = comingLine + `
         <div class="panel">
-          <div class="panel-h">Your party, ${myRes.names.length} ${myRes.names.length===1?'seat':'seats'}</div>
+          <div class="panel-h">Party, ${myRes.names.length} ${myRes.names.length===1?'seat':'seats'}</div>
           <ul class="names">
             ${myRes.names.map((nm,i)=>`
               <li><span>${esc(nm)}</span><button class="x" data-rm="${i}">remove</button></li>`).join('')}
