@@ -1,70 +1,71 @@
 /* ============================================================
-   HEIMKINO — this is the ONLY file you edit week to week.
-   Change the film, times, and synopsis here, commit, and the
-   live site updates in about a minute. Do not touch index.html.
+   HEIMKINO — PUBLIC front-end config. This file is published to
+   GitHub and is readable by anyone. It must contain NOTHING secret.
 
-   Rules that save you:
-   - every line inside { } ends with a comma, except the last one
-   - every piece of text sits inside "double quotes"
-   - if the site goes blank after an edit, it is almost always a
-     missing comma or quote. Undo your last change and redo it.
+   NOT allowed here (these live only in Apps Script Script Properties):
+     - the invite code
+     - the full street address / house number
+     - the house note
+     - current reservation names / emails
+     - any reservation secret
+   Note: past attendees you list under `attendees` ARE public (the eye is a
+   courtesy screen, not real privacy). Use `attendance: N` to keep them private.
+
+   Allowed here: films, dates, times, runtimes, factual synopses,
+   and attendance counts.
+
+   Weekly edit rules:
+     - every line inside { } ends with a comma, except the last
+     - text sits inside "double quotes"
+     - a blank page after an edit is almost always a missing comma/quote
    ============================================================ */
 window.CONFIG = {
   wordmark: "HEIMKINO",
-  tagline: "Audre-Lorde-Straße",
-  capacity: null,          // null = no limit; set a number to cap seats
+  city: "Berlin",          // public. The street address is invitation-gated (backend only).
+  endpoint: "",            // paste your Apps Script /exec URL here, in quotes
 
-  /* ---- where reservations go ----------------------------------
-     While setting up, leave backend as "demo" (nothing is saved).
-     Once your Google Web App URL is ready (see README, step 6),
-     paste it into endpoint below, THEN change backend to
-     "appsscript". That single switch makes the site live.        */
-  backend: "appsscript",         // "demo" while testing, "appsscript" when live
-  endpoint: "https://script.google.com/macros/s/AKfycbxHHR1l50mzgK8TLm4QQT8tYBLt0XFSAKjaB3y_L-zk6Ok2Mk190JJ7JyhIkjdOKd-9/exec",            // paste your Apps Script /exec URL here, in quotes
-  inviteCode: "",          // "" = the director's name, hyphenated (ridley-scott). Or set your own word.
-
-  /* ---- house defaults (rarely change) ---- */
+  /* ---- house running order (public, non-sensitive) ---- */
   schedule: { doors: "19:15", trailers: "19:30", film: "20:25" },
-  byob: true,              // always bring your own booze
-  popcorn: true,           // popcorn always provided
 
-  /* ---- THE NEXT SCREENING ---- */
+  /* ---- CURRENT SCREENING ---- */
   next: {
-    date: "2026-08-10",              // year-month-day
-    time: "",                        // one-off start time, or "" to use 20:25
-    duration: "194 min",
+    date: "2026-08-10",
+    time: "",                 // "" uses schedule.film
     title: "Kingdom of Heaven",
-    edition: "Director's Cut",       // a cut or restoration, or "" for none
-    director: "Ridley Scott",        // the invite code derives from this name
+    edition: "Director's Cut", // or ""
+    director: "Ridley Scott",
     year: 2005,
-    note: "A Crusades epic of tolerance and conscience: after his wife's death, the blacksmith Balian journeys to Jerusalem and becomes a defender of its fragile peace.",
-   hostNote: "Long one tonight. House drink: Dr. Pepper Float.",  // a personal line for THIS screening only; set to "" to hide it
-    
-     seed: []                         // leave empty; real names arrive from reservations
+    runtime: "194 min",
+    // factual, non-interpretive. Replace with your preferred factual synopsis if you like.
+    synopsis: "During the Crusades, a French blacksmith named Balian travels to Jerusalem and helps defend the city and its people."
   },
 
-  /* ---- UPCOMING (no date yet) ---- */
+  /* ---- UPCOMING (provisional; unnumbered until confirmed) ---- */
   upcoming: [
     { title: "Teorema", director: "Pier Paolo Pasolini", year: 1968 },
     { title: "Ken Park", director: "Larry Clark & Edward Lachman", year: 2002 },
     { title: "The Gospel According to St. Matthew", director: "Pier Paolo Pasolini", year: 1964 }
   ],
 
-  /* ---- PAST (newest first); attendees hide behind the eye ---- */
+  /* ---- PAST (newest first) ----
+     attendees: ["…"]  gives that entry the hold-to-reveal eye (names are PUBLIC
+                       in this file, a courtesy screen, not real privacy).
+     attendance: 3     shows a count only and keeps names off the site (private).
+     Choose whichever you want per entry. */
   past: [
     {
-      date: "2026-07-30",
-      title: "Salò, or the 120 Days of Sodom",
-      director: "Pier Paolo Pasolini", year: 1975,
-      note: "Power as ritual, the body as the last thing left to consume.",
-      attendees: ["Senthuran", "Stav", "Fynn"]
+      date: "2026-08-05",
+      title: "The Piano Teacher", director: "Michael Haneke", year: 2001,
+      attendees: ["Fynn", "Linda"],
+      // factual logline; replace with your preferred synopsis if you like.
+      synopsis: "A piano teacher at a Vienna conservatory, living under her domineering mother, becomes involved with one of her students."
     },
     {
-      date: "2026-08-05",
-      title: "The Piano Teacher",
-      director: "Michael Haneke", year: 2001,
-      note: "Desire routed through discipline, the self played against itself.",
-      attendees: ["Fynn", "Linda"]
+      date: "2026-07-30",
+      title: "Salò, or the 120 Days of Sodom", director: "Pier Paolo Pasolini", year: 1975,
+      attendees: ["Senthuran", "Stav", "Fynn"],
+      // factual logline; replace with your preferred synopsis if you like.
+      synopsis: "In the final days of Fascist Italy, four powerful men confine a group of young people at a villa and subject them to systematic cruelty."
     }
   ]
 };
