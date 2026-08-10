@@ -477,12 +477,11 @@
             <div>
               <div class="t">${esc(u.title)}</div>
               <div class="m">${esc([u.director,u.year].filter(Boolean).join(' / '))}</div>
-              <button class="notify" data-i="${i}" aria-expanded="false">Notify me when dated</button>
               <form class="nform" id="nf-${i}" hidden>
                 <input class="ni-name" type="text" placeholder="name" autocomplete="off" aria-label="Name">
                 <input class="ni-email" type="email" placeholder="email" autocomplete="off" aria-label="Email">
                 <input class="nhp" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
-                <button class="ghost ni-go" type="submit" data-film="${esc(u.title)}">Add me</button>
+                <button class="ghost ni-go" type="submit" data-film="${esc(u.title)}">Notify me</button>
                 <div class="nmsg" aria-live="polite"></div>
               </form>
             </div>
