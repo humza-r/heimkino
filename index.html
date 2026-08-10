@@ -302,7 +302,7 @@ window.CONFIG = {
   <section id="next"></section>
 
   <section id="rsvp">
-    <div class="eyebrow">Reserve a seat</div>
+    <div class="eyebrow">Confirm Attendance</div>
     <div id="rsvp-body"></div>
   </section>
 
@@ -368,7 +368,7 @@ window.CONFIG = {
   function renderNext(){
     const n = C.next, cap = C.capacity, used = seatsConfirmed();
     const capRow = uncapped()
-      ? `<div class="cap"><b>${used}</b> ${used===1?'person':'people'} registered</div>`
+      ? `<div class="cap"><b>${used}</b> ${used===1?'person':'people'} attending</div>`
       : `<div class="cap"><b>${used}</b> of ${cap} reserved, ${Math.max(0,cap-used)} left
            <div class="bar"><i style="width:${Math.min(100,Math.round(used/cap*100))}%"></i></div>
          </div>`;
