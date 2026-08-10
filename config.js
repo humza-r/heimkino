@@ -47,7 +47,7 @@ window.CONFIG = {
   upcoming: [
     { title: "Teorema", director: "Pier Paolo Pasolini", year: 1968 },
     { title: "Ken Park", director: "Larry Clark & Edward Lachman", year: 2002 },
-    { title: "Funny Games", director: "Michael Haneke", year: 1997 }
+    { title: "The Gospel According to St. Matthew", director: "Pier Paolo Pasolini", year: 1964 }
   ],
 
   /* ---- PAST (newest first); attendees hide behind the eye ---- */
