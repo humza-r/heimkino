@@ -22,7 +22,7 @@
 window.CONFIG = {
   wordmark: "HEIMKINO",
   city: "Berlin",          // public. The street address is invitation-gated (backend only).
-  endpoint: "",            // paste your Apps Script /exec URL here, in quotes
+  endpoint: "https://script.google.com/macros/s/AKfycbyeUbzH9B0IoJViZs3v-SxTsG7TxznFjIs_My3Oe2-hlky_ridbLAa9oK-raKBlh3ZA/exec",            // paste your Apps Script /exec URL here, in quotes
 
   /* ---- house running order (public, non-sensitive) ---- */
   schedule: { doors: "19:15", trailers: "19:30", film: "20:25" },
@@ -69,3 +69,6 @@ window.CONFIG = {
     }
   ]
 };
+
+
+    
