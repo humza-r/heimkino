@@ -237,7 +237,7 @@
   const pad = n => String(n).padStart(2,'0');
   const fmt = (iso, opts) => { const d = new Date(iso + 'T00:00:00'); return isNaN(d) ? iso : d.toLocaleDateString('en-GB', opts); };
 
-  // localStorage holds ONLY opaque reservation tokens for this browser's own reservation
+  // localStorage holds ONLY opaque  tokens for this browser's own 
   const KEY = 'heimkino:res';
   const store = {
     get(){ try{ return JSON.parse(localStorage.getItem(KEY)); }catch(_){ return null; } },
@@ -245,7 +245,7 @@
     clear(){ try{ localStorage.removeItem(KEY); }catch(_){ } }
   };
 
-  let mine  = store.get();     // { reservationId, editToken } or null
+  let mine  = store.get();     // { Id, editToken } or null
   let slip  = null;            // { names[], party, date } - this user's reservation
   let gated = null;            // { venue, houseNote } - from backend only, never persisted
   let agg   = null;            // { confirmed, capacity }
@@ -340,7 +340,7 @@
           <div class="seats">${slip.party} ${slip.party===1?'seat':'seats'}</div>
           <div class="when">${esc(fmt(slip.date||C.next.date,{day:'2-digit',month:'short',year:'numeric'}).toUpperCase())} \u00b7 Doors ${esc(C.schedule.doors||'')}</div>
           <div class="actions" style="margin-top:calc(var(--u)*2.5)">
-            <button class="textbtn" id="cancel-res">Cancel reservation</button>
+            <button class="textbtn" id="cancel-res">I changed by mind</button>
           </div>
           <div class="msg" id="admit-msg" role="status" aria-live="polite"></div>
         </div>`;
