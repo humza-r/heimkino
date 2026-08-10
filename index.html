@@ -319,7 +319,7 @@
   function renderNext(){
     const n = C.next, cap = C.capacity, used = seatsConfirmed();
     const capRow = uncapped()
-      ? `<div class="cap"><b>${used}</b> ${used===1?'person':'people'} attending</div>`
+      ? `<div class="cap"><b>${used}</b> ${used===1?'person':'people'} attending </div>`
       : `<div class="cap"><b>${used}</b> of ${cap} reserved, ${Math.max(0,cap-used)} left
            <div class="bar"><i style="width:${Math.min(100,Math.round(used/cap*100))}%"></i></div>
          </div>`;
@@ -1154,7 +1154,7 @@
         if (!r.ok) throw new Error('Could not confirm, try again.');
       }
       myRes = { id, names }; saveMine(); renderRsvp();
-      rsvpMsg('Confirmed Attending' + names.join(', ') + '.', 'ok');
+      rsvpMsg('Confirmed Attending ' + names.join(', ') + '.', 'ok');
     }catch(err){ rsvpMsg(err.message || 'Something went wrong.', 'err'); go.disabled = false; }
   }
 
