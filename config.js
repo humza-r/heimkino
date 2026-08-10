@@ -38,7 +38,9 @@ window.CONFIG = {
     director: "Ridley Scott",        // the invite code derives from this name
     year: 2005,
     note: "A Crusades epic of tolerance and conscience: after his wife's death, the blacksmith Balian journeys to Jerusalem and becomes a defender of its fragile peace.",
-    seed: []                         // leave empty; real names arrive from reservations
+   hostNote: "A long one tonight, three hours and fifteen. We begin at 20:25. Dr. Pepper Float on hand.",  // a personal line for THIS screening only; set to "" to hide it
+    
+     seed: []                         // leave empty; real names arrive from reservations
   },
 
   /* ---- UPCOMING (no date yet) ---- */
