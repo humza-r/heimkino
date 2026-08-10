@@ -391,7 +391,7 @@
       roster = d.coming || [];
       reveal({ venue:d.venue, houseNote:d.houseNote });
       renderAdmission();
-      admitMsg('Welcome in. RSVP is open below and the address is shown.', 'ok');
+      admitMsg('Welcome in.', 'ok');
     }catch(err){ admitMsg(err.message, 'err'); go.disabled = false; }
   }
 
