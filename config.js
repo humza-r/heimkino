@@ -20,7 +20,7 @@ window.CONFIG = {
      paste it into endpoint below, THEN change backend to
      "appsscript". That single switch makes the site live.        */
   backend: "appsscript",         // "demo" while testing, "appsscript" when live
-  endpoint: "https://script.google.com/macros/s/AKfycbyeUbzH9B0IoJViZs3v-SxTsG7TxznFjIs_My3Oe2-hlky_ridbLAa9oK-raKBlh3ZA/exec",            // paste your Apps Script /exec URL here, in quotes
+  endpoint: "https://script.google.com/macros/s/AKfycbxHHR1l50mzgK8TLm4QQT8tYBLt0XFSAKjaB3y_L-zk6Ok2Mk190JJ7JyhIkjdOKd-9/exec",            // paste your Apps Script /exec URL here, in quotes
   inviteCode: "",          // "" = the director's name, hyphenated (ridley-scott). Or set your own word.
 
   /* ---- house defaults (rarely change) ---- */
