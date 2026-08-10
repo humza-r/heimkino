@@ -349,7 +349,7 @@
           <div class="next-title">${esc(n.title || 'To be announced')}</div>
           ${line2 ? `<div class="next-sub">${esc(line2)}</div>` : ''}
           ${n.note ? `<div class="next-note">${esc(n.note)}</div>` : ''}
-          ${n.hostNote ? `<div class="hostnote"><span class="hn-l">club note</span>${esc(n.hostNote)}</div>` : ''}
+          ${n.hostNote ? `<div class="hostnote"><span class="hn-l">hosts note</span>${esc(n.hostNote)}</div>` : ''}
           ${standing.length ? `<div class="standing">${standing.map(esc).join(' · ')}</div>` : ''}
           ${capRow}
         </div>
