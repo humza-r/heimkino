@@ -501,7 +501,7 @@
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return set('Add a valid email.','err');
     if (!EP) return set('Not connected yet.','err');
     const go = form.querySelector('.ni-go'); go.disabled=true; set('Adding\u2026','ok');
-    try{ await post('interest', { name, email, film, website:hp }); set('On the list. You will hear from us once it is dated.','ok');
+    try{ await post('interest', { name, email, film, website:hp }); set('Stay tuned.','ok');
       form.querySelector('.ni-name').value=''; form.querySelector('.ni-email').value=''; }
     catch(err){ set(err.message,'err'); }
     finally{ go.disabled=false; }
