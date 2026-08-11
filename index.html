@@ -148,6 +148,9 @@
   .nform .nhp{ position:absolute; left:-9999px; width:1px; height:1px; }
   .nmsg{ flex-basis:100%; font-family:var(--mono); font-size:11px; color:var(--muted); min-height:14px; }
   .nmsg.ok{ color:var(--light); } .nmsg.err{ color:#c98b8b; }
+  .int-line{ display:flex; align-items:baseline; gap:16px; margin-top:11px; }
+  .int-count{ font-family:var(--mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); }
+  .int-line .notify{ margin-top:0; }
 
   /* wish for a film */
   .wish{ margin-top:calc(var(--u)*4); padding-top:calc(var(--u)*3); border-top:1px solid var(--line); }
@@ -183,6 +186,12 @@
   .att-names{ display:none; color:var(--light); text-transform:none; letter-spacing:0.02em; font-size:12px; }
   .att.revealed .att-count{ display:none; }
   .att.revealed .att-names{ display:inline; }
+
+  /* private screening: watched outside the club, kept for the record */
+  .entry.private{ margin-left:calc(var(--u)*4); opacity:.7; }
+  .entry.private::before{ width:7px; height:7px; background:var(--ground); border-color:var(--faint); border-style:dashed; }
+  .entry.private .t{ font-style:italic; }
+  .priv-tag{ font-family:var(--mono); font-size:9px; letter-spacing:0.18em; text-transform:uppercase; color:var(--faint); border:1px solid var(--line); padding:1px 6px; }
 
   footer{ margin-top:calc(var(--u)*16); padding-top:calc(var(--u)*3); border-top:1px solid var(--line);
     font-family:var(--mono); font-size:11px; letter-spacing:0.1em; color:var(--muted); }
@@ -259,6 +268,7 @@
   let sessionCode = null;      // the invitation code, held in memory once unlocked (not persisted)
   let roster = null;           // [names] of who is coming - only after unlock
   let flashed = false;         // afterimage flash plays once, on first render
+  let interestCounts = {};     // { film: count } - public tally for upcoming
 
   // flag-driven current screening with a date fallback:
   //   1) the flagged C.next, if it has a title and its date is today or later
@@ -358,7 +368,7 @@
     }
 
     if (!CUR){
-      body.innerHTML = `<p class="cur-syn" label="next-screening-banner" style="font-size:18px"></p>`;
+      body.innerHTML = `<p class="cur-syn" style="font-size:18px">No screening is open for reservations yet. See what is coming up below.</p>`;
       return;
     }
 
@@ -508,38 +518,46 @@
     $('#upcoming').innerHTML = `
       <div class="sec-label">Upcoming</div>
       <div style="margin-top:calc(var(--u)*2)">
-        ${list.length ? list.map((u,i)=>`
+        ${list.length ? list.map((u,i)=>{
+          const c = interestCounts[u.title] || 0;
+          return `
           <div class="prow">
             <div class="idx">${u.date ? esc(fmt(u.date,{day:'2-digit',month:'short'})) : 'TBC'}</div>
             <div>
               <div class="t">${esc(u.title)}</div>
               <div class="m">${esc([u.director,u.year].filter(Boolean).join(' / '))}</div>
+              <div class="int-line">
+                <span class="int-count">${c} interested</span>
+                <button class="notify" data-i="${i}" aria-expanded="false">I'd come to this</button>
+              </div>
               <form class="nform" id="nf-${i}" hidden>
                 <input class="ni-name" type="text" placeholder="name" autocomplete="off" aria-label="Name">
-                <input class="ni-email" type="email" placeholder="email" autocomplete="off" aria-label="Email">
                 <input class="nhp" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
-                <button class="ghost ni-go" type="submit" data-film="${esc(u.title)}">Notify me</button>
+                <button class="ghost ni-go" type="submit" data-film="${esc(u.title)}">Add me</button>
                 <div class="nmsg" aria-live="polite"></div>
               </form>
             </div>
-          </div>`).join('')
+          </div>`;}).join('')
         : `<div class="prow"><div class="idx"></div><div class="m">Nothing provisional yet.</div></div>`}
       </div>`;
   }
   async function sendInterest(form, film){
     const name = form.querySelector('.ni-name').value.trim();
-    const email = form.querySelector('.ni-email').value.trim();
     const hp = form.querySelector('.nhp').value;
     const msg = form.querySelector('.nmsg');
     const set = (t,cls)=>{ msg.textContent=t; msg.className='nmsg '+(cls||''); };
     if (hp) return;
     if (!name) return set('Add a name.','err');
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return set('Add a valid email.','err');
     if (!EP) return set('Not connected yet.','err');
     const go = form.querySelector('.ni-go'); go.disabled=true; set('Adding\u2026','ok');
-    try{ await post('interest', { name, email, film, website:hp }); set('Stay tuned.','ok');
-      form.querySelector('.ni-name').value=''; form.querySelector('.ni-email').value=''; }
-    catch(err){ set(err.message,'err'); }
+    try{
+      const d = await post('interest', { name, film, website:hp });
+      if (d.interest) interestCounts = d.interest; else interestCounts[film] = (interestCounts[film]||0)+1;
+      const cEl = form.closest('.prow').querySelector('.int-count');
+      if (cEl) cEl.textContent = (interestCounts[film]||0) + ' interested';
+      set('You are on the list.','ok');
+      form.querySelector('.ni-name').value='';
+    }catch(err){ set(err.message,'err'); }
     finally{ go.disabled=false; }
   }
   function wireUpcoming(){
@@ -568,13 +586,15 @@
 
   // ---------- past (numbered; optional hold-to-reveal eye) ----------
   function renderPast(){
-    const items = PICK.retired ? [PICK.retired].concat(C.past||[]) : (C.past||[]);
+    const items = (PICK.retired ? [PICK.retired].concat(C.past||[]) : (C.past||[]))
+      .slice().sort((a,b)=> String(b.date||'').localeCompare(String(a.date||'')));
     $('#past').innerHTML = `
       <div class="sec-label">Past</div>
       <div class="arch">
         ${items.map(f=>{
+          const priv = !!f.private;
           const att = (f.attendees||[]).filter(Boolean);
-          const present = att.length
+          const present = priv ? '' : (att.length
             ? `<div class="att">
                  <span class="att-label">Present</span>
                  <button class="peek" aria-label="Hold to reveal who attended" title="Hold to reveal">
@@ -583,10 +603,10 @@
                  <span class="att-count">${att.length} present</span>
                  <span class="att-names">${att.map(esc).join(' \u00b7 ')}</span>
                </div>`
-            : (typeof f.attendance==='number' ? `<div class="att">${f.attendance} present</div>` : '');
+            : (typeof f.attendance==='number' ? `<div class="att">${f.attendance} present</div>` : ''));
           return `
-          <article class="entry" tabindex="0">
-            <div class="hd"><span class="dt">${esc(fmt(f.date,{day:'2-digit',month:'short',year:'2-digit'}))}</span></div>
+          <article class="entry${priv?' private':''}" tabindex="0">
+            <div class="hd"><span class="dt">${esc(fmt(f.date,{day:'2-digit',month:'short',year:'2-digit'}))}</span>${priv?'<span class="priv-tag">Private</span>':''}</div>
             <div class="t">${esc(f.title)} <span>${f.year||''}</span></div>
             <div class="dir">${esc(f.director||'')}</div>
             ${f.synopsis ? `<div class="syn">${esc(f.synopsis)}</div>` : ''}
@@ -632,6 +652,7 @@
   async function loadState(){
     if (!EP) return;
     try{ const r = await fetch(EP); const d = await r.json();
+      if (d && d.interest){ interestCounts = d.interest; renderUpcoming(); }
       if (d && typeof d.confirmed==='number'){ agg={confirmed:d.confirmed, capacity:d.capacity}; renderCurrent(); } }catch(_){}
   }
   async function restoreMine(){
