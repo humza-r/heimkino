@@ -11,7 +11,7 @@ window.CONFIG = {
   "next": null,
   "upcoming": [
     {
-      "date": "2026-08-13",
+      "date": "",
       "title": "The Following",
       "director": "Christopher Nolan",
       "year": 1998,
