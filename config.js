@@ -59,7 +59,11 @@ window.CONFIG = {
       "year": 2005,
       "synopsis": "During the Crusades, a French blacksmith named Balian travels to Jerusalem and helps defend the city and its people.",
       "attendees": [
-        "Mina, Senthuran, Milana, Fynn, Stav"
+        "Mina",
+        "Senthuran",
+        "Milana",
+        "Fynn",
+        "Stav"
       ]
     },
     {
@@ -69,7 +73,8 @@ window.CONFIG = {
       "year": 2001,
       "synopsis": "A piano teacher at a Vienna conservatory, living under her domineering mother, becomes involved with one of her students.",
       "attendees": [
-        "Fynn, Linda"
+        "Fynn",
+        "Linda"
       ]
     },
     {
@@ -79,7 +84,9 @@ window.CONFIG = {
       "year": 1975,
       "synopsis": "In the final days of Fascist Italy, four powerful men confine a group of young people at a villa and subject them to systematic cruelty.",
       "attendees": [
-        "Stav, Senthuran, Fynn"
+        "Stav",
+        "Senthuran",
+        "Fynn"
       ]
     }
   ]
