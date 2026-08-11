@@ -11,6 +11,15 @@ window.CONFIG = {
   "next": null,
   "upcoming": [
     {
+      "date": "2026-08-13",
+      "title": "The Following",
+      "director": "Christopher Nolan",
+      "year": 1998,
+      "edition": "Mubi",
+      "runtime": "152",
+      "synopsis": "A 1998 British independent neo-noir film written, directed, photographed and edited by Christopher Nolan in his feature film directorial debut."
+    },
+    {
       "date": "",
       "title": "Teorema",
       "director": "Pier Paolo Pasolini",
