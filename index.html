@@ -528,12 +528,12 @@
               <div class="m">${esc([u.director,u.year].filter(Boolean).join(' / '))}</div>
               <div class="int-line">
                 <span class="int-count">${c} interested</span>
-                <button class="notify" data-i="${i}" aria-expanded="false">I'd come to this</button>
+                <button class="notify" data-i="${i}" aria-expanded="false">Want to watch</button>
               </div>
               <form class="nform" id="nf-${i}" hidden>
                 <input class="ni-name" type="text" placeholder="name" autocomplete="off" aria-label="Name">
                 <input class="nhp" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
-                <button class="ghost ni-go" type="submit" data-film="${esc(u.title)}">Add me</button>
+                <button class="ghost ni-go" type="submit" data-film="${esc(u.title)}">Let me know</button>
                 <div class="nmsg" aria-live="polite"></div>
               </form>
             </div>
