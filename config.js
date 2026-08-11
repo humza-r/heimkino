@@ -8,16 +8,17 @@ window.CONFIG = {
     "trailers": "19:30",
     "film": "20:25"
   },
-  "next": {
-    "date": "2026-08-13",
-    "title": "The Following",
-    "director": "Christopher Nolan",
-    "year": 1998,
-    "edition": "Mubi",
-    "runtime": "152",
-    "synopsis": "A 1998 British independent neo-noir film written, directed, photographed and edited by Christopher Nolan in his feature film directorial debut."
-  },
+  "next": null,
   "upcoming": [
+    {
+      "date": "2026-08-13",
+      "title": "The Following",
+      "director": "Christopher Nolan",
+      "year": 1998,
+      "edition": "Mubi",
+      "runtime": "152",
+      "synopsis": "A 1998 British independent neo-noir film written, directed, photographed and edited by Christopher Nolan in his feature film directorial debut."
+    },
     {
       "date": "",
       "title": "Teorema",
@@ -50,5 +51,36 @@ window.CONFIG = {
       "year": 2002
     }
   ],
-  "past": []
+  "past": [
+    {
+      "date": "2026-08-11",
+      "title": "Kingdom of Heaven",
+      "director": "Ridley Scott",
+      "year": 2005,
+      "synopsis": "During the Crusades, a French blacksmith named Balian travels to Jerusalem and helps defend the city and its people.",
+      "attendees": [
+        "Mina, Senthuran, Milana, Fynn, Stav"
+      ]
+    },
+    {
+      "date": "2026-08-05",
+      "title": "The Piano Teacher",
+      "director": "Michael Haneke",
+      "year": 2001,
+      "synopsis": "A piano teacher at a Vienna conservatory, living under her domineering mother, becomes involved with one of her students.",
+      "attendees": [
+        "Fynn, Linda"
+      ]
+    },
+    {
+      "date": "2026-07-30",
+      "title": "Salò, or the 120 Days of Sodom",
+      "director": "Pier Paolo Pasolini",
+      "year": 1975,
+      "synopsis": "In the final days of Fascist Italy, four powerful men confine a group of young people at a villa and subject them to systematic cruelty.",
+      "attendees": [
+        "Stav, Senthuran, Fynn"
+      ]
+    }
+  ]
 };
