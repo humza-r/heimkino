@@ -260,6 +260,22 @@
   let roster = null;           // [names] of who is coming - only after unlock
   let flashed = false;         // afterimage flash plays once, on first render
 
+  // flag-driven current screening with a date fallback:
+  //   1) the flagged C.next, if it has a title and its date is today or later
+  //   2) else the soonest future-dated upcoming (a dated upcoming counts as confirmed)
+  //   3) else none, and the page leads with the upcoming block
+  function todayISO(){ const d=new Date(), p=x=>String(x).padStart(2,'0'); return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate()); }
+  function pickCurrent(){
+    const today = todayISO(), n = C.next;
+    if (n && n.title && (!n.date || n.date >= today)) return { cur:n, promoted:null, retired:null };
+    const retired = (n && n.title && n.date && n.date < today) ? n : null;   // finished flagged night drops to past
+    const dated = (C.upcoming||[]).filter(u=>u && u.title && u.date && u.date >= today).sort((a,b)=> a.date < b.date ? -1 : 1);
+    if (dated.length) return { cur:dated[0], promoted:dated[0], retired:retired };
+    return { cur:null, promoted:null, retired:retired };
+  }
+  const PICK = pickCurrent();
+  const CUR = PICK.cur;
+
   async function post(action, payload){
     if (!EP) throw new Error('Reservations are not connected yet.');
     const r = await fetch(EP, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
@@ -274,7 +290,7 @@
     $('#mark').firstChild.nodeValue = C.wordmark;
     $('#foot-left').textContent = C.wordmark;
     $('#foot-right').textContent = '';
-    document.title = C.wordmark + ' \u00b7 ' + C.next.title;
+    document.title = C.wordmark + (CUR ? ' \u00b7 ' + CUR.title : '');
   }
 
   // label-free redacted location banners (header + footer); revealed only when unlocked
@@ -295,7 +311,8 @@
     return '<b>' + pad(agg.confirmed) + '</b>' + cap + ' confirmed';
   }
   function renderCurrent(){
-    const n = C.next, sch = C.schedule || {};
+    const n = CUR, sch = C.schedule || {};
+    if (!n){ $('#current').innerHTML = `<div class="sec-label">Next screening &nbsp;/&nbsp; <span class="cd">To be announced</span></div>`; return; }
     const meta = [n.director, n.year, n.edition].filter(Boolean).join(', ');
     const filmStart = n.time || sch.film || '';
     const unlocked = !!gated;
@@ -340,6 +357,11 @@
       return;
     }
 
+    if (!CUR){
+      body.innerHTML = `<p class="cur-syn" style="font-size:18px">No screening is open for reservations yet. See what is coming up below.</p>`;
+      return;
+    }
+
     // has a reservation -> admission slip
     if (slip){
       body.innerHTML = `
@@ -367,12 +389,12 @@
       body.innerHTML = `
         <form id="admit-form" autocomplete="off">
           <div class="field">
-            <label></label>
-            <div id="name-rows"><div class="namerow"><input class="rn" type="text" placeholder="who is coming" required aria-label="name"></div></div>
+            <label>Who is coming</label>
+            <div id="name-rows"><div class="namerow"><input class="rn" type="text" placeholder="name" required aria-label="Name"></div></div>
             <button type="button" class="ghost" id="add-row" style="margin-top:6px">Add someone</button>
           </div>
           <div class="hp" aria-hidden="true"><label>Leave empty</label><input id="website" type="text" tabindex="-1" autocomplete="off"></div>
-          <div class="actions"><button class="btn" type="submit" id="confirm-go">Confirm party</button></div>
+          <div class="actions"><button class="btn" type="submit" id="confirm-go">Confirm attendance</button></div>
           <div class="msg" id="admit-msg" role="status" aria-live="polite"></div>
         </form>`;
       return;
@@ -406,7 +428,7 @@
       roster = d.coming || [];
       reveal({ venue:d.venue, houseNote:d.houseNote });
       renderAdmission();
-      admitMsg('Details visible.', 'ok');
+      admitMsg('Welcome in.', 'ok');
     }catch(err){ admitMsg(err.message, 'err'); go.disabled = false; }
   }
 
@@ -421,9 +443,9 @@
 
     const go = form.querySelector('#confirm-go'); go.disabled = true; admitMsg('Confirming\u2026', 'ok');
     try{
-      const d = await post('create', { names, code:sessionCode, website:hp, date:C.next.date, title:C.next.title });
+      const d = await post('create', { names, code:sessionCode, website:hp, date:CUR.date, title:CUR.title });
       mine = { reservationId:d.reservationId, editToken:d.editToken }; store.set(mine);
-      slip = { names:d.names, party:d.party, date:C.next.date };
+      slip = { names:d.names, party:d.party, date:CUR.date };
       agg = { confirmed:d.confirmed, capacity:d.capacity };
       roster = d.coming || roster;
       reveal({ venue:d.venue, houseNote:d.houseNote });
@@ -482,7 +504,7 @@
 
   // ---------- upcoming ----------
   function renderUpcoming(){
-    const list = (C.upcoming||[]).filter(u=>u && u.title);
+    const list = (C.upcoming||[]).filter(u=>u && u.title && u !== PICK.promoted);
     $('#upcoming').innerHTML = `
       <div class="sec-label">Upcoming</div>
       <div style="margin-top:calc(var(--u)*2)">
@@ -494,7 +516,7 @@
               <div class="m">${esc([u.director,u.year].filter(Boolean).join(' / '))}</div>
               <form class="nform" id="nf-${i}" hidden>
                 <input class="ni-name" type="text" placeholder="name" autocomplete="off" aria-label="Name">
-                <input class="ni-email" type="email" placeholder="@/*" autocomplete="off" aria-label="Email">
+                <input class="ni-email" type="email" placeholder="email" autocomplete="off" aria-label="Email">
                 <input class="nhp" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
                 <button class="ghost ni-go" type="submit" data-film="${esc(u.title)}">Notify me</button>
                 <div class="nmsg" aria-live="polite"></div>
@@ -546,7 +568,7 @@
 
   // ---------- past (numbered; optional hold-to-reveal eye) ----------
   function renderPast(){
-    const items = (C.past||[]);
+    const items = PICK.retired ? [PICK.retired].concat(C.past||[]) : (C.past||[]);
     $('#past').innerHTML = `
       <div class="sec-label">Past</div>
       <div class="arch">
@@ -573,14 +595,14 @@
         }).join('')}
       </div>
       <div class="wish">
-        <button class="notify" id="wish-toggle" aria-expanded="false">Wish for a film screening</button>
+        <button class="notify" id="wish-toggle" aria-expanded="false">Wish for a film</button>
         <form class="wform" id="wish-form" hidden>
           <div class="wrow">
             <input id="w-film" type="text" placeholder="film" autocomplete="off" aria-label="Film" required>
             <input id="w-dir" type="text" placeholder="director" autocomplete="off" aria-label="Director" required>
           </div>
-          <input id="w-by" type="text" placeholder="your name" autocomplete="off" aria-label="Your name">
-          <input id="w-note" type="text" placeholder="note" autocomplete="off" aria-label="Why">
+          <input id="w-by" type="text" placeholder="your name (optional)" autocomplete="off" aria-label="Your name">
+          <input id="w-note" type="text" placeholder="(optional)" autocomplete="off" aria-label="Why">
           <div class="whp" aria-hidden="true"><input id="w-hp" type="text" tabindex="-1" autocomplete="off"></div>
           <div class="actions"><button class="ghost" type="submit" id="wish-go">Submit</button></div>
           <div class="nmsg" id="wish-msg" aria-live="polite"></div>
