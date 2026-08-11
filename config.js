@@ -36,7 +36,7 @@ window.CONFIG = {
       "year": 1960
     },
     {
-      "date": "",
+      "date": "2026-08-13",
       "title": "Irréversible",
       "director": "Gaspar Noé",
       "year": 2002
