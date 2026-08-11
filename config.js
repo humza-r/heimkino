@@ -46,7 +46,7 @@ window.CONFIG = {
     { title: "Ken Park", director: "Larry Clark & Edward Lachman", year: 2002 },
     { title: "The Gospel According to St. Matthew", director: "Pier Paolo Pasolini", year: 1964 },
      { title: "Spartacus", director: "Stanley Kubrick", year: 1960 },
-   { title: "Irréversible", director: "Gaspar Noé", year: 2002 }
+     { title: "Irréversible", director: "Gaspar Noé", year: 2002 }
   ],
 
   /* ---- PAST (newest first) ----
