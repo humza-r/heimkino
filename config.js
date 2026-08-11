@@ -18,7 +18,7 @@ window.CONFIG = {
       "edition": "CC"
     },
     {
-      "date": "",
+      "date": "2026-08-15",
       "title": "Ken Park",
       "director": "Larry Clark & Edward Lachman",
       "year": 2002
