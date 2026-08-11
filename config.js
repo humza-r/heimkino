@@ -22,7 +22,7 @@
 window.CONFIG = {
   wordmark: "HEIMKINO",
   city: "Berlin",          // public. The street address is invitation-gated (backend only).
-  endpoint: "https://script.google.com/macros/s/AKfycbxnXdDLZbM_dXns7UFdNf-ZOooxavMrO-FQyOCEqIBf-1Ex7B3vnCF6djnov-WPQ80_/exec",            // paste your Apps Script /exec URL here, in quotes
+  endpoint: "",            // paste your Apps Script /exec URL here, in quotes
 
   /* ---- house running order (public, non-sensitive) ---- */
   schedule: { doors: "19:15", trailers: "19:30", film: "20:25" },
@@ -45,6 +45,7 @@ window.CONFIG = {
     { title: "Teorema", director: "Pier Paolo Pasolini", year: 1968 },
     { title: "Ken Park", director: "Larry Clark & Edward Lachman", year: 2002 },
     { title: "The Gospel According to St. Matthew", director: "Pier Paolo Pasolini", year: 1964 },
+     { title: "Spartacus", director: "Stanley Kubrick", year: 1960 },
    { title: "Irréversible", director: "Gaspar Noé", year: 2002 }
   ],
 
@@ -52,7 +53,11 @@ window.CONFIG = {
      attendees: ["…"]  gives that entry the hold-to-reveal eye (names are PUBLIC
                        in this file, a courtesy screen, not real privacy).
      attendance: 3     shows a count only and keeps names off the site (private).
-     Choose whichever you want per entry. */
+     private: true     a film you watched OUTSIDE the club, kept for the record.
+                       Renders indented and dimmed, tagged "Private", with no
+                       attendee line. Add these retroactively with any date, e.g.:
+       { date:"2026-07-12", title:"Stalker", director:"Andrei Tarkovsky", year:1979, private:true },
+     Entries are sorted by date automatically, so order here does not matter. */
   past: [
     {
       date: "2026-08-05",
@@ -70,4 +75,3 @@ window.CONFIG = {
     }
   ]
 };
-
