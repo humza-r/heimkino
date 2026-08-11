@@ -66,7 +66,7 @@ window.CONFIG = {
       // factual logline; replace with your preferred synopsis if you like.
       synopsis: "A piano teacher at a Vienna conservatory, living under her domineering mother, becomes involved with one of her students."
     },
-     /*{ date: "2026-07-12", title: "Stalker", director: "Andrei Tarkovsky", year: 1979, private: true },*/
+     { date: "2026-08-02", title: "Following", director: "Christopher Nolan", year: 1979, private: true },
     {
       date: "2026-07-30",
       title: "Salò, or the 120 Days of Sodom", director: "Pier Paolo Pasolini", year: 1975,
