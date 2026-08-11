@@ -32,7 +32,7 @@ window.CONFIG = {
     date: "2026-08-10",
     time: "",                 // "" uses schedule.film
     title: "Kingdom of Heaven",
-     attendees: ["Mina, Senthuran, Milana, Fynn, Stav"],
+     attendees: ["Mina", "Senthuran", "Milana", "Fynn", "Stav"],
     edition: "Director's Cut", // or ""
     director: "Ridley Scott",
     year: 2005,
