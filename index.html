@@ -65,9 +65,9 @@
 
   /* ---- current screening: title card ---- */
   .sec-label .cd{ color:var(--light); }
-  .cur-top{ display:flex; justify-content:space-between; align-items:baseline; }
-  .cur-no{ font-family:var(--mono); font-size:12px; letter-spacing:0.18em; color:var(--muted); }
+  .cur-top{ display:block; }
   .cur-when{ font-family:var(--mono); font-size:12px; letter-spacing:0.16em; text-transform:uppercase; color:var(--light); }
+  .mast-note{ font-family:var(--mono); font-size:11px; letter-spacing:0.1em; color:var(--muted); margin-top:12px; }
   .cur-title{ font-family:var(--serif); font-weight:400; font-size:clamp(46px,10vw,92px); line-height:0.92;
     letter-spacing:-0.015em; margin-top:calc(var(--u)*1.5); }
   .cur-meta{ font-family:var(--mono); font-size:12px; letter-spacing:0.06em; color:var(--muted); margin-top:calc(var(--u)*2); }
@@ -104,9 +104,7 @@
     border:none; border-bottom:1px solid var(--line); font-family:var(--serif); font-size:22px; padding:6px 0; }
   input:focus{ outline:none; border-color:var(--accent); }
   input::placeholder{ color:#45464c; }
-  #name-rows{ counter-reset:nr; }
   .namerow{ display:flex; align-items:baseline; gap:12px; margin-bottom:10px; }
-  .namerow::before{ counter-increment:nr; content:counter(nr,decimal-leading-zero); font-family:var(--mono); font-size:11px; letter-spacing:0.1em; color:var(--faint); }
   .namerow input{ flex:1; }
   .hp{ position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden; }
 
@@ -145,25 +143,29 @@
   /* host note (revealed, gated) - the human voice, as marginalia */
   .hnote{ font-family:var(--serif); font-style:italic; font-size:18px; color:#cfcdc6; line-height:1.55; }
 
-  /* ---- upcoming: dense index ---- */
-  .up-list{ margin-top:calc(var(--u)*2); }
-  .up-row{ display:grid; grid-template-columns:34px 1fr auto; gap:calc(var(--u)*2); align-items:baseline;
-    padding:calc(var(--u)*1.75) 0; border-bottom:1px solid var(--line); }
-  .up-no{ font-family:var(--mono); font-size:11px; letter-spacing:0.12em; color:var(--faint); }
-  .up-title{ font-family:var(--serif); font-size:22px; line-height:1.1; }
-  .up-meta{ font-family:var(--mono); font-size:11px; letter-spacing:0.04em; color:var(--muted); margin-top:3px; }
-  .int{ text-align:right; }
-  .int-btn{ display:inline-flex; align-items:center; gap:10px; background:none; border:none; padding:0; cursor:pointer;
-    font-family:var(--mono); font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); }
+  /* ---- upcoming: each candidate breathes (not a table) ---- */
+  .up-list{ margin-top:calc(var(--u)*2.5); }
+  .up-film{ padding:calc(var(--u)*2.75) 0; border-bottom:1px solid var(--line); }
+  .up-title{ font-family:var(--serif); font-size:clamp(26px,4.5vw,34px); line-height:1.04; }
+  .up-meta{ font-family:var(--mono); font-size:12px; letter-spacing:0.04em; color:var(--muted); margin-top:6px; }
+  /* interest as one line that swaps in place: label + rule + count  ->  name + arrow  ->  label + check + count */
+  .int{ margin-top:calc(var(--u)*2); }
+  .int-btn{ display:flex; width:100%; align-items:center; gap:16px; background:none; border:none; padding:0; cursor:pointer; text-align:left;
+    font-family:var(--mono); font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); }
+  .int-btn[hidden]{ display:none; }
   .int-btn:not(:disabled):hover .int-label{ color:var(--light); }
+  .int-btn:not(:disabled):hover .int-rule{ background:var(--muted); }
   .int-btn:disabled{ cursor:default; }
   .int-label{ transition:color .2s; white-space:nowrap; }
-  .int-rule{ width:26px; height:1px; background:var(--line); display:inline-block; }
-  .int-n{ color:var(--light); font-size:12px; }
-  .int-form{ display:flex; align-items:baseline; gap:10px; margin-top:9px; justify-content:flex-end; flex-wrap:wrap; }
-  .int-form input{ font-size:15px; width:130px; }
-  .int-go{ background:none; border:none; color:var(--muted); font-size:16px; padding:0 4px; cursor:pointer; }
+  .int-rule{ flex:1; height:1px; background:var(--line); transition:background .2s; }
+  .int-n{ color:var(--light); font-size:13px; white-space:nowrap; }
+  .int-form{ display:flex; width:100%; align-items:baseline; gap:14px; }
+  .int-form[hidden]{ display:none; }
+  .int-form .ni-name{ flex:1; font-size:18px; }
+  .int-go{ background:none; border:none; color:var(--muted); font-size:18px; padding:0 2px; cursor:pointer; }
   .int-go:hover{ color:var(--light); }
+  /* honeypot: keep it off-screen (it was accidentally rendering) */
+  .nhp{ position:absolute !important; left:-9999px !important; width:1px !important; height:1px !important; overflow:hidden; }
   /* request toggle (shared with the request slip) */
   .notify{ margin-top:12px; background:none; border:none; color:var(--muted); font-family:var(--mono);
     font-size:11px; letter-spacing:0.1em; text-transform:uppercase; padding:0; border-bottom:1px solid var(--line); cursor:pointer; }
@@ -215,10 +217,7 @@
   .foot-row{ display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; }
 
   @media (max-width:560px){
-    .up-row{ grid-template-columns:26px 1fr; }
-    .int{ grid-column:2; text-align:left; margin-top:8px; }
-    .int-form{ justify-content:flex-start; }
-    .nmsg{ text-align:left; }
+    .int-form .ni-name{ font-size:16px; }
   }
   @media (prefers-reduced-motion:reduce){
     *{ transition:none !important; animation:none !important; }
@@ -230,6 +229,8 @@
 <div class="wrap">
   <header>
     <div class="mark" id="mark">HEIMKINO</div>
+    <!-- optional one-line notice (e.g. between events): populate #mast-note and remove hidden to show it -->
+    <div class="mast-note" id="mast-note" hidden></div>
     <div class="head-loc" id="head-loc">
       <span class="redact" style="width:200px"></span>
       <span class="head-loc-v" id="head-loc-v"></span>
@@ -344,23 +345,28 @@
   function markVoted(film){ const s=votedSet(); s[film]=1; try{ localStorage.setItem(VKEY, JSON.stringify(s)); }catch(_){ } }
   function renderCurrent(){
     const n = CUR, sch = C.schedule || {};
-    if (!n){ $('#current').innerHTML = `<div class="sec-label">Next screening &nbsp;/&nbsp; <span class="cd">To be announced</span></div>`; return; }
+    const curSec = document.getElementById('current'), admSec = document.getElementById('admission');
+    if (!n){
+      // No next screening: remove the Current and Admission sections; Upcoming becomes the lead object.
+      // (A one-line notice can be shown by populating #mast-note; left as a placeholder rather than an empty state.)
+      if (curSec){ curSec.innerHTML = ''; curSec.style.display = 'none'; }
+      if (admSec){ admSec.style.display = 'none'; }
+      return;
+    }
+    if (curSec) curSec.style.display = '';
+    if (admSec) admSec.style.display = '';
     const meta = [n.director, n.year, n.edition].filter(Boolean).join(', ');
     const filmStart = n.time || sch.film || '';
     const unlocked = !!gated;
     const rtDigits = n.runtime ? String(n.runtime).match(/\d+/) : null;
     const rt = n.runtime ? (rtDigits ? rtDigits[0] + '\u2032' : esc(n.runtime)) : '';
-    const no = pad((C.past||[]).filter(f=>f && f.title && !f.private).length + (PICK.retired?1:0) + 1);
     const flashCls = flashed ? '' : ' flash'; flashed = true;
     const attendance = (unlocked && roster && roster.length)
       ? `<div class="coming"><div class="k">Coming</div><div class="coming-names">${roster.map(esc).join(' \u00b7 ')}</div></div>`
       : `<div class="seats-row" id="seats">${seatsMarkup()}</div>`;
 
     $('#current').innerHTML = `
-      <div class="cur-top">
-        <span class="cur-no">${no}</span>
-        <span class="cur-when">${esc(fmt(n.date,{day:'2-digit',month:'short',year:'numeric'}).toUpperCase())}</span>
-      </div>
+      <div class="cur-top"><span class="cur-when">${esc(fmt(n.date,{day:'2-digit',month:'short',year:'numeric'}).toUpperCase())}</span></div>
       <h1 class="cur-title${flashCls}">${esc(n.title)}</h1>
       <div class="cur-meta">${esc(meta)}</div>
       ${n.synopsis ? `<p class="cur-syn">${esc(n.synopsis)}</p>` : ''}
@@ -384,13 +390,10 @@
   function renderAdmission(){
     const body = $('#admit-body'); if(!body) return;
 
+    if (!CUR){ return; }   // no screening: the Admission section is hidden by renderCurrent
+
     if (!EP){
       body.innerHTML = `<p class="cur-syn" style="font-size:18px">Reservations open once the invitation system is connected.</p>`;
-      return;
-    }
-
-    if (!CUR){
-      body.innerHTML = `<p class="cur-syn" style="font-size:18px">No screening is open for reservations yet. See what is coming up below.</p>`;
       return;
     }
 
@@ -410,7 +413,7 @@
           </div>
           <div class="slip-foot">
             <span class="when">${when} \u00b7 Doors ${esc((C.schedule||{}).doors||'')}</span>
-            <span class="seatn">${pad(slip.party)} ${slip.party===1?'seat':'seats'}</span>
+            <span class="seatn">${slip.party} ${slip.party===1?'seat':'seats'}</span>
           </div>
           <div class="actions" style="margin-top:calc(var(--u)*2.5)">
             <button class="textbtn" id="amend-res">Amend</button>
@@ -540,40 +543,43 @@
   }
 
   // ---------- upcoming ----------
+  // ordered by interest (desc), config order breaks ties. sorted when rendered (page load), stable during the session.
   function renderUpcoming(){
-    const list = (C.upcoming||[]).filter(u=>u && u.title && u !== PICK.promoted);
+    const base = (C.upcoming||[]).filter(u=>u && u.title && u !== PICK.promoted);
+    const list = base.map((u,idx)=>({u,idx}))
+      .sort((a,b)=>{ const va=interestCounts[a.u.title]||0, vb=interestCounts[b.u.title]||0; return (vb-va) || (a.idx-b.idx); })
+      .map(x=>x.u);
     $('#upcoming').innerHTML = `
       <div class="sec-label">Upcoming</div>
       <div class="up-list">
-        ${list.length ? list.map((u,i)=>{
+        ${list.length ? list.map(u=>{
           const c = interestCounts[u.title] || 0;
           const voted = hasVoted(u.title);
           return `
-          <div class="up-row">
-            <span class="up-no">${pad(i+1)}</span>
-            <div class="up-main">
-              <div class="up-title">${esc(u.title)}</div>
-              <div class="up-meta">${esc([u.director,u.year].filter(Boolean).join(', '))}</div>
-            </div>
+          <div class="up-film">
+            <div class="up-title">${esc(u.title)}</div>
+            <div class="up-meta">${esc([u.director,u.year].filter(Boolean).join(', '))}</div>
             <div class="int" data-film="${esc(u.title)}">
-              <button class="int-btn" data-i="${i}" aria-expanded="false"${voted?' disabled':''}>
-                <span class="int-label">Interested${voted?' \u2713':''}</span><span class="int-rule"></span><span class="int-n">${pad(c)}</span>
+              <button class="int-btn"${voted?' disabled':''} aria-expanded="false">
+                <span class="int-label">Interested${voted?' \u2713':''}</span><span class="int-rule"></span><span class="int-n">${c}</span>
               </button>
-              <form class="int-form" id="if-${i}" hidden>
+              <form class="int-form" hidden>
                 <input class="ni-name" type="text" placeholder="your name" autocomplete="off" aria-label="Your name">
                 <input class="nhp" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
-                <button class="int-go" type="submit" data-film="${esc(u.title)}" aria-label="Add">\u2192</button>
-                <div class="nmsg" aria-live="polite"></div>
+                <button class="int-go" type="submit" aria-label="Add">\u2192</button>
               </form>
+              <div class="nmsg" aria-live="polite"></div>
             </div>
           </div>`;}).join('')
-        : `<div class="up-row"><span class="up-no"></span><div class="up-main"><div class="up-meta">Nothing provisional yet.</div></div></div>`}
+        : `<div class="up-film"><div class="up-meta">Nothing provisional yet.</div></div>`}
       </div>`;
   }
-  async function sendInterest(form, film){
+  // the interest line swaps in place and does NOT re-sort after a vote (the item stays put)
+  async function sendInterest(box, film){
+    const form = box.querySelector('.int-form');
     const name = form.querySelector('.ni-name').value.trim();
     const hp = form.querySelector('.nhp').value;
-    const msg = form.querySelector('.nmsg');
+    const msg = box.querySelector('.nmsg');
     const set = (t,cls)=>{ if(msg){ msg.textContent=t; msg.className='nmsg '+(cls||''); } };
     if (hp) return;
     if (hasVoted(film)) return set('Already noted.','ok');
@@ -584,20 +590,25 @@
       const d = await post('interest', { name, film, website:hp });
       if (d.interest) interestCounts = d.interest; else interestCounts[film] = (interestCounts[film]||0)+1;
       markVoted(film);
-      const box = form.closest('.int');
-      const nEl = box.querySelector('.int-n'); if(nEl) nEl.textContent = pad(interestCounts[film]||0);
-      const lbl = box.querySelector('.int-label'); if(lbl) lbl.textContent = 'Interested \u2713';
-      const btn = box.querySelector('.int-btn'); if(btn){ btn.disabled=true; btn.setAttribute('aria-expanded','false'); }
-      form.hidden = true;
+      const btn = box.querySelector('.int-btn');
+      box.querySelector('.int-n').textContent = interestCounts[film]||0;
+      box.querySelector('.int-label').textContent = 'Interested \u2713';
+      btn.disabled = true; btn.hidden = false; btn.setAttribute('aria-expanded','false');
+      form.hidden = true; set('','');
     }catch(err){ set(err.message,'err'); go.disabled=false; }
   }
   function wireUpcoming(){
     const root = $('#upcoming');
-    root.addEventListener('click', e => { const t=e.target.closest('.int-btn'); if(!t||t.disabled) return;
-      const f=document.getElementById('if-'+t.dataset.i); const open=f.hidden; f.hidden=!open;
-      t.setAttribute('aria-expanded', String(open)); if(open) f.querySelector('.ni-name').focus(); });
-    root.addEventListener('submit', e => { if(!e.target.classList.contains('int-form')) return;
-      e.preventDefault(); sendInterest(e.target, e.target.querySelector('.int-go').dataset.film); });
+    root.addEventListener('click', e => {
+      const b = e.target.closest('.int-btn'); if(!b || b.disabled) return;
+      const box = b.closest('.int'), form = box.querySelector('.int-form');
+      b.hidden = true; form.hidden = false; b.setAttribute('aria-expanded','true');
+      form.querySelector('.ni-name').focus();
+    });
+    root.addEventListener('submit', e => {
+      if(!e.target.classList.contains('int-form')) return;
+      e.preventDefault(); const box = e.target.closest('.int'); sendInterest(box, box.dataset.film);
+    });
   }
 
   async function sendWish(form){
@@ -621,12 +632,10 @@
     const items = (PICK.retired ? [PICK.retired].concat(C.past||[]) : (C.past||[]))
       .filter(f=> f && f.title && !f.private)
       .slice().sort((a,b)=> String(b.date||'').localeCompare(String(a.date||'')));
-    const total = items.length;
     $('#past').innerHTML = `
       <div class="sec-label">Past</div>
       <div class="arch">
-        ${items.map((f,i)=>{
-          const no = pad(total - i);
+        ${items.map(f=>{
           const att = (f.attendees||[]).filter(Boolean);
           const present = att.length
             ? `<div class="att">
@@ -637,7 +646,7 @@
             : (typeof f.attendance==='number' ? `<div class="att"><span class="att-count">${f.attendance}</span> <span class="att-hint">here</span></div>` : '');
           return `
           <article class="entry" tabindex="0">
-            <div class="hd"><span class="no">${no}</span><span class="dt">${esc(fmt(f.date,{day:'2-digit',month:'short',year:'2-digit'}))}</span></div>
+            <div class="hd"><span class="dt">${esc(fmt(f.date,{day:'2-digit',month:'short',year:'2-digit'}))}</span></div>
             <div class="t">${esc(f.title)} <span>${f.year||''}</span></div>
             <div class="dir">${esc(f.director||'')}</div>
             ${f.synopsis ? `<div class="syn">${esc(f.synopsis)}</div>` : ''}
