@@ -4,9 +4,9 @@ window.CONFIG = {
   "city": "Berlin",
   "endpoint": "https://script.google.com/macros/s/AKfycbzOzhiugVHdb_sCFxhMyVw6lRGGR9t854t7I-z9jtiPFJFsxTIO8UN-5k7FXWAQma2g/exec",
   "schedule": {
-    "doors": "19:15",
+    "doors": "20:30",
     "trailers": "19:30",
-    "film": "20:25"
+    "film": "21:00"
   },
   "next": null,
   "upcoming": [
