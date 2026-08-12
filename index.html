@@ -132,13 +132,17 @@
   .slip li{ font-family:var(--serif); font-size:23px; padding:7px 0; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:baseline; }
   .slip li .rm{ font-family:var(--mono); font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:var(--muted); background:none; border:none; border-bottom:1px solid transparent; }
   .slip li .rm:hover{ color:#c98b8b; border-color:#c98b8b; }
-  .slip-mark{ font-family:var(--mono); font-weight:700; font-size:12px; letter-spacing:0.3em; color:var(--muted); }
-  .slip .sh{ margin-top:9px; }
   .slip-foot{ display:flex; justify-content:space-between; align-items:baseline; margin-top:calc(var(--u)*2.5);
     font-family:var(--mono); font-size:12px; letter-spacing:0.1em; color:var(--muted); }
   .slip-foot .seatn{ color:var(--light); }
-  .addrow{ display:flex; gap:12px; align-items:baseline; margin-top:calc(var(--u)*2); }
-  .addrow input{ flex:1; font-size:18px; }
+  .slip-add{ margin-top:calc(var(--u)*2); }
+  .addtoggle{ background:none; border:none; padding:0 0 1px; cursor:pointer; font-family:var(--mono); font-size:11px;
+    letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--line); }
+  .addtoggle[hidden]{ display:none; }
+  .addtoggle:hover{ color:var(--light); border-color:var(--light); }
+  .addline{ display:flex; align-items:baseline; gap:12px; }
+  .addline[hidden]{ display:none; }
+  .addline input{ flex:1; font-size:18px; }
 
   /* host note (revealed, gated) - the human voice, as marginalia */
   .hnote{ font-family:var(--serif); font-style:italic; font-size:18px; color:#cfcdc6; line-height:1.55; }
@@ -146,6 +150,7 @@
   /* ---- upcoming: each candidate breathes (not a table) ---- */
   .up-list{ margin-top:calc(var(--u)*2.5); }
   .up-film{ padding:calc(var(--u)*2.75) 0; border-bottom:1px solid var(--line); }
+  .up-date{ font-family:var(--mono); font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
   .up-title{ font-family:var(--serif); font-size:clamp(26px,4.5vw,34px); line-height:1.04; }
   .up-meta{ font-family:var(--mono); font-size:12px; letter-spacing:0.04em; color:var(--muted); margin-top:6px; }
   /* interest as one line that swaps in place: label + rule + count  ->  name + arrow  ->  label + check + count */
@@ -402,21 +407,22 @@
       const when = esc(fmt(slip.date||(CUR&&CUR.date)||'',{day:'2-digit',month:'short',year:'numeric'}).toUpperCase());
       body.innerHTML = `
         <div class="slip">
-          <div class="slip-mark">${esc(C.wordmark)}</div>
           <div class="sh">Admit</div>
           <ul id="slip-names">
-            ${slip.names.map((nm,i)=>`<li><span>${esc(nm)}</span><button class="rm" data-rm="${i}" aria-label="Remove ${esc(nm)}">remove</button></li>`).join('')}
+            ${slip.names.map((nm,i)=>`<li><span>${esc(nm)}</span><button class="rm" data-rm="${i}" aria-label="Remove ${esc(nm)}">\u00d7</button></li>`).join('')}
           </ul>
-          <div class="addrow" id="amend-row" hidden>
-            <input id="add-name" type="text" placeholder="add a name" autocomplete="off" aria-label="Add a name">
-            <button class="ghost" id="add-go">Add</button>
+          <div class="slip-add">
+            <button class="addtoggle" id="add-toggle" aria-expanded="false">Add someone else</button>
+            <form class="addline" id="add-line" hidden autocomplete="off">
+              <input id="add-name" type="text" placeholder="name" autocomplete="off" aria-label="Add a name">
+              <button class="int-go" id="add-go" type="submit" aria-label="Add">\u2192</button>
+            </form>
           </div>
           <div class="slip-foot">
             <span class="when">${when} \u00b7 Doors ${esc((C.schedule||{}).doors||'')}</span>
             <span class="seatn">${slip.party} ${slip.party===1?'seat':'seats'}</span>
           </div>
           <div class="actions" style="margin-top:calc(var(--u)*2.5)">
-            <button class="textbtn" id="amend-res">Amend</button>
             <button class="textbtn" id="cancel-res">Cancel</button>
           </div>
           <div class="msg" id="admit-msg" role="status" aria-live="polite"></div>
@@ -431,7 +437,7 @@
           <div class="field">
             <label>Admission</label>
             <div id="name-rows"><div class="namerow"><input class="rn" type="text" placeholder="name" required aria-label="Name"></div></div>
-            <button type="button" class="ghost" id="add-row" style="margin-top:6px">Add someone</button>
+            <button type="button" class="ghost" id="add-row" style="margin-top:6px">Add someone else</button>
           </div>
           <div class="hp" aria-hidden="true"><label>Leave empty</label><input id="website" type="text" tabindex="-1" autocomplete="off"></div>
           <div class="actions"><button class="btn" type="submit" id="confirm-go">Confirm</button></div>
@@ -503,12 +509,12 @@
   }
   async function addName(raw){
     const name = (raw||'').trim(); if(!name) return;
-    try{ await saveNames(slip.names.concat(name)); admitMsg('Added '+name+'.','ok'); }
+    try{ await saveNames(slip.names.concat(name)); }
     catch(err){ admitMsg(err.message,'err'); }
   }
   async function removeName(i){
     const names = slip.names.slice(); names.splice(i,1);
-    try{ await saveNames(names); admitMsg('Updated.','ok'); }
+    try{ await saveNames(names); }
     catch(err){ admitMsg(err.message,'err'); }
   }
   async function cancelRes(){
@@ -527,28 +533,26 @@
     root.addEventListener('submit', e => {
       if (e.target.id==='unlock-form'){ e.preventDefault(); unlockSession(e.target); }
       else if (e.target.id==='admit-form'){ e.preventDefault(); confirmAttend(e.target); }
+      else if (e.target.id==='add-line'){ e.preventDefault(); addName($('#add-name').value); }
     });
     root.addEventListener('click', e => {
       const t = e.target;
       if (t.id === 'add-row'){ const row=document.createElement('div'); row.className='namerow';
-        row.innerHTML='<input class="rn" type="text" placeholder="name" autocomplete="off" aria-label="Name"><button type="button" class="rm ghost" data-rmrow="1">remove</button>';
+        row.innerHTML='<input class="rn" type="text" placeholder="name" autocomplete="off" aria-label="Name"><button type="button" class="rm" data-rmrow="1" aria-label="Remove">\u00d7</button>';
         $('#name-rows').appendChild(row); row.querySelector('.rn').focus(); }
       else if (t.dataset.rmrow){ t.closest('.namerow').remove(); }
-      else if (t.id === 'add-go'){ addName($('#add-name').value); }
-      else if (t.id === 'amend-res'){ const r=$('#amend-row'); if(r){ r.hidden=false; const inp=$('#add-name'); if(inp) inp.focus(); } }
+      else if (t.id === 'add-toggle'){ t.hidden=true; const f=$('#add-line'); if(f){ f.hidden=false; const inp=$('#add-name'); if(inp) inp.focus(); } }
       else if (t.dataset.rm !== undefined){ removeName(parseInt(t.dataset.rm,10)); }
       else if (t.id === 'cancel-res'){ cancelRes(); }
     });
-    root.addEventListener('keydown', e => { if (e.key==='Enter' && e.target.id==='add-name'){ e.preventDefault(); addName(e.target.value); } });
   }
 
-  // ---------- upcoming ----------
-  // ordered by interest (desc), config order breaks ties. sorted when rendered (page load), stable during the session.
+  // ordered by date (soonest first); undated films follow, ordered by interest. sorted on render, stable during the session.
   function renderUpcoming(){
-    const base = (C.upcoming||[]).filter(u=>u && u.title && u !== PICK.promoted);
-    const list = base.map((u,idx)=>({u,idx}))
-      .sort((a,b)=>{ const va=interestCounts[a.u.title]||0, vb=interestCounts[b.u.title]||0; return (vb-va) || (a.idx-b.idx); })
-      .map(x=>x.u);
+    const base = (C.upcoming||[]).filter(u=>u && u.title && u !== PICK.promoted).map((u,idx)=>({u,idx}));
+    const dated = base.filter(x=>x.u.date).sort((a,b)=> a.u.date<b.u.date?-1:(a.u.date>b.u.date?1:a.idx-b.idx));
+    const undated = base.filter(x=>!x.u.date).sort((a,b)=>{ const va=interestCounts[a.u.title]||0, vb=interestCounts[b.u.title]||0; return (vb-va) || (a.idx-b.idx); });
+    const list = dated.concat(undated).map(x=>x.u);
     $('#upcoming').innerHTML = `
       <div class="sec-label">Upcoming</div>
       <div class="up-list">
@@ -557,6 +561,7 @@
           const voted = hasVoted(u.title);
           return `
           <div class="up-film">
+            ${u.date ? `<div class="up-date">${esc(fmt(u.date,{weekday:'short',day:'2-digit',month:'short'}))}</div>` : ''}
             <div class="up-title">${esc(u.title)}</div>
             <div class="up-meta">${esc([u.director,u.year].filter(Boolean).join(', '))}</div>
             <div class="int" data-film="${esc(u.title)}">
@@ -655,14 +660,14 @@
         }).join('')}
       </div>
       <div class="wish">
-        <button class="notify" id="wish-toggle" aria-expanded="false">suggest</button>
+        <button class="notify" id="wish-toggle" aria-expanded="false">Suggest something to watch</button>
         <form class="wform" id="wish-form" hidden>
           <div class="wrow">
             <input id="w-film" type="text" placeholder="film" autocomplete="off" aria-label="Film" required>
             <input id="w-dir" type="text" placeholder="director" autocomplete="off" aria-label="Director" required>
           </div>
           <input id="w-by" type="text" placeholder="your name (optional)" autocomplete="off" aria-label="Your name">
-          <input id="w-note" type="text" placeholder="comment (optional)" autocomplete="off" aria-label="Why">
+          <input id="w-note" type="text" placeholder="(optional)" autocomplete="off" aria-label="Why">
           <div class="whp" aria-hidden="true"><input id="w-hp" type="text" tabindex="-1" autocomplete="off"></div>
           <div class="actions"><button class="ghost" type="submit" id="wish-go">Submit</button></div>
           <div class="nmsg" id="wish-msg" aria-live="polite"></div>
