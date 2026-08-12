@@ -21,7 +21,9 @@ window.CONFIG = {
       "date": "2026-08-15",
       "title": "Ken Park",
       "director": "Larry Clark & Edward Lachman",
-      "year": 2002
+      "year": 2002,
+      "runtime": "93",
+      "synopsis": "This psychological drama follows the dysfunctional and abusive lives of four teenagers in Visalia, California, after their mutual acquaintance, Ken Park, commits suicide on a skateboard ramp."
     },
     {
       "date": "",
@@ -36,7 +38,7 @@ window.CONFIG = {
       "year": 1960
     },
     {
-      "date": "2026-08-13",
+      "date": "2026-08-16",
       "title": "Irréversible",
       "director": "Gaspar Noé",
       "year": 2002,
