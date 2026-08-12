@@ -39,7 +39,9 @@ window.CONFIG = {
       "date": "2026-08-13",
       "title": "Irréversible",
       "director": "Gaspar Noé",
-      "year": 2002
+      "year": 2002,
+      "runtime": "97",
+      "synopsis": "The film tracks a traumatic sequence of events in Paris involving a woman named Alex, her boyfriend Marcus, and her ex-boyfriend Pierre."
     }
   ],
   "past": [
