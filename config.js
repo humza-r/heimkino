@@ -43,6 +43,13 @@ window.CONFIG = {
       "year": 2002,
       "runtime": "97",
       "synopsis": "The film tracks a traumatic sequence of events in Paris involving a woman named Alex, her boyfriend Marcus, and her ex-boyfriend Pierre."
+    },
+    {
+      "date": "2026-08-16",
+      "title": "Possession",
+      "director": "Andrzej Żuławski",
+      "year": 1981,
+      "synopsis": "A psychological horror drama about a spy and his wife who divorce and unleash a monstrous creature."
     }
   ],
   "past": [
