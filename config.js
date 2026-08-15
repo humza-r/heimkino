@@ -37,7 +37,7 @@ window.CONFIG = {
       "year": 1960
     },
     {
-      "date": "2026-08-16",
+      "date": "2026-08-18",
       "title": "Irréversible",
       "director": "Gaspar Noé",
       "year": 2002,
@@ -45,7 +45,7 @@ window.CONFIG = {
       "synopsis": "The film tracks a traumatic sequence of events in Paris involving a woman named Alex, her boyfriend Marcus, and her ex-boyfriend Pierre."
     },
     {
-      "date": "2026-08-16",
+      "date": "2026-08-19",
       "title": "Possession",
       "director": "Andrzej Żuławski",
       "year": 1981,
