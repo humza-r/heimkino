@@ -4,265 +4,152 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Heimkino</title>
-<meta name="description" content="movie night">
-<meta name="theme-color" content="#0d0d0f">
+<meta name="description" content="beta version">
+<meta name="theme-color" content="#f4f1e9">
 <meta property="og:site_name" content="Heimkino">
 <meta property="og:title" content="Heimkino">
-<meta property="og:description" content="movie night">
+<meta property="og:description" content="beta version">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Heimkino">
 <meta name="twitter:description" content="An invitation-only screening programme in Berlin.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 
 <!-- All PUBLIC content lives in config.js. Secrets (invite code, address, house note) live in the backend. -->
 <script src="config.js"></script>
 
 <style>
   :root{
-    --ground:#0d0d0f;
-    --light:#edece6;
-    --muted:#9296a0;          /* lifted for contrast on small mono text */
-    --faint:#5a5c63;
-    --line:rgba(237,236,230,0.15);
-    --accent:#edece6;         /* overridden per screening from config */
-    --serif:"Instrument Serif", Georgia, "Times New Roman", serif;
-    --mono:"Space Mono", ui-monospace, "SF Mono", Menlo, monospace;
+    --paper:#f4f1e9; --ink:#1b1a17; --soft:#6b6862; --faint:#a7a29a; --rule:#c9c3b6;
     --u:8px;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
   }
-  *{ box-sizing:border-box; margin:0; padding:0; }
-  html{ scroll-behavior:smooth; }
-  ::selection{ background:var(--accent); color:var(--ground); }
-  body{
-    background:var(--ground); color:var(--light);
-    font-family:var(--serif); line-height:1.35;
-    -webkit-font-smoothing:antialiased; min-height:100vh;
-    position:relative; overflow-x:hidden;
-  }
-  body::before{
-    content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
-    background:radial-gradient(120% 90% at 50% 18%, rgba(30,30,34,0.55) 0%, rgba(13,13,15,0) 55%),
-      radial-gradient(140% 120% at 50% 100%, rgba(0,0,0,0.9) 0%, rgba(13,13,15,0) 60%);
-  }
-  .wrap{ position:relative; z-index:1; max-width:720px; margin:0 auto; padding:calc(var(--u)*6) calc(var(--u)*3) calc(var(--u)*16); }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; }
+  body{ background:var(--paper); color:var(--ink); font-family:var(--mono);
+    font-size:13px; line-height:1.55; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
+  .wrap{ width:min(560px, calc(100vw - 48px)); margin:40px auto; }
+  @media (max-width:560px){ .wrap{ width:auto; margin:18px; } }
 
-  .mono{ font-family:var(--mono); }
-  .label{ font-family:var(--mono); font-size:11px; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); }
+  /* sections + one consistent divider */
+  section{ margin-top:calc(var(--u)*4.5); }
+  #current{ margin-top:0; }
+  .sec-h{ font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--ink); }
+  hr.rule{ border:0; border-top:1px dashed var(--rule); margin:7px 0 calc(var(--u)*2); }
 
-  /* ---- masthead ---- */
-  header{ padding-bottom:calc(var(--u)*4); border-bottom:1px solid var(--line); }
-  .mark{ font-family:var(--mono); font-weight:700; font-size:15px; letter-spacing:0.42em; }
-  .mark small{ display:block; font-weight:400; font-size:11px; letter-spacing:0.22em; color:var(--muted); margin-top:9px; }
-  .head-loc{ margin-top:calc(var(--u)*1.75); min-height:14px; }
-  .head-loc .head-loc-v{ display:none; font-family:var(--mono); font-size:11px; letter-spacing:0.14em; text-transform:uppercase; color:var(--muted); }
-  .head-loc.revealed .head-loc-v{ display:inline; }
-  .head-loc.revealed .redact{ display:none; }
+  /* three type levels */
+  .title{ font-size:16px; font-weight:700; text-transform:uppercase; letter-spacing:0.01em; margin-top:2px; line-height:1.3; }
+  .meta{ font-size:12px; color:var(--soft); }
+  .small{ font-size:11px; color:var(--faint); }
+  p.syn{ font-size:13px; margin:calc(var(--u)*1.5) 0 0; max-width:54ch; }
 
-  section{ padding-top:calc(var(--u)*9); }
-  .sec-label{ font-family:var(--mono); font-size:11px; letter-spacing:0.24em; text-transform:uppercase; color:var(--muted); }
+  /* schedule + capacity */
+  .sched{ margin-top:calc(var(--u)*2); font-size:12px; color:var(--soft); line-height:1.85; }
+  .sched b{ color:var(--ink); font-weight:400; }
+  .cap{ margin-top:calc(var(--u)*2.5); font-size:12px; color:var(--ink); }
+  .cap .full-tag{ color:#9a3b3b; margin-left:10px; text-transform:uppercase; letter-spacing:0.12em; font-size:11px; }
+  .roster{ margin-top:6px; font-size:12px; color:var(--soft); }
+  .roster span{ color:var(--ink); }
 
-  /* ---- current screening: title card ---- */
-  .sec-label .cd{ color:var(--light); }
-  .cur-top{ display:block; }
-  .cur-when{ font-family:var(--mono); font-size:12px; letter-spacing:0.14em; color:var(--light); }
-  .mast-note{ font-family:var(--mono); font-size:11px; letter-spacing:0.1em; color:var(--muted); margin-top:12px; }
-  .cur-title{ font-family:var(--serif); font-weight:400; font-size:clamp(46px,10vw,92px); line-height:0.92;
-    letter-spacing:-0.015em; margin-top:calc(var(--u)*1.5); }
-  .cur-meta{ font-family:var(--mono); font-size:12px; letter-spacing:0.06em; color:var(--muted); margin-top:calc(var(--u)*2); }
-  .cur-syn{ font-family:var(--serif); font-size:20px; line-height:1.5; color:#d8d7d0; margin-top:calc(var(--u)*2.5); max-width:46ch; }
-  .cur-sched{ display:flex; justify-content:space-between; align-items:flex-end; gap:24px;
-    margin-top:calc(var(--u)*3); padding-top:calc(var(--u)*2); border-top:1px solid var(--line); max-width:440px; }
-  .cur-sched .times{ font-family:var(--mono); font-size:12px; letter-spacing:0.08em; color:var(--muted); line-height:1.9; }
-  .cur-sched .times b{ color:var(--light); font-weight:400; }
-  .cur-sched .run{ font-family:var(--mono); font-size:12px; letter-spacing:0.04em; color:var(--light); }
-  @keyframes afterimage{ from{ filter:invert(1); } to{ filter:invert(0); } }
-  .cur-title.flash{ animation:afterimage .9s ease forwards; }
+  /* protected info, revealed after code (plain text, no bars) */
+  .proto{ margin-top:calc(var(--u)*1.5); }
+  .proto .k{ font-size:11px; color:var(--soft); }
+  .proto .v{ white-space:pre-line; color:var(--ink); }
+  .proto .note{ margin-top:calc(var(--u)*1.5); white-space:pre-line; color:var(--ink); }
+  .proto .ok{ margin-top:calc(var(--u)*1.5); font-size:11px; color:var(--soft); }
 
-  /* gated blocks: redacted until the invitation is entered (fetched from backend) */
-  .gated{ margin-top:calc(var(--u)*3.5); display:grid; gap:calc(var(--u)*2.5); max-width:460px; }
-  .g-item .k{ font-family:var(--mono); font-size:10px; letter-spacing:0.18em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
-  .redact{ display:inline-block; height:15px; border-radius:1px; background:repeating-linear-gradient(90deg,var(--faint) 0 10px,transparent 10px 13px); opacity:.65; }
-  .g-item .v{ font-family:var(--serif); font-size:19px; color:var(--light); }
-  .g-item.locked .v{ display:none; }
-  .g-item:not(.locked) .redact{ display:none; }
+  /* typed-line inputs */
+  .line{ display:flex; align-items:baseline; gap:8px; margin-top:calc(var(--u)*1.5); }
+  .inl{ color:var(--soft); }
+  .gt{ color:var(--faint); }
+  input[type=text]{ border:0; border-bottom:1px solid currentColor; background:transparent; border-radius:0;
+    font:inherit; color:inherit; padding:2px 0; min-width:0; }
+  input[type=text]::placeholder{ color:var(--faint); }
+  input[type=text]:focus{ outline:none; border-bottom-color:var(--ink); }
+  .grow{ flex:1; }
 
-  /* seats: anonymous capacity before invitation, names once inside */
-  .seats-row{ margin-top:calc(var(--u)*3.5); }
-  .seats-k{ font-family:var(--mono); font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); margin-right:14px; }
-  .seats-dots{ font-family:var(--mono); font-size:14px; letter-spacing:0.28em; color:var(--light); }
-  .coming{ margin-top:calc(var(--u)*3.5); max-width:460px; }
-  .coming .k{ font-family:var(--mono); font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); margin-bottom:9px; }
-  .coming-names{ font-family:var(--serif); font-size:19px; line-height:1.5; color:var(--light); }
+  /* text-link controls */
+  .lnk{ background:none; border:0; padding:0; color:var(--ink); cursor:pointer; font:inherit; }
+  .lnk:hover, .lnk:focus-visible{ text-decoration:underline; outline:none; }
+  .lnk[disabled]{ color:var(--faint); cursor:default; text-decoration:none; }
+  .acts{ margin-top:calc(var(--u)*2); display:flex; gap:20px; }
 
-  /* ---- admission ---- */
-  .admit{ margin-top:calc(var(--u)*3); max-width:440px; }
-  .field{ margin-bottom:calc(var(--u)*2.5); }
-  .field > label{ display:block; font-family:var(--mono); font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; }
-  input[type=text], input[type=email]{ width:100%; background:transparent; color:var(--light);
-    border:none; border-bottom:1px solid var(--line); font-family:var(--serif); font-size:22px; padding:6px 0; }
-  input:focus{ outline:none; border-color:var(--accent); }
-  input::placeholder{ color:#45464c; }
-  .namerow{ display:flex; align-items:baseline; gap:12px; margin-bottom:10px; }
-  .namerow input{ flex:1; }
-  .hp{ position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden; }
+  /* RSVP name rows */
+  .rows{ margin-top:calc(var(--u)*1); }
+  .row{ display:flex; align-items:baseline; gap:8px; margin-top:9px; }
+  .row .grow{ flex:1; }
+  .rm{ background:none; border:0; padding:0 2px; cursor:pointer; color:var(--faint); font-size:14px; line-height:1; }
+  .rm:hover, .rm:focus-visible{ color:#9a3b3b; outline:none; }
+  .addmore{ margin-top:11px; }
 
-  button{ font-family:var(--mono); cursor:pointer; }
-  .btn{ display:inline-block; background:var(--light); color:var(--ground); border:none;
-    font-size:12px; letter-spacing:0.16em; text-transform:uppercase; padding:13px 22px; transition:filter .2s; }
-  .btn:hover:not(:disabled){ filter:invert(1) saturate(0); }
-  .btn:disabled{ opacity:.4; cursor:not-allowed; }
-  .ghost{ background:none; border:1px solid var(--line); color:var(--light);
-    font-size:11px; letter-spacing:0.12em; text-transform:uppercase; padding:9px 14px; transition:background .2s,color .2s; }
-  .ghost:hover:not(:disabled){ background:var(--light); color:var(--ground); }
-  .ghost:disabled{ opacity:.4; cursor:not-allowed; }
-  .textbtn{ background:none; border:none; color:var(--muted); font-size:11px; letter-spacing:0.1em;
-    text-transform:uppercase; padding:0; border-bottom:1px solid var(--line); }
-  .textbtn:hover{ color:var(--light); border-color:var(--light); }
-  .actions{ display:flex; gap:14px; align-items:center; margin-top:calc(var(--u)*1.5); flex-wrap:wrap; }
-  .msg{ font-family:var(--mono); font-size:12px; margin-top:12px; min-height:16px; letter-spacing:0.03em; }
-  .msg.ok{ color:var(--light); } .msg.err{ color:#c98b8b; }
+  /* confirmed reservation */
+  .slip ul{ list-style:none; margin:calc(var(--u)*1) 0 0; padding:0; }
+  .slip li{ display:flex; justify-content:space-between; align-items:baseline; padding:2px 0; }
+  .slip .rm{ display:none; }
+  .slip.editing .rm{ display:inline; }
+  .slip-foot{ margin-top:calc(var(--u)*2); font-size:12px; color:var(--soft); display:flex; gap:20px; }
 
-  /* admission slip */
-  .slip{ border:1px solid var(--line); padding:calc(var(--u)*3); max-width:440px; position:relative; }
-  .slip::before{ content:""; position:absolute; left:0; top:0; bottom:0; width:2px; background:var(--accent); }
-  .slip .sh{ font-family:var(--mono); font-size:12px; letter-spacing:0.2em; text-transform:uppercase; color:var(--accent); }
-  .slip ul{ list-style:none; margin:calc(var(--u)*2) 0 0; }
-  .slip li{ font-family:var(--serif); font-size:23px; padding:7px 0; border-bottom:1px solid var(--line); display:flex; justify-content:space-between; align-items:baseline; }
-  .rm{ background:none; border:none; padding:0 2px; cursor:pointer; font-family:var(--mono); font-size:15px; line-height:1; color:var(--faint); transition:color .15s; }
-  .rm:hover, .rm:focus-visible{ color:#c98b8b; outline:none; }
-  .slip-foot{ display:flex; justify-content:space-between; align-items:baseline; margin-top:calc(var(--u)*2.5);
-    font-family:var(--mono); font-size:12px; letter-spacing:0.1em; color:var(--muted); }
-  .slip-foot .seatn{ color:var(--light); }
-  .slip-add{ margin-top:calc(var(--u)*2); }
-  .addtoggle{ background:none; border:none; padding:0 0 1px; cursor:pointer; font-family:var(--mono); font-size:11px;
-    letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); border-bottom:1px solid var(--line); }
-  .addtoggle[hidden]{ display:none; }
-  .addtoggle:hover{ color:var(--light); border-color:var(--light); }
-  .addline{ display:flex; align-items:baseline; gap:12px; }
-  .addline[hidden]{ display:none; }
-  .addline input{ flex:1; font-size:18px; }
-
-  /* host note (revealed, gated) - the human voice, as marginalia */
-  .hnote{ font-family:var(--serif); font-style:italic; font-size:18px; color:#cfcdc6; line-height:1.55; }
-
-  /* ---- upcoming: each candidate breathes (not a table) ---- */
-  .up-list{ margin-top:calc(var(--u)*2.5); }
-  .up-film{ padding:calc(var(--u)*2.75) 0; border-bottom:1px solid var(--line); }
-  .up-date{ font-family:var(--mono); font-size:11px; letter-spacing:0.12em; color:var(--muted); margin-bottom:9px; }
-  .up-title{ font-family:var(--serif); font-size:clamp(26px,4.5vw,34px); line-height:1.04; }
-  .up-meta{ font-family:var(--mono); font-size:12px; letter-spacing:0.04em; color:var(--muted); margin-top:6px; }
-  /* interest: one line that swaps in place. rest: label · dotted leader · count | open: name · arrow | done: label check · count */
-  .int{ margin-top:calc(var(--u)*2.25); }
-  .int-btn{ display:flex; width:100%; align-items:baseline; gap:16px; background:none; border:none; padding:0; cursor:pointer; text-align:left;
-    font-family:var(--mono); font-size:11px; letter-spacing:0.16em; text-transform:uppercase; color:var(--muted); }
+  /* upcoming */
+  .up{ margin-top:calc(var(--u)*1); }
+  .up-film{ margin-top:calc(var(--u)*3.25); }
+  .up-film:first-child{ margin-top:calc(var(--u)*2); }
+  .up-date{ font-size:11px; color:var(--soft); letter-spacing:0.06em; margin-bottom:4px; }
+  .int{ margin-top:calc(var(--u)*1.5); }
+  .int-btn{ display:flex; width:100%; align-items:center; gap:12px; background:none; border:0; padding:0; cursor:pointer;
+    color:var(--soft); font:inherit; text-align:left; }
   .int-btn[hidden]{ display:none; }
-  .int-btn:not(:disabled):hover .int-label{ color:var(--light); }
-  .int-btn:not(:disabled):hover .int-rule{ border-color:var(--muted); }
-  .int-btn:disabled{ cursor:default; }
-  .int-btn:disabled .int-label{ color:var(--light); }
-  .int-label{ transition:color .2s; white-space:nowrap; }
-  .int-rule{ flex:1; align-self:center; height:0; border-bottom:1px dotted var(--faint); transition:border-color .2s; }
-  .int-n{ color:var(--light); font-size:15px; letter-spacing:0.02em; white-space:nowrap; }
-  .int-form{ display:flex; width:100%; align-items:center; gap:14px; }
+  .int-btn:not(:disabled):hover .int-label{ text-decoration:underline; }
+  .int-btn:disabled{ cursor:default; color:var(--soft); }
+  .int-label{ white-space:nowrap; }
+  .int-rule{ flex:1; border-bottom:1px dotted var(--rule); height:0; }
+  .int-n{ color:var(--ink); white-space:nowrap; }
+  .int-form{ display:flex; width:100%; align-items:baseline; gap:12px; }
   .int-form[hidden]{ display:none; }
-  .int-form .ni-name{ flex:1; font-size:18px; }
-  .int-go{ background:none; border:none; color:var(--muted); font-size:20px; line-height:1; padding:0 2px; cursor:pointer; }
-  .int-go:hover{ color:var(--light); }
-  /* honeypot: keep it off-screen (it was accidentally rendering) */
-  .nhp{ position:absolute !important; left:-9999px !important; width:1px !important; height:1px !important; overflow:hidden; }
-  /* request toggle (shared with the request slip) */
-  .notify{ margin-top:12px; background:none; border:none; color:var(--muted); font-family:var(--mono);
-    font-size:11px; letter-spacing:0.1em; text-transform:uppercase; padding:0; border-bottom:1px solid var(--line); cursor:pointer; }
-  .notify:hover, .notify:focus-visible{ color:var(--light); border-color:var(--light); outline:none; }
-  .nmsg{ flex-basis:100%; font-family:var(--mono); font-size:11px; color:var(--muted); min-height:14px; }
-  .nmsg.ok{ color:var(--light); } .nmsg.err{ color:#c98b8b; }
+  .int-form .grow{ flex:1; }
 
-  /* wish for a film */
-  .wish{ margin-top:calc(var(--u)*4); padding-top:calc(var(--u)*3); border-top:1px solid var(--line); }
-  .wform{ margin-top:calc(var(--u)*2); max-width:440px; display:grid; gap:calc(var(--u)*1.5); }
-  .wform[hidden]{ display:none; }
-  .wrow{ display:flex; gap:14px; flex-wrap:wrap; }
-  .wrow input{ flex:1 1 150px; }
-  .whp{ position:absolute; left:-9999px; width:1px; height:1px; }
-
-  /* ---- archive: numbered spine, restrained interaction ---- */
-  .arch{ margin-top:calc(var(--u)*3.5); position:relative; padding-left:calc(var(--u)*3.5); }
-  .arch::before{ content:""; position:absolute; left:5px; top:10px; bottom:10px; width:1px; background:var(--line); }
-  .entry{ position:relative; padding:calc(var(--u)*2.5) 0; border-bottom:1px solid var(--line); }
-  .entry::before{ content:""; position:absolute; left:calc(var(--u)*-3.5 + 1px); top:calc(var(--u)*3);
-    width:9px; height:9px; border-radius:50%; background:var(--ground); border:1px solid var(--muted);
-    transition:background .2s, border-color .2s, transform .2s; }
-  .entry:hover::before, .entry:focus-within::before{ background:var(--ea, var(--light)); border-color:var(--ea, var(--light)); }
-  .entry .hd{ display:flex; gap:calc(var(--u)*2); align-items:baseline; }
-  .entry .no{ font-family:var(--mono); font-size:12px; letter-spacing:0.12em; color:var(--ea, var(--muted)); }
-  .entry .dt{ font-family:var(--mono); font-size:12px; letter-spacing:0.08em; color:var(--muted); }
-  .entry .t{ font-family:var(--serif); font-size:27px; line-height:1.05; margin-top:6px; transition:transform .2s; }
-  .entry:hover .t{ transform:translateX(3px); }
-  .entry .t span{ font-family:var(--mono); font-size:13px; color:var(--muted); }
-  .entry .dir{ font-family:var(--mono); font-size:12px; color:var(--muted); margin-top:3px; }
-  .entry .syn{ font-family:var(--serif); font-style:italic; font-size:16px; color:#c3c2bb; margin-top:9px; max-width:52ch; line-height:1.4; }
-  .entry .att{ font-family:var(--mono); font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--muted); margin-top:12px;
-    display:flex; align-items:baseline; gap:10px; }
-  /* the attendance number itself is the hold-to-reveal target - no icon */
-  .peek{ font-family:var(--mono); font-size:13px; letter-spacing:0.08em; color:var(--muted); background:none; border:none;
-    padding:0 0 1px; cursor:pointer; border-bottom:1px solid var(--line); touch-action:none; -webkit-user-select:none; user-select:none; }
-  .peek:hover, .peek:focus-visible{ color:var(--light); border-color:var(--light); outline:none; }
-  .att-hint{ color:var(--muted); }
-  .att-count{ color:var(--muted); }
-  .att-names{ display:none; color:var(--light); text-transform:none; letter-spacing:0.02em; font-size:12px; }
-  .att.revealed .peek, .att.revealed .att-hint, .att.revealed .att-count{ display:none; }
+  /* past */
+  .pastlist{ margin-top:calc(var(--u)*1); }
+  .entry{ margin-top:calc(var(--u)*3.25); }
+  .entry:first-child{ margin-top:calc(var(--u)*2); }
+  .entry .dt{ font-size:11px; color:var(--soft); letter-spacing:0.06em; }
+  .entry.priv{ opacity:0.5; }
+  .priv-tag{ margin-top:8px; font-size:11px; color:var(--faint); }
+  .att{ margin-top:9px; font-size:12px; color:var(--soft); }
+  .peek{ background:none; border:0; padding:0 0 1px; cursor:pointer; color:var(--soft);
+    border-bottom:1px dotted var(--rule); font:inherit; -webkit-user-select:none; user-select:none; touch-action:none; }
+  .peek:hover, .peek:focus-visible{ color:var(--ink); outline:none; }
+  .att-names{ display:none; color:var(--ink); }
+  .att.revealed .peek, .att.revealed .att-word, .att.revealed .att-count{ display:none; }
   .att.revealed .att-names{ display:inline; }
 
-  footer{ margin-top:calc(var(--u)*16); padding-top:calc(var(--u)*3); border-top:1px solid var(--line);
-    font-family:var(--mono); font-size:11px; letter-spacing:0.1em; color:var(--muted); }
-  .foot-loc{ margin-bottom:calc(var(--u)*2.5); min-height:15px; }
-  .foot-loc .foot-loc-v{ display:none; color:var(--light); letter-spacing:0.08em; text-transform:uppercase; }
-  .foot-loc.revealed .foot-loc-v{ display:inline; }
-  .foot-loc.revealed .redact{ display:none; }
-  .foot-row{ display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; }
+  /* suggest */
+  .sug-form{ margin-top:calc(var(--u)*1.5); }
+  .sug-form[hidden]{ display:none; }
 
-  @media (max-width:560px){
-    .int-form .ni-name{ font-size:16px; }
-  }
-  @media (prefers-reduced-motion:reduce){
-    *{ transition:none !important; animation:none !important; }
-    html{ scroll-behavior:auto; }
-  }
+  /* messages: terse, machine-like */
+  .msg, .nmsg{ margin-top:calc(var(--u)*1.5); font-size:11px; color:var(--soft); min-height:14px; }
+  .msg.err, .nmsg.err{ color:#9a3b3b; }
+  .msg.ok, .nmsg.ok{ color:var(--ink); }
+
+  /* footer */
+  .foot{ margin-top:calc(var(--u)*5.5); padding-top:calc(var(--u)*2); border-top:1px dashed var(--rule);
+    font-size:11px; color:var(--faint); letter-spacing:0.04em; }
+
+  /* honeypots kept functional but unseen */
+  .hp{ position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden; }
+  .nhp{ display:none !important; }
+
+  /* no motion beyond a functional fade */
+  @media (prefers-reduced-motion: no-preference){ .int-label, .lnk{ transition:opacity .15s; } }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <div class="mark" id="mark">HEIMKINO</div>
-    <!-- optional one-line notice (e.g. between events): populate #mast-note and remove hidden to show it -->
-    <div class="mast-note" id="mast-note" hidden></div>
-    <div class="head-loc" id="head-loc">
-      <span class="redact" style="width:200px"></span>
-      <span class="head-loc-v" id="head-loc-v"></span>
-    </div>
-  </header>
-
   <section id="current"></section>
-
-  <section id="admission">
-    <div id="admit-body"></div>
-  </section>
-
+  <section id="admission"><div id="admit-body"></div></section>
   <section id="upcoming"></section>
+  <section id="suggest"></section>
   <section id="past"></section>
-
-  <footer>
-    <div class="foot-loc" id="foot-loc">
-      <span class="redact" style="width:240px"></span>
-      <span class="foot-loc-v" id="foot-loc-v"></span>
-    </div>
-    <div class="foot-row">
-      <span id="foot-left"></span>
-      <span id="foot-right"></span>
-    </div>
-  </footer>
+  <div class="foot" id="foot"></div>
 </div>
 
 <script>
@@ -317,33 +204,17 @@
     return d;
   }
 
-  // ---------- masthead + footer ----------
+  // ---------- page chrome (receipt header line + title) ----------
   function renderChrome(){
-    $('#mark').firstChild.nodeValue = C.wordmark;
-    $('#foot-left').textContent = C.wordmark;
-    $('#foot-right').textContent = '';
-    document.title = C.wordmark + (CUR ? ' \u00b7 ' + CUR.title : '');
+    document.title = (CUR ? CUR.title : (C.wordmark || 'Programme'));
+    const d = new Date(), p = x => String(x).padStart(2,'0');
+    const foot = $('#foot'); if (foot) foot.textContent = 'updated ' + p(d.getDate()) + '.' + p(d.getMonth()+1) + '.' + String(d.getFullYear()).slice(2);
   }
 
-  // label-free redacted location banners (header + footer); revealed only when unlocked
-  function renderVenue(){
-    const v = (gated && gated.venue) ? gated.venue : '';
-    [['#head-loc','#head-loc-v'], ['#foot-loc','#foot-loc-v']].forEach(([b,val])=>{
-      const el = $(b); if(!el) return;
-      if (v){ el.classList.add('revealed'); $(val).textContent = v; }
-      else { el.classList.remove('revealed'); $(val).textContent = ''; }
-    });
-  }
+  // location now reveals inline in the admission block; no separate banners to update
+  function renderVenue(){}
 
   // ---------- current screening ----------
-  // anonymous seating: filled dots are taken, hollow are open. no "confirmed".
-  function seatsMarkup(){
-    if (!EP || !agg) return `<span class="seats-k">Seats</span><span class="seats-dots">\u00b7\u00b7\u00b7</span>`;
-    const cap = agg.capacity, conf = agg.confirmed || 0;
-    if (cap == null) return `<span class="seats-k">Seats</span><span class="seats-dots">${pad(conf)}</span>`;
-    let dots = ''; for (let i=0;i<cap;i++) dots += (i<conf ? '\u25cf' : '\u25cb');
-    return `<span class="seats-k">Seats</span><span class="seats-dots">${dots}</span>`;
-  }
 
   // one interest vote per browser per film (dedupe client-side; the backend has no caller identity)
   const VKEY = 'heimkino:interested';
@@ -354,41 +225,30 @@
     const n = CUR, sch = C.schedule || {};
     const curSec = document.getElementById('current'), admSec = document.getElementById('admission');
     if (!n){
-      // No next screening: remove the Current and Admission sections; Upcoming becomes the lead object.
-      // (A one-line notice can be shown by populating #mast-note; left as a placeholder rather than an empty state.)
+      // No screening: drop the Current and Admission blocks; Upcoming leads.
       if (curSec){ curSec.innerHTML = ''; curSec.style.display = 'none'; }
       if (admSec){ admSec.style.display = 'none'; }
       return;
     }
     if (curSec) curSec.style.display = '';
     if (admSec) admSec.style.display = '';
-    const meta = [n.director, n.year, n.edition].filter(Boolean).join(', ');
+    const meta = [n.director, n.year, n.edition].filter(Boolean).join(' / ');
     const filmStart = n.time || sch.film || '';
-    const unlocked = !!gated;
-    const rtDigits = n.runtime ? String(n.runtime).match(/\d+/) : null;
-    const rt = n.runtime ? (rtDigits ? rtDigits[0] + '\u2032' : esc(n.runtime)) : '';
-    const flashCls = flashed ? '' : ' flash'; flashed = true;
-    const attendance = (unlocked && roster && roster.length)
-      ? `<div class="coming"><div class="k">Coming</div><div class="coming-names">${roster.map(esc).join(' \u00b7 ')}</div></div>`
-      : `<div class="seats-row" id="seats">${seatsMarkup()}</div>`;
-
+    const dateLine = esc(fmt(n.date, {weekday:'short', day:'numeric', month:'short', year:'numeric'})).toUpperCase();
+    let cap = '';
+    if (agg && typeof agg.confirmed === 'number'){
+      const conf = agg.confirmed, capn = agg.capacity, full = (capn != null && conf >= capn);
+      cap = `<div class="cap">${conf}${capn!=null?' / '+capn:''} coming${full?'<span class="full-tag">full</span>':''}</div>`;
+      if (gated && roster && roster.length) cap += `<div class="roster"><span>${roster.map(esc).join('</span> / <span>')}</span></div>`;
+    }
     $('#current').innerHTML = `
-      <div class="cur-top"><span class="cur-when">${esc(fmt(n.date,{weekday:'short',day:'numeric',month:'short',year:'numeric'}))}</span></div>
-      <h1 class="cur-title${flashCls}">${esc(n.title)}</h1>
-      <div class="cur-meta">${esc(meta)}</div>
-      ${n.synopsis ? `<p class="cur-syn">${esc(n.synopsis)}</p>` : ''}
-      <div class="cur-sched">
-        <div class="times">${sch.doors ? `doors <b>${esc(sch.doors)}</b><br>` : ''}${filmStart ? `film <b>${esc(filmStart)}</b>` : ''}</div>
-        ${rt ? `<div class="run">${rt}</div>` : ''}
-      </div>
-      <div class="gated">
-        <div class="g-item ${unlocked?'':'locked'}" id="g-note">
-          <div class="k">House note</div>
-          <span class="redact" style="width:300px"></span>
-          <div class="v hnote">${esc(gated?gated.houseNote:'')}</div>
-        </div>
-      </div>
-      ${attendance}`;
+      <div class="sec-h">Next screening</div><hr class="rule">
+      <div class="title">${esc(n.title)}</div>
+      <div class="meta">${esc(meta)}</div>
+      ${n.runtime ? `<div class="meta">${esc(n.runtime)}</div>` : ''}
+      ${n.synopsis ? `<p class="syn">${esc(n.synopsis)}</p>` : ''}
+      <div class="sched">${dateLine}<br>${sch.doors ? `doors <b>${esc(sch.doors)}</b><br>` : ''}${filmStart ? `film&nbsp; <b>${esc(filmStart)}</b>` : ''}</div>
+      ${cap}`;
   }
 
   // ---------- admission ----------
@@ -396,67 +256,50 @@
 
   function renderAdmission(){
     const body = $('#admit-body'); if(!body) return;
+    if (!CUR){ return; }   // no screening: block hidden by renderCurrent
+    if (!EP){ body.innerHTML = `<div class="sec-h">Code</div><hr class="rule"><div class="small">reservations offline</div>`; return; }
 
-    if (!CUR){ return; }   // no screening: the Admission section is hidden by renderCurrent
+    let html = '';
 
-    if (!EP){
-      body.innerHTML = `<p class="cur-syn" style="font-size:18px">Reservations open once the invitation system is connected.</p>`;
-      return;
+    // protected info, revealed once a valid code is entered (plain text, no bars)
+    if (gated){
+      const venue = gated.venue ? esc(gated.venue) : '';
+      const note  = gated.houseNote ? esc(gated.houseNote) : '';
+      html += `<div class="sec-h">Code</div><hr class="rule"><div class="proto">`
+        + (venue ? `<div class="k">location</div><div class="v">${venue}</div>` : '')
+        + (note ? `<div class="note">${note}</div>` : '')
+        + `<div class="ok">accepted</div></div>`;
     }
 
-    // has a reservation -> admission slip
     if (slip){
-      const when = esc(fmt(slip.date||(CUR&&CUR.date)||'',{weekday:'short',day:'numeric',month:'short',year:'numeric'}));
-      body.innerHTML = `
-        <div class="slip">
-          <ul id="slip-names">
-            ${slip.names.map((nm,i)=>`<li><span>${esc(nm)}</span><button class="rm" data-rm="${i}" aria-label="Remove ${esc(nm)}">\u00d7</button></li>`).join('')}
-          </ul>
-          <div class="slip-add">
-            <button class="addtoggle" id="add-toggle" aria-expanded="false">Add someone else</button>
-            <form class="addline" id="add-line" hidden autocomplete="off">
-              <input id="add-name" type="text" placeholder="name" autocomplete="off" aria-label="Add a name">
-              <button class="int-go" id="add-go" type="submit" aria-label="Add">\u2192</button>
-            </form>
-          </div>
-          <div class="slip-foot">
-            <span class="when">${when} \u00b7 Doors ${esc((C.schedule||{}).doors||'')}</span>
-            <span class="seatn">${slip.party} ${slip.party===1?'seat':'seats'}</span>
-          </div>
-          <div class="actions" style="margin-top:calc(var(--u)*2.5)">
-            <button class="textbtn" id="cancel-res">Cancel</button>
-          </div>
-          <div class="msg" id="admit-msg" role="status" aria-live="polite"></div>
-        </div>`;
-      return;
+      // confirmed reservation
+      html += `<div class="sec-h"${gated?' style="margin-top:calc(var(--u)*4.5)"':''}>Coming</div><hr class="rule">`
+        + `<div class="slip" id="slip">`
+        + `<ul id="slip-names">${slip.names.map((nm,i)=>`<li><span>${esc(nm)}</span><button class="rm" data-rm="${i}" aria-label="Remove">\u00d7</button></li>`).join('')}</ul>`
+        + `<form class="int-form" id="add-line" hidden autocomplete="off"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow" id="add-name" type="text" aria-label="Add a name"><button class="lnk" id="add-go" type="submit">[add]</button></form>`
+        + `<div class="slip-foot"><span>${slip.party} ${slip.party===1?'seat':'seats'}</span><span>doors ${esc((C.schedule||{}).doors||'')}</span></div>`
+        + `<div class="acts"><button class="lnk" id="change-res">[change]</button><button class="lnk" id="cancel-res">[cancel]</button></div>`
+        + `<div class="msg" id="admit-msg" role="status" aria-live="polite"></div></div>`;
+    } else if (sessionCode){
+      // unlocked, no reservation yet -> RSVP
+      html += `<div class="sec-h"${gated?' style="margin-top:calc(var(--u)*4.5)"':''}>Coming?</div><hr class="rule">`
+        + `<form id="admit-form" autocomplete="off">`
+        + `<div class="rows" id="name-rows"><div class="row"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow rn" type="text" required aria-label="Name"></div></div>`
+        + `<div class="addmore"><button type="button" class="lnk" id="add-row">+ add another person</button></div>`
+        + `<div class="hp" aria-hidden="true"><input id="website" type="text" tabindex="-1" autocomplete="off"></div>`
+        + `<div class="acts"><button class="lnk" type="submit" id="confirm-go">[confirm]</button></div>`
+        + `<div class="msg" id="admit-msg" role="status" aria-live="polite"></div></form>`;
+    } else {
+      // locked -> code entry
+      html += `<div class="sec-h">Code</div><hr class="rule">`
+        + `<form id="unlock-form" autocomplete="off">`
+        + `<div class="line"><span class="inl">code</span><span class="gt">&gt;</span><input class="grow" id="code" type="text" required aria-label="Code"></div>`
+        + `<div class="hp" aria-hidden="true"><input id="u-hp" type="text" tabindex="-1" autocomplete="off"></div>`
+        + `<div class="acts"><button class="lnk" type="submit" id="unlock-go">[enter]</button></div>`
+        + `<div class="msg" id="admit-msg" role="status" aria-live="polite"></div></form>`;
     }
 
-    // unlocked for this session -> RSVP form (no code field; the session is already open)
-    if (sessionCode){
-      body.innerHTML = `
-        <form id="admit-form" autocomplete="off">
-          <div class="field">
-            <label>Admission</label>
-            <div id="name-rows"><div class="namerow"><input class="rn" type="text" placeholder="name" required aria-label="Name"></div></div>
-            <button type="button" class="ghost" id="add-row" style="margin-top:6px">Add someone else</button>
-          </div>
-          <div class="hp" aria-hidden="true"><label>Leave empty</label><input id="website" type="text" tabindex="-1" autocomplete="off"></div>
-          <div class="actions"><button class="btn" type="submit" id="confirm-go">Confirm</button></div>
-          <div class="msg" id="admit-msg" role="status" aria-live="polite"></div>
-        </form>`;
-      return;
-    }
-
-    // locked -> invitation entry; a valid code opens the session
-    body.innerHTML = `
-      <form id="unlock-form" autocomplete="off">
-        <div class="field">
-          <input id="code" type="text" placeholder="your invitation" required aria-label="Invitation">
-        </div>
-        <div class="hp" aria-hidden="true"><label>Leave empty</label><input id="u-hp" type="text" tabindex="-1" autocomplete="off"></div>
-        <div class="actions"><button class="btn" type="submit" id="unlock-go">Enter</button></div>
-        <div class="msg" id="admit-msg" role="status" aria-live="polite"></div>
-      </form>`;
+    body.innerHTML = html;
   }
 
   function reveal(g){ gated = g; renderVenue(); renderCurrent(); }
@@ -466,15 +309,15 @@
     const code = form.querySelector('#code').value.trim();
     const hp = form.querySelector('#u-hp').value;
     if (hp) return;
-    if (!code) return admitMsg('Enter your invitation.', 'err');
-    const go = form.querySelector('#unlock-go'); go.disabled = true; admitMsg('Checking\u2026', 'ok');
+    if (!code) return admitMsg('enter code', 'err');
+    const go = form.querySelector('#unlock-go'); go.disabled = true; admitMsg('', 'ok');
     try{
       const d = await post('unlock', { code, website:hp });
       sessionCode = code;
       roster = d.coming || [];
       reveal({ venue:d.venue, houseNote:d.houseNote });
       renderAdmission();
-      admitMsg('Invitation accepted.', 'ok');
+      admitMsg('accepted', 'ok');
     }catch(err){ admitMsg(err.message, 'err'); go.disabled = false; }
   }
 
@@ -482,12 +325,12 @@
     const names = [...form.querySelectorAll('.rn')].map(i=>i.value.trim()).filter(Boolean);
     const hp = form.querySelector('#website').value;
     if (hp) return;
-    if (Date.now() - startedAt < 1500) return admitMsg('One moment, then try again.', 'err');
-    if (!names.length) return admitMsg('Add at least one name.', 'err');
-    if (names.length > 6) return admitMsg('Up to 6 per reservation.', 'err');
-    if (!sessionCode) return admitMsg('Enter your invitation first.', 'err');
+    if (Date.now() - startedAt < 1500) return admitMsg('one moment', 'err');
+    if (!names.length) return admitMsg('add a name', 'err');
+    if (names.length > 6) return admitMsg('max 6', 'err');
+    if (!sessionCode) return admitMsg('enter code first', 'err');
 
-    const go = form.querySelector('#confirm-go'); go.disabled = true; admitMsg('Confirming\u2026', 'ok');
+    const go = form.querySelector('#confirm-go'); go.disabled = true; admitMsg('', 'ok');
     try{
       const d = await post('create', { names, code:sessionCode, website:hp, date:CUR.date, title:CUR.title });
       mine = { reservationId:d.reservationId, editToken:d.editToken }; store.set(mine);
@@ -496,7 +339,7 @@
       roster = d.coming || roster;
       reveal({ venue:d.venue, houseNote:d.houseNote });
       renderAdmission();
-      admitMsg('Confirmed.', 'ok');
+      admitMsg('recorded', 'ok');
     }catch(err){ admitMsg(err.message, 'err'); go.disabled = false; }
   }
 
@@ -525,7 +368,7 @@
       if (typeof d !== 'undefined' && d.coming) roster = d.coming;
       mine=null; slip=null; store.clear();
       if (!sessionCode){ gated=null; roster=null; renderVenue(); }   // re-lock if the session was opened only by a stored reservation
-      renderAdmission(); renderCurrent(); admitMsg('Your reservation is cancelled.','ok');
+      renderAdmission(); renderCurrent(); admitMsg('cancelled','ok');
     }catch(err){ admitMsg(err.message,'err'); }
   }
 
@@ -538,18 +381,17 @@
     });
     root.addEventListener('click', e => {
       const t = e.target;
-      if (t.id === 'add-row'){ const row=document.createElement('div'); row.className='namerow';
-        row.innerHTML='<input class="rn" type="text" placeholder="name" autocomplete="off" aria-label="Name"><button type="button" class="rm" data-rmrow="1" aria-label="Remove">\u00d7</button>';
+      if (t.id === 'add-row'){ const row=document.createElement('div'); row.className='row';
+        row.innerHTML='<span class="inl">name</span><span class="gt">&gt;</span><input class="grow rn" type="text" autocomplete="off" aria-label="Name"><button type="button" class="rm" data-rmrow="1" aria-label="Remove">\u00d7</button>';
         $('#name-rows').appendChild(row); row.querySelector('.rn').focus(); }
-      else if (t.dataset.rmrow){ t.closest('.namerow').remove(); }
-      else if (t.id === 'add-toggle'){ t.hidden=true; const f=$('#add-line'); if(f){ f.hidden=false; const inp=$('#add-name'); if(inp) inp.focus(); } }
+      else if (t.dataset.rmrow){ t.closest('.row').remove(); }
+      else if (t.id === 'change-res'){ const s=$('#slip'); if(s){ const on=!s.classList.contains('editing'); s.classList.toggle('editing',on); const f=$('#add-line'); if(f) f.hidden=!on; if(on){ const i=$('#add-name'); if(i) i.focus(); } } }
       else if (t.dataset.rm !== undefined){ removeName(parseInt(t.dataset.rm,10)); }
       else if (t.id === 'cancel-res'){ cancelRes(); }
     });
     root.addEventListener('keydown', e => {
       if(e.key==='Escape' && e.target.id==='add-name'){
-        const f=$('#add-line'), tog=$('#add-toggle');
-        if(f) f.hidden=true; if(tog){ tog.hidden=false; tog.setAttribute('aria-expanded','false'); }
+        const s=$('#slip'), f=$('#add-line'); if(f) f.hidden=true; if(s) s.classList.remove('editing');
       }
     });
   }
@@ -561,29 +403,23 @@
     const undated = base.filter(x=>!x.u.date).sort((a,b)=>{ const va=interestCounts[a.u.title]||0, vb=interestCounts[b.u.title]||0; return (vb-va) || (a.idx-b.idx); });
     const list = dated.concat(undated).map(x=>x.u);
     $('#upcoming').innerHTML = `
-      <div class="sec-label">Upcoming</div>
-      <div class="up-list">
+      <div class="sec-h">Upcoming</div><hr class="rule">
+      <div class="up">
         ${list.length ? list.map(u=>{
           const c = interestCounts[u.title] || 0;
           const voted = hasVoted(u.title);
           return `
           <div class="up-film">
-            ${u.date ? `<div class="up-date">${esc(fmt(u.date,{weekday:'short',day:'numeric',month:'short'}))}</div>` : ''}
-            <div class="up-title">${esc(u.title)}</div>
-            <div class="up-meta">${esc([u.director,u.year].filter(Boolean).join(', '))}</div>
+            ${u.date ? `<div class="up-date">${esc(fmt(u.date,{weekday:'short',day:'numeric',month:'short'})).toUpperCase()}</div>` : ''}
+            <div class="title">${esc(u.title)}</div>
+            <div class="meta">${esc([u.director,u.year].filter(Boolean).join(' / '))}</div>
             <div class="int" data-film="${esc(u.title)}">
-              <button class="int-btn"${voted?' disabled':''} aria-expanded="false">
-                <span class="int-label">Interested${voted?' \u2713':''}</span><span class="int-rule"></span><span class="int-n">${c}</span>
-              </button>
-              <form class="int-form" hidden>
-                <input class="ni-name" type="text" placeholder="your name" autocomplete="off" aria-label="Your name">
-                <input class="nhp" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
-                <button class="int-go" type="submit" aria-label="Add">\u2192</button>
-              </form>
+              <button class="int-btn"${voted?' disabled':''} aria-expanded="false"><span class="int-label">interested${voted?' \u2713':''}</span><span class="int-rule"></span><span class="int-n">${c}</span></button>
+              <form class="int-form" hidden autocomplete="off"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow ni-name" type="text" aria-label="Your name"><input class="nhp" type="text" tabindex="-1" autocomplete="off" aria-hidden="true"><button class="lnk int-go" type="submit">[enter]</button></form>
               <div class="nmsg" aria-live="polite"></div>
             </div>
           </div>`;}).join('')
-        : `<div class="up-film"><div class="up-meta">Nothing provisional yet.</div></div>`}
+        : `<div class="up-film"><div class="meta">nothing listed</div></div>`}
       </div>`;
   }
   // the interest line swaps in place and does NOT re-sort after a vote (the item stays put)
@@ -594,9 +430,9 @@
     const msg = box.querySelector('.nmsg');
     const set = (t,cls)=>{ if(msg){ msg.textContent=t; msg.className='nmsg '+(cls||''); } };
     if (hp) return;
-    if (hasVoted(film)) return set('Already noted.','ok');
-    if (!name) return set('Add a name.','err');
-    if (!EP) return set('Not connected yet.','err');
+    if (hasVoted(film)) return set('noted','ok');
+    if (!name) return set('name?','err');
+    if (!EP) return set('offline','err');
     const go = form.querySelector('.int-go'); go.disabled=true;
     try{
       const d = await post('interest', { name, film, website:hp });
@@ -604,7 +440,7 @@
       markVoted(film);
       const btn = box.querySelector('.int-btn');
       box.querySelector('.int-n').textContent = interestCounts[film]||0;
-      box.querySelector('.int-label').textContent = 'Interested \u2713';
+      box.querySelector('.int-label').textContent = 'interested \u2713';
       btn.disabled = true; btn.hidden = false; btn.setAttribute('aria-expanded','false');
       form.hidden = true; set('','');
     }catch(err){ set(err.message,'err'); go.disabled=false; }
@@ -634,58 +470,64 @@
     const by = $('#w-by').value.trim(), note = $('#w-note').value.trim(), hp = $('#w-hp').value;
     const set = (t,cls)=>{ const m=$('#wish-msg'); m.textContent=t; m.className='nmsg '+(cls||''); };
     if (hp) return;
-    if (!film || !director) return set('Film and director are required.','err');
-    if (!EP) return set('Not connected yet.','err');
-    const go=$('#wish-go'); go.disabled=true; set('Sending\u2026','ok');
+    if (!film) return set('film?','err');
+    if (!EP) return set('offline','err');
+    const go=$('#wish-go'); go.disabled=true; set('','ok');
     try{ await post('wish', { film, director, by, note });
-      set('Noted. If it fits, it may appear in Upcoming.','ok');
+      set('recorded','ok');
       $('#w-film').value=''; $('#w-dir').value=''; $('#w-by').value=''; $('#w-note').value=''; }
     catch(err){ set(err.message,'err'); }
     finally{ go.disabled=false; }
   }
 
-  // ---------- past (numbered; optional hold-to-reveal eye) ----------
+  // ---------- past ----------
   function renderPast(){
-    // Past is the record of Heimkino nights only; films watched elsewhere are not part of the public chronology
     const items = (PICK.retired ? [PICK.retired].concat(C.past||[]) : (C.past||[]))
-      .filter(f=> f && f.title && !f.private)
+      .filter(f=> f && f.title)
       .slice().sort((a,b)=> String(b.date||'').localeCompare(String(a.date||'')));
     $('#past').innerHTML = `
-      <div class="sec-label">Past</div>
-      <div class="arch">
+      <div class="sec-h">Past</div><hr class="rule">
+      <div class="pastlist">
         ${items.map(f=>{
+          const priv = !!f.private;
           const att = (f.attendees||[]).filter(Boolean);
-          const present = att.length
-            ? `<div class="att">
-                 <button class="peek" aria-label="Hold to reveal who was here" title="Hold to reveal">${att.length}</button>
-                 <span class="att-hint">here</span>
-                 <span class="att-names">${att.map(esc).join(' \u00b7 ')}</span>
-               </div>`
-            : (typeof f.attendance==='number' ? `<div class="att"><span class="att-count">${f.attendance}</span> <span class="att-hint">here</span></div>` : '');
+          const present = priv ? '' : (att.length
+            ? `<div class="att"><button class="peek" aria-label="Hold to reveal who was here" title="Hold to reveal">${att.length}</button> <span class="att-word">attended</span> <span class="att-names">${att.map(esc).join(' / ')}</span></div>`
+            : (typeof f.attendance==='number' ? `<div class="att"><span class="att-count">${f.attendance}</span> attended</div>` : ''));
           return `
-          <article class="entry" tabindex="0">
-            <div class="hd"><span class="dt">${esc(fmt(f.date,{day:'2-digit',month:'short',year:'2-digit'}))}</span></div>
-            <div class="t">${esc(f.title)} <span>${f.year||''}</span></div>
-            <div class="dir">${esc(f.director||'')}</div>
-            ${f.synopsis ? `<div class="syn">${esc(f.synopsis)}</div>` : ''}
-            ${present}
-          </article>`;
+          <div class="entry${priv?' priv':''}">
+            <div class="dt">${esc(fmt(f.date,{day:'2-digit',month:'short',year:'numeric'})).toUpperCase()}</div>
+            <div class="title">${esc(f.title)}</div>
+            <div class="meta">${esc([f.director,f.year].filter(Boolean).join(' / '))}</div>
+            ${f.synopsis ? `<p class="syn">${esc(f.synopsis)}</p>` : ''}
+            ${priv ? '<div class="priv-tag">private</div>' : present}
+          </div>`;
         }).join('')}
-      </div>
-      <div class="wish">
-        <button class="notify" id="wish-toggle" aria-expanded="false">Suggest something to watch</button>
-        <form class="wform" id="wish-form" hidden>
-          <div class="wrow">
-            <input id="w-film" type="text" placeholder="film" autocomplete="off" aria-label="Film" required>
-            <input id="w-dir" type="text" placeholder="director" autocomplete="off" aria-label="Director" required>
-          </div>
-          <input id="w-by" type="text" placeholder="your name (optional)" autocomplete="off" aria-label="Your name">
-          <input id="w-note" type="text" placeholder="comment (optional)" autocomplete="off" aria-label="Why">
-          <div class="whp" aria-hidden="true"><input id="w-hp" type="text" tabindex="-1" autocomplete="off"></div>
-          <div class="actions"><button class="ghost" type="submit" id="wish-go">Submit</button></div>
-          <div class="nmsg" id="wish-msg" aria-live="polite"></div>
-        </form>
       </div>`;
+  }
+
+  // ---------- suggest a film (its own section between Upcoming and Past) ----------
+  function renderSuggest(){
+    const el = $('#suggest'); if(!el) return;
+    el.innerHTML = `
+      <div class="sec-h">Suggest a film</div><hr class="rule">
+      <button class="lnk" id="wish-toggle" aria-expanded="false">+ suggest a film</button>
+      <form class="sug-form" id="wish-form" hidden autocomplete="off">
+        <div class="line"><span class="inl">film</span><span class="gt">&gt;</span><input class="grow" id="w-film" type="text" required aria-label="Film"></div>
+        <div class="line"><span class="inl">director</span><span class="gt">&gt;</span><input class="grow" id="w-dir" type="text" aria-label="Director"></div>
+        <div class="line"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow" id="w-by" type="text" aria-label="Your name"></div>
+        <div class="line"><span class="inl">note</span><span class="gt">&gt;</span><input class="grow" id="w-note" type="text" aria-label="Note"></div>
+        <div class="hp" aria-hidden="true"><input id="w-hp" type="text" tabindex="-1" autocomplete="off"></div>
+        <div class="acts"><button class="lnk" type="submit" id="wish-go">[send]</button></div>
+        <div class="nmsg" id="wish-msg" aria-live="polite"></div>
+      </form>`;
+  }
+  function wireSuggest(){
+    const el = $('#suggest');
+    el.addEventListener('click', e => { if(e.target.id!=='wish-toggle') return;
+      const f=$('#wish-form'); const open=f.hidden; f.hidden=!open;
+      e.target.setAttribute('aria-expanded', String(open)); if(open) $('#w-film').focus(); });
+    el.addEventListener('submit', e => { if(e.target.id!=='wish-form') return; e.preventDefault(); sendWish(e.target); });
   }
 
   // hold the eye to reveal attendees, release to redact (only where attendees are listed)
@@ -698,12 +540,6 @@
     past.addEventListener('keydown', e => { const b=e.target.closest('.peek'); if(!b) return; if(e.key===' '||e.key==='Enter'){ e.preventDefault(); b.closest('.att').classList.add('revealed'); } });
     past.addEventListener('keyup', e => { const b=e.target.closest('.peek'); if(!b) return; if(e.key===' '||e.key==='Enter'){ b.closest('.att').classList.remove('revealed'); } });
     past.addEventListener('focusout', e => { const b=e.target.closest&&e.target.closest('.peek'); if(b) b.closest('.att').classList.remove('revealed'); });
-    past.addEventListener('click', e => {
-      if (e.target.id !== 'wish-toggle') return;
-      const f=$('#wish-form'); const open=f.hidden; f.hidden=!open;
-      e.target.setAttribute('aria-expanded', String(open)); if(open) $('#w-film').focus();
-    });
-    past.addEventListener('submit', e => { if (e.target.id !== 'wish-form') return; e.preventDefault(); sendWish(e.target); });
   }
 
   // ---------- live aggregate + restore own reservation ----------
@@ -726,8 +562,8 @@
   }
 
   // ---------- init ----------
-  renderChrome(); renderVenue(); renderCurrent(); renderAdmission(); renderUpcoming(); renderPast();
-  wireAdmission(); wireUpcoming(); wirePeek();
+  renderChrome(); renderVenue(); renderCurrent(); renderAdmission(); renderUpcoming(); renderSuggest(); renderPast();
+  wireAdmission(); wireUpcoming(); wireSuggest(); wirePeek();
   loadState(); restoreMine();
 })();
 </script>
