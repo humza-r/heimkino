@@ -49,6 +49,7 @@ window.CONFIG = {
       "title": "Possession",
       "director": "Andrzej Żuławski",
       "year": 1981,
+      "runtime": "124",
       "synopsis": "A psychological horror drama about a spy and his wife who divorce and unleash a monstrous creature."
     }
   ],
