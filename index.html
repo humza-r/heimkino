@@ -112,7 +112,9 @@
   .entry:first-child{ margin-top:calc(var(--u)*2); }
   .entry .dt{ font-size:11px; color:var(--soft); letter-spacing:0.06em; }
   .entry.priv{ opacity:0.5; }
-  .priv-tag{ margin-top:8px; font-size:11px; color:var(--faint); }
+  .tags{ margin-top:9px; }
+  .tag{ display:inline-block; font-size:10px; letter-spacing:0.16em; text-transform:uppercase; color:var(--soft); margin-right:16px; }
+  .meta.rec{ color:var(--soft); margin-top:6px; }
   .att{ margin-top:9px; font-size:12px; color:var(--soft); }
   .peek{ background:none; border:0; padding:0 0 1px; cursor:pointer; color:var(--soft);
     border-bottom:1px dotted var(--rule); font:inherit; -webkit-user-select:none; user-select:none; touch-action:none; }
@@ -246,6 +248,8 @@
       <div class="title">${esc(n.title)}</div>
       <div class="meta">${esc(meta)}</div>
       ${n.runtime ? `<div class="meta">${esc(n.runtime)}</div>` : ''}
+      ${n.rec ? `<div class="meta rec">recommended by ${esc(n.rec)}</div>` : ''}
+      ${n.away ? `<div class="tags"><span class="tag">away</span></div>` : ''}
       ${n.synopsis ? `<p class="syn">${esc(n.synopsis)}</p>` : ''}
       <div class="sched">${dateLine}<br>${sch.doors ? `doors <b>${esc(sch.doors)}</b><br>` : ''}${filmStart ? `film&nbsp; <b>${esc(filmStart)}</b>` : ''}</div>
       ${cap}`;
@@ -257,7 +261,7 @@
   function renderAdmission(){
     const body = $('#admit-body'); if(!body) return;
     if (!CUR){ return; }   // no screening: block hidden by renderCurrent
-    if (!EP){ body.innerHTML = `<div class="sec-h">Code</div><hr class="rule"><div class="small">reservations offline</div>`; return; }
+    if (!EP){ body.innerHTML = `<div class="small">reservations offline</div>`; return; }
 
     let html = '';
 
@@ -265,7 +269,7 @@
     if (gated){
       const venue = gated.venue ? esc(gated.venue) : '';
       const note  = gated.houseNote ? esc(gated.houseNote) : '';
-      html += `<div class="sec-h">Code</div><hr class="rule"><div class="proto">`
+      html += `<div class="proto">`
         + (venue ? `<div class="k">location</div><div class="v">${venue}</div>` : '')
         + (note ? `<div class="note">${note}</div>` : '')
         + `<div class="ok">accepted</div></div>`;
@@ -290,9 +294,8 @@
         + `<div class="acts"><button class="lnk" type="submit" id="confirm-go">[confirm]</button></div>`
         + `<div class="msg" id="admit-msg" role="status" aria-live="polite"></div></form>`;
     } else {
-      // locked -> code entry
-      html += `<div class="sec-h">Code</div><hr class="rule">`
-        + `<form id="unlock-form" autocomplete="off">`
+      // locked -> just the code bar
+      html += `<form id="unlock-form" autocomplete="off">`
         + `<div class="line"><span class="inl">code</span><span class="gt">&gt;</span><input class="grow" id="code" type="text" required aria-label="Code"></div>`
         + `<div class="hp" aria-hidden="true"><input id="u-hp" type="text" tabindex="-1" autocomplete="off"></div>`
         + `<div class="acts"><button class="lnk" type="submit" id="unlock-go">[enter]</button></div>`
@@ -413,6 +416,8 @@
             ${u.date ? `<div class="up-date">${esc(fmt(u.date,{weekday:'short',day:'numeric',month:'short'})).toUpperCase()}</div>` : ''}
             <div class="title">${esc(u.title)}</div>
             <div class="meta">${esc([u.director,u.year].filter(Boolean).join(' / '))}</div>
+            ${u.rec ? `<div class="meta rec">recommended by ${esc(u.rec)}</div>` : ''}
+            ${u.away ? `<div class="tags"><span class="tag">away</span></div>` : ''}
             <div class="int" data-film="${esc(u.title)}">
               <button class="int-btn"${voted?' disabled':''} aria-expanded="false"><span class="int-label">interested${voted?' \u2713':''}</span><span class="int-rule"></span><span class="int-n">${c}</span></button>
               <form class="int-form" hidden autocomplete="off"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow ni-name" type="text" aria-label="Your name"><input class="nhp" type="text" tabindex="-1" autocomplete="off" aria-hidden="true"><button class="lnk int-go" type="submit">[enter]</button></form>
@@ -489,7 +494,9 @@
       <div class="sec-h">Past</div><hr class="rule">
       <div class="pastlist">
         ${items.map(f=>{
-          const priv = !!f.private;
+          const priv = !!f.private, away = !!f.away;
+          const tags = []; if (away) tags.push('away'); if (priv) tags.push('private');
+          const tagsHtml = tags.length ? `<div class="tags">${tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>` : '';
           const att = (f.attendees||[]).filter(Boolean);
           const present = priv ? '' : (att.length
             ? `<div class="att"><button class="peek" aria-label="Hold to reveal who was here" title="Hold to reveal">${att.length}</button> <span class="att-word">attended</span> <span class="att-names">${att.map(esc).join(' / ')}</span></div>`
@@ -499,8 +506,10 @@
             <div class="dt">${esc(fmt(f.date,{day:'2-digit',month:'short',year:'numeric'})).toUpperCase()}</div>
             <div class="title">${esc(f.title)}</div>
             <div class="meta">${esc([f.director,f.year].filter(Boolean).join(' / '))}</div>
+            ${f.rec ? `<div class="meta rec">recommended by ${esc(f.rec)}</div>` : ''}
             ${f.synopsis ? `<p class="syn">${esc(f.synopsis)}</p>` : ''}
-            ${priv ? '<div class="priv-tag">private</div>' : present}
+            ${tagsHtml}
+            ${present}
           </div>`;
         }).join('')}
       </div>`;
