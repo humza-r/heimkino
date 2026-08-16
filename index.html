@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Heimkino</title>
 <meta name="description" content="beta version">
-<meta name="theme-color" content="#f4f1e9">
+<meta name="theme-color" content="#fbfbf9">
 <meta property="og:site_name" content="Heimkino">
 <meta property="og:title" content="Heimkino">
 <meta property="og:description" content="beta version">
@@ -19,7 +19,7 @@
 
 <style>
   :root{
-    --paper:#f4f1e9; --ink:#1b1a17; --soft:#6b6862; --faint:#a7a29a; --rule:#c9c3b6;
+    --paper:#fbfbf9; --ink:#1b1a17; --soft:#6b6862; --faint:#a7a29a; --rule:#c9c3b6;
     --u:8px;
     --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
   }
@@ -54,9 +54,9 @@
   /* protected info, revealed after code (plain text, no bars) */
   .proto{ margin-top:calc(var(--u)*2.75); }
   .proto .k{ font-size:11px; color:var(--soft); }
-  .proto .v{ white-space:pre-line; color:var(--ink); }
-  .proto .note{ margin-top:calc(var(--u)*1.5); white-space:pre-line; color:var(--ink); }
-  .proto .ok{ margin-top:calc(var(--u)*1.5); font-size:11px; color:var(--soft); }
+  .proto .note{ margin-top:5px; white-space:pre-line; color:var(--ink); }
+  .proto .note + .k{ margin-top:calc(var(--u)*2.75); }
+  .proto .v{ margin-top:5px; white-space:pre-line; color:var(--ink); }
 
   /* typed-line inputs */
   .line{ display:flex; align-items:baseline; gap:8px; margin-top:calc(var(--u)*1.5); }
@@ -259,7 +259,7 @@
       ${n.synopsis ? `<p class="syn">${esc(n.synopsis)}</p>` : ''}
       <div class="sched">${dateLine}<br>${sch.doors ? `doors <b>${esc(sch.doors)}</b><br>` : ''}${filmStart ? `film&nbsp; <b>${esc(filmStart)}</b>` : ''}</div>
       ${cap}
-      ${gated && (gated.houseNote || gated.venue) ? `<div class="proto">${gated.houseNote?`<div class="note">${esc(gated.houseNote)}</div>`:''}${gated.venue?`<div class="k">location</div><div class="v">${esc(gated.venue)}</div>`:''}</div>` : ''}`;
+      ${gated && (gated.houseNote || gated.venue) ? `<div class="proto">${gated.houseNote?`<div class="k">house note</div><div class="note">${esc(gated.houseNote)}</div>`:''}${gated.venue?`<div class="k">location</div><div class="v">${esc(gated.venue)}</div>`:''}</div>` : ''}`;
   }
 
   // ---------- admission ----------
