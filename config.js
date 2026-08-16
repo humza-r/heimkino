@@ -53,6 +53,7 @@ window.CONFIG = {
       "year": 2002,
       "runtime": "97",
       "synopsis": "The film tracks a traumatic sequence of events in Paris involving a woman named Alex, her boyfriend Marcus, and her ex-boyfriend Pierre.",
+      "away": true,
       "attendees": [
         "Soedeh",
         "Raha"
@@ -78,6 +79,7 @@ window.CONFIG = {
       "director": "Michael Haneke",
       "year": 2001,
       "synopsis": "A piano teacher at a Vienna conservatory, living under her domineering mother, becomes involved with one of her students.",
+      "rec": "Soedeh",
       "attendees": [
         "Fynn",
         "Linda"
@@ -89,6 +91,7 @@ window.CONFIG = {
       "director": "Pier Paolo Pasolini",
       "year": 1975,
       "synopsis": "In the final days of Fascist Italy, four powerful men confine a group of young people at a villa and subject them to systematic cruelty.",
+      "rec": "David",
       "attendees": [
         "Stav",
         "Senthuran",
