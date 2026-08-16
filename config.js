@@ -10,11 +10,12 @@ window.CONFIG = {
   },
   "next": {
     "date": "2026-08-18",
-    "title": "Ken Park",
-    "director": "Larry Clark & Edward Lachman",
-    "year": 2002,
-    "runtime": "93",
-    "synopsis": "This psychological drama follows the dysfunctional and abusive lives of four teenagers in Visalia, California, after their mutual acquaintance, Ken Park, commits suicide on a skateboard ramp."
+    "title": "Passion",
+    "director": "Jean-Luc Godard",
+    "year": 1982,
+    "runtime": "88",
+    "synopsis": "A filmmaker struggles to complete a film composed of staged recreations of classical paintings while becoming entangled with workers from a nearby factory.",
+    "rec": "Deleuze / Cinema II"
   },
   "upcoming": [
     {
@@ -23,6 +24,15 @@ window.CONFIG = {
       "director": "Pier Paolo Pasolini",
       "year": 1968,
       "edition": "CC"
+    },
+    {
+      "date": "2026-08-25",
+      "title": "Ken Park",
+      "director": "Larry Clark & Edward Lachman",
+      "year": 2002,
+      "runtime": "93",
+      "synopsis": "This psychological drama follows the dysfunctional and abusive lives of four teenagers in Visalia, California, after their mutual acquaintance, Ken Park, commits suicide on a skateboard ramp.",
+      "rec": "Fynn"
     },
     {
       "date": "",
@@ -43,6 +53,15 @@ window.CONFIG = {
       "year": 1981,
       "runtime": "124",
       "synopsis": "A psychological horror drama about a spy and his wife who divorce and unleash a monstrous creature."
+    },
+    {
+      "date": "",
+      "title": "L'Argent",
+      "director": "Robert Bresson",
+      "year": 1983,
+      "runtime": "85",
+      "synopsis": "A forged banknote passes through a chain of transactions and sets in motion consequences that transform the life of an innocent man.",
+      "rec": "Deleuze / Cinema II"
     }
   ],
   "past": [
