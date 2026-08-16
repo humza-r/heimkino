@@ -23,7 +23,8 @@ window.CONFIG = {
       "title": "Teorema",
       "director": "Pier Paolo Pasolini",
       "year": 1968,
-      "edition": "CC"
+      "edition": "CC",
+      "rec": "Fynn"
     },
     {
       "date": "2026-08-25",
