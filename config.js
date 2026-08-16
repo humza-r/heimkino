@@ -47,7 +47,7 @@ window.CONFIG = {
       "year": 1960
     },
     {
-      "date": "2026-08-19",
+      "date": "2026-08-27",
       "title": "Possession",
       "director": "Andrzej Żuławski",
       "year": 1981,
@@ -62,6 +62,15 @@ window.CONFIG = {
       "runtime": "85",
       "synopsis": "A forged banknote passes through a chain of transactions and sets in motion consequences that transform the life of an innocent man.",
       "rec": "Deleuze / Cinema II"
+    },
+    {
+      "date": "",
+      "title": "The Passion of Joan of Arc",
+      "director": "Carl Theodor Dreyer",
+      "year": 1928,
+      "runtime": "82",
+      "synopsis": "Joan of Arc is interrogated, tried and condemned by an ecclesiastical court.",
+      "rec": "Deleuze / Cinema I"
     }
   ],
   "past": [
