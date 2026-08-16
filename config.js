@@ -4,12 +4,12 @@ window.CONFIG = {
   "city": "Berlin",
   "endpoint": "https://script.google.com/macros/s/AKfycbzOzhiugVHdb_sCFxhMyVw6lRGGR9t854t7I-z9jtiPFJFsxTIO8UN-5k7FXWAQma2g/exec",
   "schedule": {
-    "doors": "20:30",
-    "trailers": "19:30",
-    "film": "21:00"
+    "doors": "1915",
+    "trailers": "",
+    "film": "1955"
   },
   "next": {
-    "date": "2026-08-18",
+    "date": "2026-08-19",
     "title": "Passion",
     "director": "Jean-Luc Godard",
     "year": 1982,
