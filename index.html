@@ -51,7 +51,7 @@
   .roster span{ color:var(--ink); }
 
   /* protected info, revealed after code (plain text, no bars) */
-  .proto{ margin-top:calc(var(--u)*1.5); }
+  .proto{ margin-top:calc(var(--u)*2.75); }
   .proto .k{ font-size:11px; color:var(--soft); }
   .proto .v{ white-space:pre-line; color:var(--ink); }
   .proto .note{ margin-top:calc(var(--u)*1.5); white-space:pre-line; color:var(--ink); }
@@ -114,7 +114,8 @@
   .entry.priv{ opacity:0.5; }
   .tags{ margin-top:9px; }
   .tag{ display:inline-block; font-size:10px; letter-spacing:0.16em; text-transform:uppercase; color:var(--soft); margin-right:16px; }
-  .meta.rec{ color:var(--soft); margin-top:6px; }
+  .rec{ margin-top:6px; font-size:12px; color:var(--soft); }
+  .rec span{ color:var(--ink); }
   .att{ margin-top:9px; font-size:12px; color:var(--soft); }
   .peek{ background:none; border:0; padding:0 0 1px; cursor:pointer; color:var(--soft);
     border-bottom:1px dotted var(--rule); font:inherit; -webkit-user-select:none; user-select:none; touch-action:none; }
@@ -248,11 +249,12 @@
       <div class="title">${esc(n.title)}</div>
       <div class="meta">${esc(meta)}</div>
       ${n.runtime ? `<div class="meta">${esc(n.runtime)}</div>` : ''}
-      ${n.rec ? `<div class="meta rec">recommended by ${esc(n.rec)}</div>` : ''}
+      ${n.rec ? `<div class="rec">rec: <span>${esc(n.rec)}</span></div>` : ''}
       ${n.away ? `<div class="tags"><span class="tag">away</span></div>` : ''}
       ${n.synopsis ? `<p class="syn">${esc(n.synopsis)}</p>` : ''}
       <div class="sched">${dateLine}<br>${sch.doors ? `doors <b>${esc(sch.doors)}</b><br>` : ''}${filmStart ? `film&nbsp; <b>${esc(filmStart)}</b>` : ''}</div>
-      ${cap}`;
+      ${cap}
+      ${gated && (gated.houseNote || gated.venue) ? `<div class="proto">${gated.houseNote?`<div class="note">${esc(gated.houseNote)}</div>`:''}${gated.venue?`<div class="k">location</div><div class="v">${esc(gated.venue)}</div>`:''}</div>` : ''}`;
   }
 
   // ---------- admission ----------
@@ -265,19 +267,9 @@
 
     let html = '';
 
-    // protected info, revealed once a valid code is entered (plain text, no bars)
-    if (gated){
-      const venue = gated.venue ? esc(gated.venue) : '';
-      const note  = gated.houseNote ? esc(gated.houseNote) : '';
-      html += `<div class="proto">`
-        + (venue ? `<div class="k">location</div><div class="v">${venue}</div>` : '')
-        + (note ? `<div class="note">${note}</div>` : '')
-        + `<div class="ok">accepted</div></div>`;
-    }
-
     if (slip){
       // confirmed reservation
-      html += `<div class="sec-h"${gated?' style="margin-top:calc(var(--u)*4.5)"':''}>Coming</div><hr class="rule">`
+      html += `<div class="sec-h">Coming</div><hr class="rule">`
         + `<div class="slip" id="slip">`
         + `<ul id="slip-names">${slip.names.map((nm,i)=>`<li><span>${esc(nm)}</span><button class="rm" data-rm="${i}" aria-label="Remove">\u00d7</button></li>`).join('')}</ul>`
         + `<form class="int-form" id="add-line" hidden autocomplete="off"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow" id="add-name" type="text" aria-label="Add a name"><button class="lnk" id="add-go" type="submit">[add]</button></form>`
@@ -286,7 +278,7 @@
         + `<div class="msg" id="admit-msg" role="status" aria-live="polite"></div></div>`;
     } else if (sessionCode){
       // unlocked, no reservation yet -> RSVP
-      html += `<div class="sec-h"${gated?' style="margin-top:calc(var(--u)*4.5)"':''}>Coming?</div><hr class="rule">`
+      html += `<div class="sec-h">Coming?</div><hr class="rule">`
         + `<form id="admit-form" autocomplete="off">`
         + `<div class="rows" id="name-rows"><div class="row"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow rn" type="text" required aria-label="Name"></div></div>`
         + `<div class="addmore"><button type="button" class="lnk" id="add-row">+ add another person</button></div>`
@@ -416,7 +408,7 @@
             ${u.date ? `<div class="up-date">${esc(fmt(u.date,{weekday:'short',day:'numeric',month:'short'})).toUpperCase()}</div>` : ''}
             <div class="title">${esc(u.title)}</div>
             <div class="meta">${esc([u.director,u.year].filter(Boolean).join(' / '))}</div>
-            ${u.rec ? `<div class="meta rec">recommended by ${esc(u.rec)}</div>` : ''}
+            ${u.rec ? `<div class="rec">rec: <span>${esc(u.rec)}</span></div>` : ''}
             ${u.away ? `<div class="tags"><span class="tag">away</span></div>` : ''}
             <div class="int" data-film="${esc(u.title)}">
               <button class="int-btn"${voted?' disabled':''} aria-expanded="false"><span class="int-label">interested${voted?' \u2713':''}</span><span class="int-rule"></span><span class="int-n">${c}</span></button>
@@ -506,7 +498,7 @@
             <div class="dt">${esc(fmt(f.date,{day:'2-digit',month:'short',year:'numeric'})).toUpperCase()}</div>
             <div class="title">${esc(f.title)}</div>
             <div class="meta">${esc([f.director,f.year].filter(Boolean).join(' / '))}</div>
-            ${f.rec ? `<div class="meta rec">recommended by ${esc(f.rec)}</div>` : ''}
+            ${f.rec ? `<div class="rec">rec: <span>${esc(f.rec)}</span></div>` : ''}
             ${f.synopsis ? `<p class="syn">${esc(f.synopsis)}</p>` : ''}
             ${tagsHtml}
             ${present}
@@ -519,7 +511,6 @@
   function renderSuggest(){
     const el = $('#suggest'); if(!el) return;
     el.innerHTML = `
-      <div class="sec-h">Suggest a film</div><hr class="rule">
       <button class="lnk" id="wish-toggle" aria-expanded="false">+ suggest a film</button>
       <form class="sug-form" id="wish-form" hidden autocomplete="off">
         <div class="line"><span class="inl">film</span><span class="gt">&gt;</span><input class="grow" id="w-film" type="text" required aria-label="Film"></div>
