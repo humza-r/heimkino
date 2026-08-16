@@ -48,6 +48,7 @@
   .cap{ margin-top:calc(var(--u)*2.5); font-size:12px; color:var(--ink); }
   .cap .full-tag{ color:#9a3b3b; margin-left:10px; text-transform:uppercase; letter-spacing:0.12em; font-size:11px; }
   .roster{ margin-top:6px; font-size:12px; color:var(--soft); }
+  .dots{ margin-top:9px; font-size:13px; letter-spacing:3px; color:var(--ink); }
   .roster span{ color:var(--ink); }
 
   /* protected info, revealed after code (plain text, no bars) */
@@ -164,6 +165,7 @@
   const esc = s => String(s==null?'':s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const pad = n => String(n).padStart(2,'0');
   const fmt = (iso, opts) => { const d = new Date(iso + 'T00:00:00'); return isNaN(d) ? iso : d.toLocaleDateString('en-GB', opts); };
+  const rt = (v, unit) => { const m = String(v==null?'':v).match(/\d+/); return m ? (unit==='min' ? m[0]+' min' : m[0]+'\u2032') : esc(v||''); };
 
   // localStorage holds ONLY opaque  tokens for this browser's own 
   const KEY = 'heimkino:res';
@@ -241,16 +243,19 @@
     let cap = '';
     if (agg && typeof agg.confirmed === 'number'){
       const conf = agg.confirmed, capn = agg.capacity, full = (capn != null && conf >= capn);
-      cap = `<div class="cap">${conf}${capn!=null?' / '+capn:''} coming${full?'<span class="full-tag">full</span>':''}</div>`;
+      const line = conf > 0 ? `<div class="cap">${conf} attending${full?'<span class="full-tag">full</span>':''}</div>` : '';
+      let dots = '';
+      if (capn != null){ let d=''; for(let i=0;i<capn;i++) d += (i<conf?'\u25cf':'\u25cb'); dots = `<div class="dots" aria-label="${conf} of ${capn} seats taken">${d}</div>`; }
+      cap = line + dots;
       if (gated && roster && roster.length) cap += `<div class="roster"><span>${roster.map(esc).join('</span> / <span>')}</span></div>`;
     }
     $('#current').innerHTML = `
       <div class="sec-h">Next screening</div><hr class="rule">
       <div class="title">${esc(n.title)}</div>
       <div class="meta">${esc(meta)}</div>
-      ${n.runtime ? `<div class="meta">${esc(n.runtime)}</div>` : ''}
+      ${n.runtime ? `<div class="meta">${rt(n.runtime,'min')}</div>` : ''}
       ${n.rec ? `<div class="rec">rec: <span>${esc(n.rec)}</span></div>` : ''}
-      ${n.away ? `<div class="tags"><span class="tag">away</span></div>` : ''}
+      ${n.away ? `<div class="tags"><span class="tag">away screening</span></div>` : ''}
       ${n.synopsis ? `<p class="syn">${esc(n.synopsis)}</p>` : ''}
       <div class="sched">${dateLine}<br>${sch.doors ? `doors <b>${esc(sch.doors)}</b><br>` : ''}${filmStart ? `film&nbsp; <b>${esc(filmStart)}</b>` : ''}</div>
       ${cap}
@@ -312,7 +317,7 @@
       roster = d.coming || [];
       reveal({ venue:d.venue, houseNote:d.houseNote });
       renderAdmission();
-      admitMsg('accepted', 'ok');
+      admitMsg('', 'ok');
     }catch(err){ admitMsg(err.message, 'err'); go.disabled = false; }
   }
 
@@ -408,8 +413,9 @@
             ${u.date ? `<div class="up-date">${esc(fmt(u.date,{weekday:'short',day:'numeric',month:'short'})).toUpperCase()}</div>` : ''}
             <div class="title">${esc(u.title)}</div>
             <div class="meta">${esc([u.director,u.year].filter(Boolean).join(' / '))}</div>
+            ${u.runtime ? `<div class="meta">${rt(u.runtime,'prime')}</div>` : ''}
             ${u.rec ? `<div class="rec">rec: <span>${esc(u.rec)}</span></div>` : ''}
-            ${u.away ? `<div class="tags"><span class="tag">away</span></div>` : ''}
+            ${u.away ? `<div class="tags"><span class="tag">away screening</span></div>` : ''}
             <div class="int" data-film="${esc(u.title)}">
               <button class="int-btn"${voted?' disabled':''} aria-expanded="false"><span class="int-label">interested${voted?' \u2713':''}</span><span class="int-rule"></span><span class="int-n">${c}</span></button>
               <form class="int-form" hidden autocomplete="off"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow ni-name" type="text" aria-label="Your name"><input class="nhp" type="text" tabindex="-1" autocomplete="off" aria-hidden="true"><button class="lnk int-go" type="submit">[enter]</button></form>
@@ -487,7 +493,7 @@
       <div class="pastlist">
         ${items.map(f=>{
           const priv = !!f.private, away = !!f.away;
-          const tags = []; if (away) tags.push('away'); if (priv) tags.push('private');
+          const tags = []; if (away) tags.push('away screening'); if (priv) tags.push('private');
           const tagsHtml = tags.length ? `<div class="tags">${tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>` : '';
           const att = (f.attendees||[]).filter(Boolean);
           const present = priv ? '' : (att.length
@@ -498,6 +504,7 @@
             <div class="dt">${esc(fmt(f.date,{day:'2-digit',month:'short',year:'numeric'})).toUpperCase()}</div>
             <div class="title">${esc(f.title)}</div>
             <div class="meta">${esc([f.director,f.year].filter(Boolean).join(' / '))}</div>
+            ${f.runtime ? `<div class="meta">${rt(f.runtime,'prime')}</div>` : ''}
             ${f.rec ? `<div class="rec">rec: <span>${esc(f.rec)}</span></div>` : ''}
             ${f.synopsis ? `<p class="syn">${esc(f.synopsis)}</p>` : ''}
             ${tagsHtml}
