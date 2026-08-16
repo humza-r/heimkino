@@ -9,7 +9,7 @@ window.CONFIG = {
     "film": "21:00"
   },
   "next": {
-    "date": "2026-08-15",
+    "date": "2026-08-18",
     "title": "Ken Park",
     "director": "Larry Clark & Edward Lachman",
     "year": 2002,
@@ -37,14 +37,6 @@ window.CONFIG = {
       "year": 1960
     },
     {
-      "date": "2026-08-15",
-      "title": "Irréversible",
-      "director": "Gaspar Noé",
-      "year": 2002,
-      "runtime": "97",
-      "synopsis": "The film tracks a traumatic sequence of events in Paris involving a woman named Alex, her boyfriend Marcus, and her ex-boyfriend Pierre."
-    },
-    {
       "date": "2026-08-19",
       "title": "Possession",
       "director": "Andrzej Żuławski",
@@ -54,6 +46,14 @@ window.CONFIG = {
     }
   ],
   "past": [
+    {
+      "date": "2026-08-15",
+      "title": "Irréversible",
+      "director": "Gaspar Noé",
+      "year": 2002,
+      "runtime": "97",
+      "synopsis": "The film tracks a traumatic sequence of events in Paris involving a woman named Alex, her boyfriend Marcus, and her ex-boyfriend Pierre."
+    },
     {
       "date": "2026-08-11",
       "title": "Kingdom of Heaven",
