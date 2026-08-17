@@ -14,7 +14,6 @@
 <meta name="twitter:title" content="Heimkino">
 <meta name="twitter:description" content="An invitation-only screening programme in Berlin.">
 
-<!-- All PUBLIC content lives in config.js. Secrets (invite code, address, house note) live in the backend. -->
 <script src="config.js"></script>
 
 <style>
@@ -30,10 +29,11 @@
   .wrap{ width:min(560px, calc(100vw - 48px)); margin:40px auto; }
   @media (max-width:560px){ .wrap{ width:auto; margin:18px; } }
 
-  /* sections + one consistent divider */
+  /* sections */
   section{ margin-top:calc(var(--u)*4.5); }
   #current{ margin-top:0; }
   .sec-h{ font-size:12px; letter-spacing:0.14em; text-transform:uppercase; color:var(--ink); }
+  .sec-date{ float:right; color:var(--soft); letter-spacing:0.1em; }
   hr.rule{ border:0; border-top:1px dashed var(--rule); margin:7px 0 calc(var(--u)*2); }
 
   /* three type levels */
@@ -51,7 +51,7 @@
   .dots{ margin-top:9px; font-size:13px; letter-spacing:3px; color:var(--ink); }
   .roster span{ color:var(--ink); }
 
-  /* protected info, revealed after code (plain text, no bars) */
+  /* protected info */
   .proto{ margin-top:calc(var(--u)*2.75); }
   .proto .k{ font-size:11px; color:var(--soft); }
   .proto .note{ margin-top:5px; white-space:pre-line; color:var(--ink); }
@@ -129,7 +129,7 @@
   .sug-form{ margin-top:calc(var(--u)*1.5); }
   .sug-form[hidden]{ display:none; }
 
-  /* messages: terse, machine-like */
+  /* messages */
   .msg, .nmsg{ margin-top:calc(var(--u)*1.5); font-size:11px; color:var(--soft); min-height:14px; }
   .msg.err, .nmsg.err{ color:#9a3b3b; }
   .msg.ok, .nmsg.ok{ color:var(--ink); }
@@ -138,11 +138,11 @@
   .foot{ margin-top:calc(var(--u)*5.5); padding-top:calc(var(--u)*2); border-top:1px dashed var(--rule);
     font-size:11px; color:var(--faint); letter-spacing:0.04em; }
 
-  /* honeypots kept functional but unseen */
+  /* honeypots */
   .hp{ position:absolute; left:-9999px; width:1px; height:1px; overflow:hidden; }
   .nhp{ display:none !important; }
 
-  /* no motion beyond a functional fade */
+  /* motion */
   @media (prefers-reduced-motion: no-preference){ .int-label, .lnk{ transition:opacity .15s; } }
 </style>
 </head>
@@ -167,7 +167,6 @@
   const fmt = (iso, opts) => { const d = new Date(iso + 'T00:00:00'); return isNaN(d) ? iso : d.toLocaleDateString('en-GB', opts); };
   const rt = (v, unit) => { const m = String(v==null?'':v).match(/\d+/); return m ? (unit==='min' ? m[0]+' min' : m[0]+'\u2032') : esc(v||''); };
 
-  // localStorage holds ONLY opaque  tokens for this browser's own 
   const KEY = 'heimkino:res';
   const store = {
     get(){ try{ return JSON.parse(localStorage.getItem(KEY)); }catch(_){ return null; } },
@@ -175,24 +174,20 @@
     clear(){ try{ localStorage.removeItem(KEY); }catch(_){ } }
   };
 
-  let mine  = store.get();     // { Id, editToken } or null
-  let slip  = null;            // { names[], party, date } - this user's reservation
-  let gated = null;            // { venue, houseNote } - from backend only, never persisted
-  let agg   = null;            // { confirmed, capacity }
-  let sessionCode = null;      // the invitation code, held in memory once unlocked (not persisted)
-  let roster = null;           // [names] of who is coming - only after unlock
-  let flashed = false;         // afterimage flash plays once, on first render
-  let interestCounts = {};     // { film: count } - public tally for upcoming
+  let mine  = store.get();
+  let slip  = null;
+  let gated = null;
+  let agg   = null;
+  let sessionCode = null;
+  let roster = null;
+  let flashed = false;
+  let interestCounts = {};
 
-  // flag-driven current screening with a date fallback:
-  //   1) the flagged C.next, if it has a title and its date is today or later
-  //   2) else the soonest future-dated upcoming (a dated upcoming counts as confirmed)
-  //   3) else none, and the page leads with the upcoming block
   function todayISO(){ const d=new Date(), p=x=>String(x).padStart(2,'0'); return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate()); }
   function pickCurrent(){
     const today = todayISO(), n = C.next;
     if (n && n.title && (!n.date || n.date >= today)) return { cur:n, promoted:null, retired:null };
-    const retired = (n && n.title && n.date && n.date < today) ? n : null;   // finished flagged night drops to past
+    const retired = (n && n.title && n.date && n.date < today) ? n : null;
     const dated = (C.upcoming||[]).filter(u=>u && u.title && u.date && u.date >= today).sort((a,b)=> a.date < b.date ? -1 : 1);
     if (dated.length) return { cur:dated[0], promoted:dated[0], retired:retired };
     return { cur:null, promoted:null, retired:retired };
@@ -209,19 +204,17 @@
     return d;
   }
 
-  // ---------- page chrome (receipt header line + title) ----------
+  // ---------- page chrome ----------
   function renderChrome(){
     document.title = (CUR ? CUR.title : (C.wordmark || 'Programme'));
     const d = new Date(), p = x => String(x).padStart(2,'0');
     const foot = $('#foot'); if (foot) foot.textContent = 'updated ' + p(d.getDate()) + '.' + p(d.getMonth()+1) + '.' + String(d.getFullYear()).slice(2);
   }
 
-  // location now reveals inline in the admission block; no separate banners to update
   function renderVenue(){}
 
   // ---------- current screening ----------
 
-  // one interest vote per browser per film (dedupe client-side; the backend has no caller identity)
   const VKEY = 'heimkino:interested';
   function votedSet(){ try{ return JSON.parse(localStorage.getItem(VKEY)) || {}; }catch(_){ return {}; } }
   function hasVoted(film){ return !!votedSet()[film]; }
@@ -230,7 +223,6 @@
     const n = CUR, sch = C.schedule || {};
     const curSec = document.getElementById('current'), admSec = document.getElementById('admission');
     if (!n){
-      // No screening: drop the Current and Admission blocks; Upcoming leads.
       if (curSec){ curSec.innerHTML = ''; curSec.style.display = 'none'; }
       if (admSec){ admSec.style.display = 'none'; }
       return;
@@ -250,14 +242,14 @@
       if (gated && roster && roster.length) cap += `<div class="roster"><span>${roster.map(esc).join('</span> / <span>')}</span></div>`;
     }
     $('#current').innerHTML = `
-      <div class="sec-h">Next screening</div><hr class="rule">
+      <div class="sec-h">Next screening<span class="sec-date">${dateLine}</span></div><hr class="rule">
       <div class="title">${esc(n.title)}</div>
       <div class="meta">${esc(meta)}</div>
       ${n.runtime ? `<div class="meta">${rt(n.runtime,'min')}</div>` : ''}
       ${n.rec ? `<div class="rec">rec: <span>${esc(n.rec)}</span></div>` : ''}
       ${n.away ? `<div class="tags"><span class="tag">away screening</span></div>` : ''}
       ${n.synopsis ? `<p class="syn">${esc(n.synopsis)}</p>` : ''}
-      <div class="sched">${dateLine}<br>${sch.doors ? `doors <b>${esc(sch.doors)}</b><br>` : ''}${filmStart ? `film&nbsp; <b>${esc(filmStart)}</b>` : ''}</div>
+      <div class="sched">${sch.doors ? `doors <b>${esc(sch.doors)}</b><br>` : ''}${filmStart ? `film&nbsp; <b>${esc(filmStart)}</b>` : ''}</div>
       ${cap}
       ${gated && (gated.houseNote || gated.venue) ? `<div class="proto">${gated.houseNote?`<div class="k">house note</div><div class="note">${esc(gated.houseNote)}</div>`:''}${gated.venue?`<div class="k">location</div><div class="v">${esc(gated.venue)}</div>`:''}</div>` : ''}`;
   }
@@ -267,13 +259,12 @@
 
   function renderAdmission(){
     const body = $('#admit-body'); if(!body) return;
-    if (!CUR){ return; }   // no screening: block hidden by renderCurrent
+    if (!CUR){ return; }
     if (!EP){ body.innerHTML = `<div class="small">reservations offline</div>`; return; }
 
     let html = '';
 
     if (slip){
-      // confirmed reservation
       html += `<div class="sec-h">Coming</div><hr class="rule">`
         + `<div class="slip" id="slip">`
         + `<ul id="slip-names">${slip.names.map((nm,i)=>`<li><span>${esc(nm)}</span><button class="rm" data-rm="${i}" aria-label="Remove">\u00d7</button></li>`).join('')}</ul>`
@@ -282,7 +273,6 @@
         + `<div class="acts"><button class="lnk" id="change-res">[change]</button><button class="lnk" id="cancel-res">[cancel]</button></div>`
         + `<div class="msg" id="admit-msg" role="status" aria-live="polite"></div></div>`;
     } else if (sessionCode){
-      // unlocked, no reservation yet -> RSVP
       html += `<div class="sec-h">Coming?</div><hr class="rule">`
         + `<form id="admit-form" autocomplete="off">`
         + `<div class="rows" id="name-rows"><div class="row"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow rn" type="text" required aria-label="Name"></div></div>`
@@ -291,7 +281,6 @@
         + `<div class="acts"><button class="lnk" type="submit" id="confirm-go">[confirm]</button></div>`
         + `<div class="msg" id="admit-msg" role="status" aria-live="polite"></div></form>`;
     } else {
-      // locked -> just the code bar
       html += `<form id="unlock-form" autocomplete="off">`
         + `<div class="line"><span class="inl">code</span><span class="gt">&gt;</span><input class="grow" id="code" type="text" required aria-label="Code"></div>`
         + `<div class="hp" aria-hidden="true"><input id="u-hp" type="text" tabindex="-1" autocomplete="off"></div>`
@@ -304,7 +293,6 @@
 
   function reveal(g){ gated = g; renderVenue(); renderCurrent(); }
 
-  // the invitation opens the session: reveals location, house note and roster, and enables RSVP
   async function unlockSession(form){
     const code = form.querySelector('#code').value.trim();
     const hp = form.querySelector('#u-hp').value;
@@ -367,7 +355,7 @@
       agg = { confirmed:d.confirmed, capacity:d.capacity };
       if (typeof d !== 'undefined' && d.coming) roster = d.coming;
       mine=null; slip=null; store.clear();
-      if (!sessionCode){ gated=null; roster=null; renderVenue(); }   // re-lock if the session was opened only by a stored reservation
+      if (!sessionCode){ gated=null; roster=null; renderVenue(); }
       renderAdmission(); renderCurrent(); admitMsg('cancelled','ok');
     }catch(err){ admitMsg(err.message,'err'); }
   }
@@ -396,7 +384,6 @@
     });
   }
 
-  // ordered by date (soonest first); undated films follow, ordered by interest. sorted on render, stable during the session.
   function renderUpcoming(){
     const base = (C.upcoming||[]).filter(u=>u && u.title && u !== PICK.promoted).map((u,idx)=>({u,idx}));
     const dated = base.filter(x=>x.u.date).sort((a,b)=> a.u.date<b.u.date?-1:(a.u.date>b.u.date?1:a.idx-b.idx));
@@ -416,6 +403,7 @@
             ${u.runtime ? `<div class="meta">${rt(u.runtime,'prime')}</div>` : ''}
             ${u.rec ? `<div class="rec">rec: <span>${esc(u.rec)}</span></div>` : ''}
             ${u.away ? `<div class="tags"><span class="tag">away screening</span></div>` : ''}
+            ${u.synopsis ? `<p class="syn">${esc(u.synopsis)}</p>` : ''}
             <div class="int" data-film="${esc(u.title)}">
               <button class="int-btn"${voted?' disabled':''} aria-expanded="false"><span class="int-label">interested${voted?' \u2713':''}</span><span class="int-rule"></span><span class="int-n">${c}</span></button>
               <form class="int-form" hidden autocomplete="off"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow ni-name" type="text" aria-label="Your name"><input class="nhp" type="text" tabindex="-1" autocomplete="off" aria-hidden="true"><button class="lnk int-go" type="submit">[enter]</button></form>
@@ -425,7 +413,6 @@
         : `<div class="up-film"><div class="meta">nothing listed</div></div>`}
       </div>`;
   }
-  // the interest line swaps in place and does NOT re-sort after a vote (the item stays put)
   async function sendInterest(box, film){
     const form = box.querySelector('.int-form');
     const name = form.querySelector('.ni-name').value.trim();
@@ -506,7 +493,6 @@
             <div class="meta">${esc([f.director,f.year].filter(Boolean).join(' / '))}</div>
             ${f.runtime ? `<div class="meta">${rt(f.runtime,'prime')}</div>` : ''}
             ${f.rec ? `<div class="rec">rec: <span>${esc(f.rec)}</span></div>` : ''}
-            ${f.synopsis ? `<p class="syn">${esc(f.synopsis)}</p>` : ''}
             ${tagsHtml}
             ${present}
           </div>`;
@@ -514,7 +500,7 @@
       </div>`;
   }
 
-  // ---------- suggest a film (its own section between Upcoming and Past) ----------
+  // ---------- suggest a film ----------
   function renderSuggest(){
     const el = $('#suggest'); if(!el) return;
     el.innerHTML = `
@@ -537,7 +523,6 @@
     el.addEventListener('submit', e => { if(e.target.id!=='wish-form') return; e.preventDefault(); sendWish(e.target); });
   }
 
-  // hold the eye to reveal attendees, release to redact (only where attendees are listed)
   function wirePeek(){
     const past = $('#past');
     const hide = () => past.querySelectorAll('.att.revealed').forEach(a=>a.classList.remove('revealed'));
@@ -565,7 +550,7 @@
       roster = d.coming || null;
       reveal({ venue:d.venue, houseNote:d.houseNote });
       renderAdmission();
-    }catch(_){ mine=null; store.clear(); renderAdmission(); }   // reservation gone -> reset quietly
+    }catch(_){ mine=null; store.clear(); renderAdmission(); }
   }
 
   // ---------- init ----------
