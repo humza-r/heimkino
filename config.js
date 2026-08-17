@@ -36,7 +36,7 @@ window.CONFIG = {
       "synopsis": "A psychological horror drama about a spy and his wife who divorce and unleash a monstrous creature."
     },
     {
-      "date": "",
+      "date": "2026-09-09",
       "title": "Teorema",
       "director": "Pier Paolo Pasolini",
       "year": 1968,
