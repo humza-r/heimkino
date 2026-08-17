@@ -19,16 +19,7 @@ window.CONFIG = {
   },
   "upcoming": [
     {
-      "date": "2026-08-25",
-      "title": "Ken Park",
-      "director": "Larry Clark & Edward Lachman",
-      "year": 2002,
-      "runtime": "93",
-      "synopsis": "This psychological drama follows the dysfunctional and abusive lives of four teenagers in Visalia, California, after their mutual acquaintance, Ken Park, commits suicide on a skateboard ramp.",
-      "rec": "Fynn"
-    },
-    {
-      "date": "2026-08-27",
+      "date": "2026-08-26",
       "title": "Possession",
       "director": "Andrzej Żuławski",
       "year": 1981,
