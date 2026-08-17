@@ -41,19 +41,22 @@ window.CONFIG = {
       "director": "Pier Paolo Pasolini",
       "year": 1968,
       "edition": "CC",
+      "synopsis": "A mysterious visitor enters the home of a wealthy Milanese family and forms an intimate bond with each member before abruptly leaving, destabilising the household.",
       "rec": "Fynn"
     },
     {
       "date": "",
       "title": "The Gospel According to St. Matthew",
       "director": "Pier Paolo Pasolini",
-      "year": 1964
+      "year": 1964,
+      "synopsis": "The life of Jesus Christ is retold from his birth through his ministry, crucifixion and resurrection, closely following the Gospel of Matthew."
     },
     {
       "date": "",
       "title": "Spartacus",
       "director": "Stanley Kubrick",
-      "year": 1960
+      "year": 1960,
+      "synopsis": "An enslaved gladiator leads a large-scale revolt against the Roman Republic and attempts to secure freedom for his followers."
     },
     {
       "date": "",
