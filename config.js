@@ -19,7 +19,7 @@ window.CONFIG = {
   },
   "upcoming": [
     {
-      "date": "2026-08-26",
+      "date": "2026-08-20",
       "title": "Possession",
       "director": "Andrzej Żuławski",
       "year": 1981,
