@@ -10,22 +10,13 @@ window.CONFIG = {
   },
   "next": {
     "date": "2026-08-19",
-    "title": "Passion",
-    "director": "Jean-Luc Godard",
-    "year": 1982,
-    "runtime": "88",
-    "synopsis": "A filmmaker struggles to complete a film composed of staged recreations of classical paintings while becoming entangled with workers from a nearby factory.",
-    "rec": "Deleuze / Cinema II"
+    "title": "L'Appartement",
+    "director": "Gilles Mimouni",
+    "year": 1996,
+    "runtime": "116",
+    "synopsis": "A recently engaged man sees a former lover and becomes obsessed with meeting her again."
   },
   "upcoming": [
-    {
-      "date": "",
-      "title": "Teorema",
-      "director": "Pier Paolo Pasolini",
-      "year": 1968,
-      "edition": "CC",
-      "rec": "Fynn"
-    },
     {
       "date": "2026-08-25",
       "title": "Ken Park",
@@ -33,6 +24,22 @@ window.CONFIG = {
       "year": 2002,
       "runtime": "93",
       "synopsis": "This psychological drama follows the dysfunctional and abusive lives of four teenagers in Visalia, California, after their mutual acquaintance, Ken Park, commits suicide on a skateboard ramp.",
+      "rec": "Fynn"
+    },
+    {
+      "date": "2026-08-27",
+      "title": "Possession",
+      "director": "Andrzej Żuławski",
+      "year": 1981,
+      "runtime": "124",
+      "synopsis": "A psychological horror drama about a spy and his wife who divorce and unleash a monstrous creature."
+    },
+    {
+      "date": "",
+      "title": "Teorema",
+      "director": "Pier Paolo Pasolini",
+      "year": 1968,
+      "edition": "CC",
       "rec": "Fynn"
     },
     {
@@ -46,14 +53,6 @@ window.CONFIG = {
       "title": "Spartacus",
       "director": "Stanley Kubrick",
       "year": 1960
-    },
-    {
-      "date": "2026-08-27",
-      "title": "Possession",
-      "director": "Andrzej Żuławski",
-      "year": 1981,
-      "runtime": "124",
-      "synopsis": "A psychological horror drama about a spy and his wife who divorce and unleash a monstrous creature."
     },
     {
       "date": "",
