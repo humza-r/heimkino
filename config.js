@@ -10,11 +10,12 @@ window.CONFIG = {
   },
   "next": {
     "date": "2026-08-19",
-    "title": "L'Appartement",
-    "director": "Gilles Mimouni",
-    "year": 1996,
-    "runtime": "116",
-    "synopsis": "A recently engaged man sees a former lover and becomes obsessed with meeting her again."
+    "title": "Passion",
+    "director": "Jean-Luc Godard",
+    "year": 1982,
+    "runtime": "88",
+    "synopsis": "A filmmaker struggles to complete a film composed of staged recreations of classical paintings while becoming entangled with workers from a nearby factory.",
+    "rec": "Deleuze / Cinema II"
   },
   "upcoming": [
     {
@@ -71,6 +72,14 @@ window.CONFIG = {
       "runtime": "82",
       "synopsis": "Joan of Arc is interrogated, tried and condemned by an ecclesiastical court.",
       "rec": "Deleuze / Cinema I"
+    },
+    {
+      "date": "2026-08-20",
+      "title": "L'Appartement",
+      "director": "Gilles Mimouni",
+      "year": 1996,
+      "runtime": "116",
+      "synopsis": "A recently engaged man sees a former lover and becomes obsessed with meeting her again."
     }
   ],
   "past": [
