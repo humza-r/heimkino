@@ -92,7 +92,7 @@ window.CONFIG = {
     },
     {
       "date": "2026-08-11",
-      "title": "Kingdom of Heaven (directors cut)",
+      "title": "Kingdom of Heaven (director's cut)",
       "director": "Ridley Scott",
       "year": 2005,
       "synopsis": "During the Crusades, a French blacksmith named Balian travels to Jerusalem and helps defend the city and its people.",
