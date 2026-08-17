@@ -56,7 +56,8 @@ window.CONFIG = {
       "title": "Spartacus",
       "director": "Stanley Kubrick",
       "year": 1960,
-      "synopsis": "An enslaved gladiator leads a large-scale revolt against the Roman Republic and attempts to secure freedom for his followers."
+      "synopsis": "An enslaved gladiator leads a large-scale revolt against the Roman Republic and attempts to secure freedom for his followers.",
+      "rec": "Fynn"
     },
     {
       "date": "",
