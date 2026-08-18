@@ -119,10 +119,9 @@
   .rec span{ color:var(--ink); }
   .att{ margin-top:9px; font-size:12px; color:var(--soft); }
   .peek{ background:none; border:0; padding:0 0 1px; cursor:pointer; color:var(--soft);
-    border-bottom:1px dotted var(--rule); font:inherit; -webkit-user-select:none; user-select:none; touch-action:none; }
+    border-bottom:1px dotted var(--rule); font:inherit; -webkit-user-select:none; user-select:none; }
   .peek:hover, .peek:focus-visible{ color:var(--ink); outline:none; }
   .att-names{ display:none; color:var(--ink); }
-  .att.revealed .peek, .att.revealed .att-word, .att.revealed .att-count{ display:none; }
   .att.revealed .att-names{ display:inline; }
 
   /* suggest */
@@ -484,7 +483,7 @@
           const tagsHtml = tags.length ? `<div class="tags">${tags.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}</div>` : '';
           const att = (f.attendees||[]).filter(Boolean);
           const present = priv ? '' : (att.length
-            ? `<div class="att"><button class="peek" aria-label="Hold to reveal who was here" title="Hold to reveal">${att.length}</button> <span class="att-word">attended</span> <span class="att-names">${att.map(esc).join(' / ')}</span></div>`
+            ? `<div class="att"><span class="att-count">${att.length}</span> attended <button class="peek" aria-expanded="false">[show]</button> <span class="att-names">${att.map(esc).join(' / ')}</span></div>`
             : (typeof f.attendance==='number' ? `<div class="att"><span class="att-count">${f.attendance}</span> attended</div>` : ''));
           return `
           <div class="entry${priv?' priv':''}">
@@ -524,14 +523,12 @@
   }
 
   function wirePeek(){
-    const past = $('#past');
-    const hide = () => past.querySelectorAll('.att.revealed').forEach(a=>a.classList.remove('revealed'));
-    past.addEventListener('pointerdown', e => { const b=e.target.closest('.peek'); if(!b) return; e.preventDefault(); b.closest('.att').classList.add('revealed'); });
-    document.addEventListener('pointerup', hide);
-    document.addEventListener('pointercancel', hide);
-    past.addEventListener('keydown', e => { const b=e.target.closest('.peek'); if(!b) return; if(e.key===' '||e.key==='Enter'){ e.preventDefault(); b.closest('.att').classList.add('revealed'); } });
-    past.addEventListener('keyup', e => { const b=e.target.closest('.peek'); if(!b) return; if(e.key===' '||e.key==='Enter'){ b.closest('.att').classList.remove('revealed'); } });
-    past.addEventListener('focusout', e => { const b=e.target.closest&&e.target.closest('.peek'); if(b) b.closest('.att').classList.remove('revealed'); });
+    $('#past').addEventListener('click', e => {
+      const b = e.target.closest('.peek'); if(!b) return;
+      const on = b.closest('.att').classList.toggle('revealed');
+      b.textContent = on ? '[hide]' : '[show]';
+      b.setAttribute('aria-expanded', String(on));
+    });
   }
 
   // ---------- live aggregate + restore own reservation ----------
