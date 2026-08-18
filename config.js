@@ -19,7 +19,7 @@ window.CONFIG = {
   },
   "upcoming": [
     {
-      "date": "2026-08-20",
+      "date": "2026-08-26",
       "title": "Possession",
       "director": "Andrzej Żuławski",
       "year": 1981,
@@ -69,7 +69,7 @@ window.CONFIG = {
       "rec": "Deleuze / Cinema I"
     },
     {
-      "date": "2026-08-26",
+      "date": "2026-09-02",
       "title": "L'Appartement",
       "director": "Gilles Mimouni",
       "year": 1996,
