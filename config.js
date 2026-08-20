@@ -76,7 +76,12 @@ window.CONFIG = {
       "year": 1982,
       "runtime": "88",
       "synopsis": "A filmmaker struggles to complete a film composed of staged recreations of classical paintings while becoming entangled with workers from a nearby factory.",
-      "rec": "Deleuze / Cinema II"
+      "rec": "Deleuze / Cinema II",
+      "attendees": [
+        "Soedeh",
+        "Fynn",
+        "Chloe"
+      ]
     },
     {
       "date": "2026-08-15",
