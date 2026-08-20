@@ -9,23 +9,14 @@ window.CONFIG = {
     "film": "1955"
   },
   "next": {
-    "date": "2026-08-19",
-    "title": "Passion",
-    "director": "Jean-Luc Godard",
-    "year": 1982,
-    "runtime": "88",
-    "synopsis": "A filmmaker struggles to complete a film composed of staged recreations of classical paintings while becoming entangled with workers from a nearby factory.",
-    "rec": "Deleuze / Cinema II"
+    "date": "2026-08-26",
+    "title": "Possession",
+    "director": "Andrzej Żuławski",
+    "year": 1981,
+    "runtime": "124",
+    "synopsis": "A psychological horror drama about a spy and his wife who divorce and unleash a monstrous creature."
   },
   "upcoming": [
-    {
-      "date": "2026-08-26",
-      "title": "Possession",
-      "director": "Andrzej Żuławski",
-      "year": 1981,
-      "runtime": "124",
-      "synopsis": "A psychological horror drama about a spy and his wife who divorce and unleash a monstrous creature."
-    },
     {
       "date": "2026-09-09",
       "title": "Teorema",
@@ -78,6 +69,15 @@ window.CONFIG = {
     }
   ],
   "past": [
+    {
+      "date": "2026-08-19",
+      "title": "Passion",
+      "director": "Jean-Luc Godard",
+      "year": 1982,
+      "runtime": "88",
+      "synopsis": "A filmmaker struggles to complete a film composed of staged recreations of classical paintings while becoming entangled with workers from a nearby factory.",
+      "rec": "Deleuze / Cinema II"
+    },
     {
       "date": "2026-08-15",
       "title": "Irréversible",
