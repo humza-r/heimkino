@@ -51,15 +51,6 @@ window.CONFIG = {
       "rec": "Deleuze / Cinema II"
     },
     {
-      "date": "",
-      "title": "The Passion of Joan of Arc",
-      "director": "Carl Theodor Dreyer",
-      "year": 1928,
-      "runtime": "82",
-      "synopsis": "Joan of Arc is interrogated, tried and condemned by an ecclesiastical court.",
-      "rec": "Deleuze / Cinema I"
-    },
-    {
       "date": "2026-09-02",
       "title": "L'Appartement",
       "director": "Gilles Mimouni",
