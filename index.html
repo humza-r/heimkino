@@ -63,7 +63,7 @@
   .inl{ color:var(--soft); }
   .gt{ color:var(--faint); }
   input[type=text]{ border:0; border-bottom:1px solid currentColor; background:transparent; border-radius:0;
-    font:inherit; color:inherit; padding:2px 0; min-width:0; }
+    font-family:inherit; font-size:16px; color:inherit; padding:4px 0; min-width:0; }
   input[type=text]::placeholder{ color:var(--faint); }
   input[type=text]:focus{ outline:none; border-bottom-color:var(--ink); }
   .grow{ flex:1; }
@@ -72,6 +72,8 @@
   .lnk{ background:none; border:0; padding:0; color:var(--ink); cursor:pointer; font:inherit; }
   .lnk:hover, .lnk:focus-visible{ text-decoration:underline; outline:none; }
   .lnk[disabled]{ color:var(--faint); cursor:default; text-decoration:none; }
+  /* generous tap targets for the inline submit + action controls on touch */
+  .int-go, #add-go, .acts .lnk, #confirm-go, #unlock-go, #wish-go, #cal-go{ padding:8px 6px; margin:-8px -6px; font-size:15px; }
   .acts{ margin-top:calc(var(--u)*2); display:flex; gap:20px; }
 
   /* RSVP name rows */
@@ -166,7 +168,7 @@
   const pad = n => String(n).padStart(2,'0');
   const fmt = (iso, opts) => { const d = new Date(iso + 'T00:00:00'); return isNaN(d) ? iso : d.toLocaleDateString('en-GB', opts); };
   const rt = (v, unit) => { const m = String(v==null?'':v).match(/\d+/); return m ? (unit==='min' ? m[0]+' min' : m[0]+'\u2032') : esc(v||''); };
-  function icsHref(n, sch){
+  function icsText(n, sch){
     if (!n || !n.date) return '';
     const place = (gated && gated.venue) ? gated.venue : '';
     const filmT = (n.time || (sch && sch.film) || (sch && sch.doors) || '20:00');
@@ -181,7 +183,22 @@
       'SUMMARY:'+ie('Heimkino: '+n.title)];
     if (place) body.push('LOCATION:'+ie(place));
     body.push('END:VEVENT','END:VCALENDAR');
-    return 'data:text/calendar;charset=utf-8,' + encodeURIComponent(body.join('\r\n'));
+    return body.join('\r\n');
+  }
+  function saveIcs(){
+    if (!CUR) return;
+    const text = icsText(CUR, C.schedule || {});
+    try{
+      const blob = new Blob([text], { type:'text/calendar;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'heimkino.ics'; a.rel = 'noopener';
+      document.body.appendChild(a); a.click();
+      setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); }, 1500);
+    }catch(_){
+      // last-resort fallback: open the event inline (iOS shows the add-to-calendar sheet)
+      window.location.href = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(text);
+    }
   }
 
   const KEY = 'heimkino:res';
@@ -283,22 +300,22 @@
       html += `<div class="sec-h">Coming</div><hr class="rule">`
         + `<div class="slip" id="slip">`
         + `<ul id="slip-names">${slip.names.map((nm,i)=>`<li><span>${esc(nm)}</span><button class="rm" data-rm="${i}" aria-label="Remove">\u00d7</button></li>`).join('')}</ul>`
-        + `<form class="int-form" id="add-line" hidden autocomplete="off"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow" id="add-name" type="text" aria-label="Add a name"><button class="lnk" id="add-go" type="submit">[add]</button></form>`
+        + `<form class="int-form" id="add-line" hidden autocomplete="off"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow" id="add-name" type="text" aria-label="Add a name" enterkeyhint="done" autocapitalize="words" autocorrect="off" spellcheck="false"><button class="lnk" id="add-go" type="submit">[add]</button></form>`
         + `<div class="slip-foot"><span>${slip.party} ${slip.party===1?'seat':'seats'}</span><span>doors ${esc((C.schedule||{}).doors||'')}</span></div>`
-        + `<div class="cal"><a class="lnk" href="${icsHref(CUR, C.schedule||{})}" download="heimkino.ics">[add to calendar]</a></div>`
+        + `<div class="cal"><button class="lnk" id="cal-go" type="button">[add to calendar]</button></div>`
         + `<div class="acts"><button class="lnk" id="change-res">[change]</button><button class="lnk" id="cancel-res">[cancel]</button></div>`
         + `<div class="msg" id="admit-msg" role="status" aria-live="polite"></div></div>`;
     } else if (sessionCode){
       html += `<div class="sec-h">Coming?</div><hr class="rule">`
         + `<form id="admit-form" autocomplete="off">`
-        + `<div class="rows" id="name-rows"><div class="row"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow rn" type="text" required aria-label="Name"></div></div>`
+        + `<div class="rows" id="name-rows"><div class="row"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow rn" type="text" required aria-label="Name" enterkeyhint="send" autocapitalize="words" autocorrect="off" spellcheck="false"></div></div>`
         + `<div class="addmore"><button type="button" class="lnk" id="add-row">+ add another person</button></div>`
         + `<div class="hp" aria-hidden="true"><input id="website" type="text" tabindex="-1" autocomplete="off"></div>`
         + `<div class="acts"><button class="lnk" type="submit" id="confirm-go">[confirm]</button></div>`
         + `<div class="msg" id="admit-msg" role="status" aria-live="polite"></div></form>`;
     } else {
       html += `<form id="unlock-form" autocomplete="off">`
-        + `<div class="line"><span class="inl">code</span><span class="gt">&gt;</span><input class="grow" id="code" type="text" required aria-label="Code"></div>`
+        + `<div class="line"><span class="inl">code</span><span class="gt">&gt;</span><input class="grow" id="code" type="text" required aria-label="Code" enterkeyhint="go" autocapitalize="none" autocorrect="off" spellcheck="false" autocomplete="off"></div>`
         + `<div class="hp" aria-hidden="true"><input id="u-hp" type="text" tabindex="-1" autocomplete="off"></div>`
         + `<div class="acts"><button class="lnk" type="submit" id="unlock-go">[enter]</button></div>`
         + `<div class="msg" id="admit-msg" role="status" aria-live="polite"></div></form>`;
@@ -387,12 +404,13 @@
     root.addEventListener('click', e => {
       const t = e.target;
       if (t.id === 'add-row'){ const row=document.createElement('div'); row.className='row';
-        row.innerHTML='<span class="inl">name</span><span class="gt">&gt;</span><input class="grow rn" type="text" autocomplete="off" aria-label="Name"><button type="button" class="rm" data-rmrow="1" aria-label="Remove">\u00d7</button>';
+        row.innerHTML='<span class="inl">name</span><span class="gt">&gt;</span><input class="grow rn" type="text" autocomplete="off" aria-label="Name" enterkeyhint="done" autocapitalize="words" autocorrect="off" spellcheck="false"><button type="button" class="rm" data-rmrow="1" aria-label="Remove">\u00d7</button>';
         $('#name-rows').appendChild(row); row.querySelector('.rn').focus(); }
       else if (t.dataset.rmrow){ t.closest('.row').remove(); }
       else if (t.id === 'change-res'){ const s=$('#slip'); if(s){ const on=!s.classList.contains('editing'); s.classList.toggle('editing',on); const f=$('#add-line'); if(f) f.hidden=!on; if(on){ const i=$('#add-name'); if(i) i.focus(); } } }
       else if (t.dataset.rm !== undefined){ removeName(parseInt(t.dataset.rm,10)); }
       else if (t.id === 'cancel-res'){ cancelRes(); }
+      else if (t.id === 'cal-go'){ saveIcs(); }
     });
     root.addEventListener('keydown', e => {
       if(e.key==='Escape' && e.target.id==='add-name'){
@@ -423,7 +441,7 @@
             ${u.synopsis ? `<p class="syn">${esc(u.synopsis)}</p>` : ''}
             <div class="int" data-film="${esc(u.title)}">
               <button class="int-btn"${voted?' disabled':''} aria-expanded="false"><span class="int-label">interested${voted?' \u2713':''}</span><span class="int-rule"></span><span class="int-n">${c}</span></button>
-              <form class="int-form" hidden autocomplete="off"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow ni-name" type="text" aria-label="Your name"><input class="nhp" type="text" tabindex="-1" autocomplete="off" aria-hidden="true"><button class="lnk int-go" type="submit">[enter]</button></form>
+              <form class="int-form" hidden autocomplete="off"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow ni-name" type="text" aria-label="Your name" enterkeyhint="send" autocapitalize="words" autocorrect="off" spellcheck="false"><input class="nhp" type="text" tabindex="-1" autocomplete="off" aria-hidden="true"><button class="lnk int-go" type="submit">[enter]</button></form>
               <div class="nmsg" aria-live="polite"></div>
             </div>
           </div>`;}).join('')
@@ -523,10 +541,10 @@
     el.innerHTML = `
       <button class="lnk" id="wish-toggle" aria-expanded="false">+ suggest a film</button>
       <form class="sug-form" id="wish-form" hidden autocomplete="off">
-        <div class="line"><span class="inl">film</span><span class="gt">&gt;</span><input class="grow" id="w-film" type="text" required aria-label="Film"></div>
-        <div class="line"><span class="inl">director</span><span class="gt">&gt;</span><input class="grow" id="w-dir" type="text" aria-label="Director"></div>
-        <div class="line"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow" id="w-by" type="text" aria-label="Your name"></div>
-        <div class="line"><span class="inl">note</span><span class="gt">&gt;</span><input class="grow" id="w-note" type="text" aria-label="Note"></div>
+        <div class="line"><span class="inl">film</span><span class="gt">&gt;</span><input class="grow" id="w-film" type="text" required aria-label="Film" enterkeyhint="next" autocapitalize="words" autocorrect="off"></div>
+        <div class="line"><span class="inl">director</span><span class="gt">&gt;</span><input class="grow" id="w-dir" type="text" aria-label="Director" enterkeyhint="next" autocapitalize="words" autocorrect="off"></div>
+        <div class="line"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow" id="w-by" type="text" aria-label="Your name" enterkeyhint="next" autocapitalize="words" autocorrect="off" spellcheck="false"></div>
+        <div class="line"><span class="inl">note</span><span class="gt">&gt;</span><input class="grow" id="w-note" type="text" aria-label="Note" enterkeyhint="send" autocapitalize="sentences"></div>
         <div class="hp" aria-hidden="true"><input id="w-hp" type="text" tabindex="-1" autocomplete="off"></div>
         <div class="acts"><button class="lnk" type="submit" id="wish-go">[send]</button></div>
         <div class="nmsg" id="wish-msg" aria-live="polite"></div>
