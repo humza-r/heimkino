@@ -9,7 +9,14 @@ window.CONFIG = {
     "trailers": "",
     "film": "1955"
   },
-  "next": null,
+  "next": {
+    "date": "2026-08-27",
+    "title": "Breathless",
+    "director": "Jean-Luc Godard",
+    "year": 1960,
+    "runtime": "90",
+    "synopsis": "After killing a police officer, a young man returns to Paris, where he spends time with an American journalism student while trying to evade the authorities and persuade her to leave with him."
+  },
   "upcoming": [
     {
       "date": "2026-09-09",
@@ -78,14 +85,6 @@ window.CONFIG = {
       "runtime": "108",
       "synopsis": "A woman with a titanium plate fitted in her head and murderous intent on her mind embarks on a bizarre journey of identity and unconditional love when she's forced to go on the run.",
       "rec": "Chloe"
-    },
-    {
-      "date": "2026-08-27",
-      "title": "Breathless",
-      "director": "Jean-Luc Godard",
-      "year": 1960,
-      "runtime": "90",
-      "synopsis": "After killing a police officer, a young man returns to Paris, where he spends time with an American journalism student while trying to evade the authorities and persuade her to leave with him."
     }
   ],
   "past": [
