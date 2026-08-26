@@ -15,7 +15,7 @@ window.CONFIG = {
     "director": "Andrzej Żuławski",
     "year": 1981,
     "runtime": "124",
-    "synopsis": "A psychological horror drama about a spy and his wife who divorce and unleash a monstrous creature.",
+    "synopsis": "A woman starts exhibiting increasingly disturbing behavior after asking her husband for a divorce. Suspicions of infidelity soon give way to something much more sinister.",
     "lang": "German, with English subtitles"
   },
   "upcoming": [
