@@ -95,7 +95,10 @@ window.CONFIG = {
       "director": "Andrzej Żuławski",
       "year": 1981,
       "runtime": "124",
-      "synopsis": "A woman starts exhibiting increasingly disturbing behavior after asking her husband for a divorce. Suspicions of infidelity soon give way to something much more sinister."
+      "synopsis": "A woman starts exhibiting increasingly disturbing behavior after asking her husband for a divorce. Suspicions of infidelity soon give way to something much more sinister.",
+      "attendees": [
+        "Vincent"
+      ]
     },
     {
       "date": "2026-08-19",
