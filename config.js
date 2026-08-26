@@ -9,14 +9,7 @@ window.CONFIG = {
     "trailers": "",
     "film": "1955"
   },
-  "next": {
-    "date": "2026-08-26",
-    "title": "Possession",
-    "director": "Andrzej Żuławski",
-    "year": 1981,
-    "runtime": "124",
-    "synopsis": "A woman starts exhibiting increasingly disturbing behavior after asking her husband for a divorce. Suspicions of infidelity soon give way to something much more sinister."
-  },
+  "next": null,
   "upcoming": [
     {
       "date": "2026-09-09",
@@ -96,6 +89,14 @@ window.CONFIG = {
     }
   ],
   "past": [
+    {
+      "date": "2026-08-26",
+      "title": "Possession",
+      "director": "Andrzej Żuławski",
+      "year": 1981,
+      "runtime": "124",
+      "synopsis": "A woman starts exhibiting increasingly disturbing behavior after asking her husband for a divorce. Suspicions of infidelity soon give way to something much more sinister."
+    },
     {
       "date": "2026-08-19",
       "title": "Passion",
