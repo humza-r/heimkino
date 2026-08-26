@@ -51,6 +51,21 @@
   .rsvp .edge{ flex:1; height:0; border-top:1px dashed var(--rule); }
   .rsvp .lbl{ font-size:11px; letter-spacing:0.16em; white-space:nowrap; color:var(--soft); }
   .rsvp.closed .edge{ border-top-style:solid; }
+  /* seat plan (kept in the receipt aesthetic; outlined furniture, fixed orientation) */
+  .seat-who{ margin-top:calc(var(--u)*1.5); font-size:12px; color:var(--soft); }
+  .plan{ margin-top:calc(var(--u)*2); overflow-x:auto; }
+  .plan-row{ display:flex; gap:12px; align-items:flex-end; justify-content:space-between; min-width:260px; }
+  .furn{ text-align:center; }
+  .furn-l{ font-size:9px; letter-spacing:0.06em; text-transform:uppercase; color:var(--soft); margin-bottom:5px; white-space:nowrap; }
+  .furn-b{ display:flex; gap:4px; justify-content:center; }
+  .seat{ width:26px; height:20px; border:1px solid var(--ink); background:transparent; border-radius:0; cursor:pointer; padding:0; }
+  .seat.taken{ border-color:var(--faint); opacity:.4; cursor:default; }
+  .seat.sel{ border-width:2px; background:var(--ink); }
+  .plan-floor{ margin-top:16px; text-align:center; }
+  .plan-floor .seat{ width:96px; }
+  .plan-screen{ margin-top:16px; border-top:1px dashed var(--rule); text-align:center; font-size:10px; letter-spacing:0.32em; color:var(--soft); padding-top:6px; }
+  .review{ list-style:none; margin:calc(var(--u)*1.5) 0 0; padding:0; font-size:13px; }
+  .review li{ padding:2px 0; }
   .roster span{ color:var(--ink); }
 
   /* protected info */
@@ -190,17 +205,23 @@
   function saveIcs(){
     if (!CUR) return;
     const text = icsText(CUR, C.schedule || {});
-    try{
-      const blob = new Blob([text], { type:'text/calendar;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = 'heimkino.ics'; a.rel = 'noopener';
-      document.body.appendChild(a); a.click();
-      setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); }, 1500);
-    }catch(_){
-      // last-resort fallback: open the event inline (iOS shows the add-to-calendar sheet)
-      window.location.href = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(text);
+    if (!text) return;
+    track('calendar');
+    const ua = navigator.userAgent || '';
+    const isIOS = /iP(hone|od|ad)/.test(ua) || (/Macintosh/.test(ua) && 'ontouchend' in document);
+    let url;
+    try{ url = URL.createObjectURL(new Blob([text], { type:'text/calendar;charset=utf-8' })); }
+    catch(_){ window.location.href = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(text); return; }
+    if (isIOS){
+      // Safari has no reliable download for .ics; navigating to the file opens the Add-to-Calendar sheet
+      window.location.href = url;
+      setTimeout(()=>URL.revokeObjectURL(url), 8000);
+      return;
     }
+    const a = document.createElement('a');
+    a.href = url; a.download = 'heimkino.ics';
+    document.body.appendChild(a); a.click();
+    setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); }, 1500);
   }
 
   const KEY = 'heimkino:res';
@@ -218,6 +239,18 @@
   let roster = null;
   let flashed = false;
   let interestCounts = {};
+  let seatMap = {};                 // seatId -> occupant name (names only after unlock)
+  let takenIds = [];                // seat ids taken (public, pre-unlock)
+  let rsvpStage = 'names';          // names | seats | review
+  let pendNames = [], pendSeats = [], pendIdx = 0;
+
+  const SEAT_LABEL = { sofa:'sofa', black:'black chair', chaise:'chaise', fold:'fold', churchBench:'church bench', floor:'floor' };
+  // display order left->right in the back row, then floor
+  const ROOM_ORDER = ['churchBench','fold','chaise','black','sofa'];
+  function seatLabel(id){ return SEAT_LABEL[String(id).split('-')[0]] || id; }
+  function seatMode(){ return !!(CUR && CUR.seatSelectionEnabled); }
+  function openSeats(){ const o=(CUR && CUR.openSeats) ? CUR.openSeats.slice() : []; if(seatMode() && o.indexOf('floor-1')<0) o.push('floor-1'); return o; }
+  function seatTaken(id){ return takenIds.indexOf(id) >= 0 || seatMap.hasOwnProperty(id); }
 
   function todayISO(){ const d=new Date(), p=x=>String(x).padStart(2,'0'); return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate()); }
   function pickCurrent(){
@@ -238,6 +271,11 @@
     const d = await r.json();
     if (!d.ok) throw new Error(d.error || 'Something went wrong.');
     return d;
+  }
+  function track(ev){
+    if (!EP) return;
+    try{ fetch(EP, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({ action:'event', event:ev, film:(CUR && CUR.title) || '' }) }); }catch(_){}
   }
 
   // ---------- page chrome ----------
@@ -274,7 +312,13 @@
       const st = (capn == null) ? 'open' : (conf >= capn ? 'closed' : (capn - conf <= 2 ? 'closing' : 'open'));
       const lb = st === 'closed' ? 'rsvp closed' : (st === 'closing' ? 'nearly full' : 'rsvp open');
       cap = `<div class="rsvp ${st}" role="status"><span class="edge"></span><span class="lbl">${lb}</span><span class="edge"></span></div>`;
-      if (gated && roster && roster.length) cap += `<div class="roster"><span>${roster.map(esc).join('</span> \u00b7 <span>')}</span></div>`;
+      if (gated && roster && roster.length){
+        if (seatMode() && Object.keys(seatMap).length){
+          cap += `<div class="roster">${Object.keys(seatMap).map(id=>`${esc(seatMap[id])} <span class="gt">/</span> ${esc(seatLabel(id))}`).join('<br>')}</div>`;
+        } else {
+          cap += `<div class="roster"><span>${roster.map(esc).join('</span> \u00b7 <span>')}</span></div>`;
+        }
+      }
     }
     $('#current').innerHTML = `
       <div class="sec-h">Next screening<span class="sec-date">${dateLine}</span></div><hr class="rule">
@@ -303,20 +347,34 @@
     if (slip){
       html += `<div class="sec-h">Coming</div><hr class="rule">`
         + `<div class="slip" id="slip">`
-        + `<ul id="slip-names">${slip.names.map((nm,i)=>`<li><span>${esc(nm)}</span><button class="rm" data-rm="${i}" aria-label="Remove">\u00d7</button></li>`).join('')}</ul>`
+        + `<ul id="slip-names">${slip.names.map((nm,i)=>`<li><span>${esc(nm)}${slip.seats&&slip.seats[i]?' <span class="gt">/</span> '+esc(seatLabel(slip.seats[i])):''}</span><button class="rm" data-rm="${i}" aria-label="Remove">\u00d7</button></li>`).join('')}</ul>`
         + `<form class="int-form" id="add-line" hidden autocomplete="off"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow" id="add-name" type="text" aria-label="Add a name" enterkeyhint="done" autocapitalize="words" autocorrect="off" spellcheck="false"><button class="lnk" id="add-go" type="submit">[add]</button></form>`
         + `<div class="slip-foot"><span>${slip.party} ${slip.party===1?'seat':'seats'}</span><span>doors ${esc((C.schedule||{}).doors||'')}</span></div>`
         + `<div class="cal"><button class="lnk" id="cal-go" type="button">[add to calendar]</button></div>`
         + `<div class="acts"><button class="lnk" id="change-res">[change]</button><button class="lnk" id="cancel-res">[cancel]</button></div>`
         + `<div class="msg" id="admit-msg" role="status" aria-live="polite"></div></div>`;
     } else if (sessionCode){
-      html += `<div class="sec-h">Coming?</div><hr class="rule">`
-        + `<form id="admit-form" autocomplete="off">`
-        + `<div class="rows" id="name-rows"><div class="row"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow rn" type="text" required aria-label="Name" enterkeyhint="send" autocapitalize="words" autocorrect="off" spellcheck="false"></div></div>`
-        + `<div class="addmore"><button type="button" class="lnk" id="add-row">+ add another person</button></div>`
-        + `<div class="hp" aria-hidden="true"><input id="website" type="text" tabindex="-1" autocomplete="off"></div>`
-        + `<div class="acts"><button class="lnk" type="submit" id="confirm-go">[confirm]</button></div>`
-        + `<div class="msg" id="admit-msg" role="status" aria-live="polite"></div></form>`;
+      if (seatMode() && rsvpStage === 'seats'){
+        const who = pendNames[pendIdx] || '';
+        html += `<div class="sec-h">Choose a place</div><hr class="rule">`
+          + `<div class="seat-who">${esc(who)} <span class="gt">&gt;</span> choose a place</div>`
+          + roomPlanHtml()
+          + `<div class="acts"><button class="lnk" id="seat-back">[back]</button></div>`
+          + `<div class="msg" id="admit-msg" role="status" aria-live="polite"></div>`;
+      } else if (seatMode() && rsvpStage === 'review'){
+        html += `<div class="sec-h">Coming?</div><hr class="rule">`
+          + `<ul class="review">${pendNames.map((nm,i)=>`<li>${esc(nm)} <span class="gt">/</span> ${esc(seatLabel(pendSeats[i]))}</li>`).join('')}</ul>`
+          + `<div class="acts"><button class="lnk" id="seat-restart">[back]</button><button class="lnk" id="seat-confirm">[confirm]</button></div>`
+          + `<div class="msg" id="admit-msg" role="status" aria-live="polite"></div>`;
+      } else {
+        html += `<div class="sec-h">Coming?</div><hr class="rule">`
+          + `<form id="admit-form" autocomplete="off">`
+          + `<div class="rows" id="name-rows"><div class="row"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow rn" type="text" required aria-label="Name" enterkeyhint="send" autocapitalize="words" autocorrect="off" spellcheck="false"></div></div>`
+          + `<div class="addmore"><button type="button" class="lnk" id="add-row">+ add another person</button></div>`
+          + `<div class="hp" aria-hidden="true"><input id="website" type="text" tabindex="-1" autocomplete="off"></div>`
+          + `<div class="acts"><button class="lnk" type="submit" id="confirm-go">${seatMode()?'[continue]':'[confirm]'}</button></div>`
+          + `<div class="msg" id="admit-msg" role="status" aria-live="polite"></div></form>`;
+      }
     } else {
       html += `<form id="unlock-form" autocomplete="off">`
         + `<div class="line"><span class="inl">code</span><span class="gt">&gt;</span><input class="grow" id="code" type="text" required aria-label="Code" enterkeyhint="go" autocapitalize="none" autocorrect="off" spellcheck="false" autocomplete="off"></div>`
@@ -340,11 +398,54 @@
       const d = await post('unlock', { code, website:hp, date: (CUR && CUR.date) || '' });
       sessionCode = code;
       roster = d.coming || [];
+      if (d.seatMap) seatMap = d.seatMap;
       if (typeof d.confirmed === 'number') agg = { confirmed:d.confirmed, capacity:d.capacity };
       reveal({ venue:d.venue, houseNote:d.houseNote });
       renderAdmission(); renderCurrent();
-      admitMsg('', 'ok');
+      admitMsg('', 'ok'); track('code');
     }catch(err){ admitMsg(err.message, 'err'); go.disabled = false; }
+  }
+
+  function roomPlanHtml(){
+    const open = openSeats();
+    const cell = obj => {
+      const ids = open.filter(id => String(id).split('-')[0] === obj);
+      if (!ids.length) return '';
+      const boxes = ids.map(id => {
+        const chosen = pendSeats.indexOf(id) >= 0;
+        const taken = seatTaken(id) && !chosen;
+        const cls = taken ? 'taken' : (chosen ? 'sel' : 'avail');
+        const occ = (taken && seatMap[id]) ? ` title="${esc(seatMap[id])}"` : '';
+        return `<button type="button" class="seat ${cls}" data-seat="${esc(id)}"${taken?' disabled':''}${occ}></button>`;
+      }).join('');
+      return `<div class="furn"><div class="furn-l">${esc(SEAT_LABEL[obj])}</div><div class="furn-b">${boxes}</div></div>`;
+    };
+    const back = ROOM_ORDER.map(cell).filter(Boolean).join('');
+    const floor = cell('floor');
+    return `<div class="plan"><div class="plan-row">${back}</div>${floor?`<div class="plan-floor">${floor}</div>`:''}<div class="plan-screen">SCREEN</div></div>`;
+  }
+  function pickSeat(id){
+    if (rsvpStage !== 'seats') return;
+    if (seatTaken(id) || pendSeats.indexOf(id) >= 0) return;
+    pendSeats[pendIdx] = id; pendIdx++;
+    if (pendIdx >= pendNames.length) rsvpStage = 'review';
+    renderAdmission();
+  }
+  async function doCreateSeats(){
+    const go = $('#seat-confirm'); if (go) go.disabled = true; admitMsg('', 'ok');
+    try{
+      const d = await post('create', { names:pendNames, seats:pendSeats, code:sessionCode, date:CUR.date, title:CUR.title });
+      mine = { reservationId:d.reservationId, editToken:d.editToken }; store.set(mine);
+      slip = { names:d.names, party:d.party, date:CUR.date, seats:d.seats };
+      agg = { confirmed:d.confirmed, capacity:d.capacity }; roster = d.coming || roster;
+      if (d.seatMap) seatMap = d.seatMap;
+      reveal({ venue:d.venue, houseNote:d.houseNote });
+      rsvpStage = 'names'; pendNames = []; pendSeats = []; pendIdx = 0;
+      renderAdmission(); admitMsg('recorded', 'ok'); track('rsvp');
+    }catch(err){
+      if (/just taken/i.test(err.message)){ await loadState(); rsvpStage='seats'; pendIdx=0; pendSeats=[]; renderAdmission(); admitMsg('a place was just taken, choose again','err'); }
+      else { admitMsg(err.message, 'err'); if (go) go.disabled = false; }
+    }
   }
 
   async function confirmAttend(form){
@@ -356,6 +457,11 @@
     if (names.length > 6) return admitMsg('max 6', 'err');
     if (!sessionCode) return admitMsg('enter code first', 'err');
 
+    if (seatMode()){
+      if (agg && agg.capacity != null && agg.confirmed >= agg.capacity) return admitMsg('rsvp closed', 'err');
+      pendNames = names; pendSeats = []; pendIdx = 0; rsvpStage = 'seats'; renderAdmission(); return;
+    }
+
     const go = form.querySelector('#confirm-go'); go.disabled = true; admitMsg('', 'ok');
     try{
       const d = await post('create', { names, code:sessionCode, website:hp, date:CUR.date, title:CUR.title });
@@ -365,7 +471,7 @@
       roster = d.coming || roster;
       reveal({ venue:d.venue, houseNote:d.houseNote });
       renderAdmission();
-      admitMsg('recorded', 'ok');
+      admitMsg('recorded', 'ok'); track('rsvp');
     }catch(err){ admitMsg(err.message, 'err'); go.disabled = false; }
   }
 
@@ -415,6 +521,10 @@
       else if (t.dataset.rm !== undefined){ removeName(parseInt(t.dataset.rm,10)); }
       else if (t.id === 'cancel-res'){ cancelRes(); }
       else if (t.id === 'cal-go'){ saveIcs(); }
+      else if (t.dataset.seat){ pickSeat(t.dataset.seat); }
+      else if (t.id === 'seat-back'){ if (pendIdx>0){ pendIdx--; pendSeats.pop(); } else { rsvpStage='names'; } renderAdmission(); }
+      else if (t.id === 'seat-restart'){ rsvpStage='seats'; pendIdx=0; pendSeats=[]; renderAdmission(); }
+      else if (t.id === 'seat-confirm'){ doCreateSeats(); }
     });
     root.addEventListener('keydown', e => {
       if(e.key==='Escape' && e.target.id==='add-name'){
@@ -471,7 +581,7 @@
       box.querySelector('.int-n').textContent = interestCounts[film]||0;
       box.querySelector('.int-label').textContent = 'interested \u2713';
       btn.disabled = true; btn.hidden = false; btn.setAttribute('aria-expanded','false');
-      form.hidden = true; set('','');
+      form.hidden = true; set('',''); track('interest');
     }catch(err){ set(err.message,'err'); go.disabled=false; }
   }
   function wireUpcoming(){
@@ -503,7 +613,7 @@
     if (!EP) return set('offline','err');
     const go=$('#wish-go'); go.disabled=true; set('','ok');
     try{ await post('wish', { film, director, by, note });
-      set('recorded','ok');
+      set('recorded','ok'); track('suggest');
       $('#w-film').value=''; $('#w-dir').value=''; $('#w-by').value=''; $('#w-note').value=''; }
     catch(err){ set(err.message,'err'); }
     finally{ go.disabled=false; }
@@ -577,6 +687,7 @@
     const q = (CUR && CUR.date) ? ('?date=' + encodeURIComponent(CUR.date)) : '';
     try{ const r = await fetch(EP + q); const d = await r.json();
       if (d && d.interest){ interestCounts = d.interest; renderUpcoming(); }
+      if (d && Array.isArray(d.taken)) takenIds = d.taken;
       if (d && typeof d.confirmed==='number'){ agg={confirmed:d.confirmed, capacity:d.capacity}; renderCurrent(); } }catch(_){}
   }
   async function restoreMine(){
@@ -584,7 +695,8 @@
     try{
       const d = await post('mine', { reservationId:mine.reservationId, editToken:mine.editToken, date: (CUR && CUR.date) || '' });
       if (d.stale){ mine=null; store.clear(); renderAdmission(); return; }
-      slip = { names:d.names, party:d.party, date:d.date };
+      slip = { names:d.names, party:d.party, date:d.date, seats:d.seats };
+      if (d.seatMap) seatMap = d.seatMap;
       if (typeof d.confirmed==='number') agg={confirmed:d.confirmed, capacity:d.capacity};
       roster = d.coming || null;
       reveal({ venue:d.venue, houseNote:d.houseNote });
@@ -595,7 +707,7 @@
   // ---------- init ----------
   renderChrome(); renderVenue(); renderCurrent(); renderAdmission(); renderUpcoming(); renderSuggest(); renderPast();
   wireAdmission(); wireUpcoming(); wireSuggest(); wirePeek();
-  loadState(); restoreMine();
+  loadState(); restoreMine(); track('open');
 })();
 </script>
 </body>
