@@ -51,7 +51,7 @@ window.CONFIG = {
       "rec": "Deleuze / Cinema II"
     },
     {
-      "date": "",
+      "date": "2026-09-02",
       "title": "L'Appartement",
       "director": "Gilles Mimouni",
       "year": 1996,
