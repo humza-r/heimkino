@@ -86,6 +86,7 @@
   .slip .rm{ display:none; }
   .slip.editing .rm{ display:inline; }
   .slip-foot{ margin-top:calc(var(--u)*2); font-size:12px; color:var(--soft); display:flex; gap:20px; }
+  .cal{ margin-top:calc(var(--u)*1.5); }
 
   /* upcoming */
   .up{ margin-top:calc(var(--u)*1); }
@@ -163,6 +164,25 @@
   const pad = n => String(n).padStart(2,'0');
   const fmt = (iso, opts) => { const d = new Date(iso + 'T00:00:00'); return isNaN(d) ? iso : d.toLocaleDateString('en-GB', opts); };
   const rt = (v, unit) => { const m = String(v==null?'':v).match(/\d+/); return m ? (unit==='min' ? m[0]+' min' : m[0]+'\u2032') : esc(v||''); };
+  function icsHref(n, sch){
+    if (!n || !n.date) return '';
+    const place = (gated && gated.venue) ? gated.venue : '';
+    const doorsT = ((sch && sch.doors) || n.time || (sch && sch.film) || '20:00');
+    const filmT = (n.time || (sch && sch.film) || doorsT);
+    const dh = parseInt(doorsT.split(':')[0],10)||20, dm = parseInt(doorsT.split(':')[1],10)||0;
+    const fh = parseInt(filmT.split(':')[0],10)||dh, fm = parseInt(filmT.split(':')[1],10)||dm;
+    const dur = (n.runtime ? parseInt((String(n.runtime).match(/\d+/)||['150'])[0],10) : 150) + 20;
+    const s = new Date(n.date + 'T' + pad(dh) + ':' + pad(dm) + ':00');
+    const e = new Date(new Date(n.date + 'T' + pad(fh) + ':' + pad(fm) + ':00').getTime() + dur*60000);
+    const f = d => d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'T'+pad(d.getHours())+pad(d.getMinutes())+'00';
+    const ie = t => String(t).replace(/[\\,;]/g, m=>'\\'+m).replace(/\r?\n/g,'\\n');
+    const body = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Heimkino//EN','BEGIN:VEVENT',
+      'UID:'+f(s)+'-heimkino','DTSTAMP:'+f(new Date()),'DTSTART:'+f(s),'DTEND:'+f(e),
+      'SUMMARY:'+ie('Heimkino: '+n.title)];
+    if (place) body.push('LOCATION:'+ie(place));
+    body.push('END:VEVENT','END:VCALENDAR');
+    return 'data:text/calendar;charset=utf-8,' + encodeURIComponent(body.join('\r\n'));
+  }
 
   const KEY = 'heimkino:res';
   const store = {
@@ -240,6 +260,7 @@
       <div class="title">${esc(n.title)}</div>
       <div class="meta">${esc(meta)}</div>
       ${n.runtime ? `<div class="meta">${rt(n.runtime,'min')}</div>` : ''}
+      ${(n.lang || C.language) ? `<div class="meta">${esc(n.lang || C.language)}</div>` : ''}
       ${n.rec ? `<div class="rec">rec: <span>${esc(n.rec)}</span></div>` : ''}
       ${n.away ? `<div class="tags"><span class="tag">away screening</span></div>` : ''}
       ${n.synopsis ? `<p class="syn">${esc(n.synopsis)}</p>` : ''}
@@ -264,6 +285,7 @@
         + `<ul id="slip-names">${slip.names.map((nm,i)=>`<li><span>${esc(nm)}</span><button class="rm" data-rm="${i}" aria-label="Remove">\u00d7</button></li>`).join('')}</ul>`
         + `<form class="int-form" id="add-line" hidden autocomplete="off"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow" id="add-name" type="text" aria-label="Add a name"><button class="lnk" id="add-go" type="submit">[add]</button></form>`
         + `<div class="slip-foot"><span>${slip.party} ${slip.party===1?'seat':'seats'}</span><span>doors ${esc((C.schedule||{}).doors||'')}</span></div>`
+        + `<div class="cal"><a class="lnk" href="${icsHref(CUR, C.schedule||{})}" download="heimkino.ics">[add to calendar]</a></div>`
         + `<div class="acts"><button class="lnk" id="change-res">[change]</button><button class="lnk" id="cancel-res">[cancel]</button></div>`
         + `<div class="msg" id="admit-msg" role="status" aria-live="polite"></div></div>`;
     } else if (sessionCode){
@@ -294,11 +316,12 @@
     if (!code) return admitMsg('enter code', 'err');
     const go = form.querySelector('#unlock-go'); go.disabled = true; admitMsg('', 'ok');
     try{
-      const d = await post('unlock', { code, website:hp });
+      const d = await post('unlock', { code, website:hp, date: (CUR && CUR.date) || '' });
       sessionCode = code;
       roster = d.coming || [];
+      if (typeof d.confirmed === 'number') agg = { confirmed:d.confirmed, capacity:d.capacity };
       reveal({ venue:d.venue, houseNote:d.houseNote });
-      renderAdmission();
+      renderAdmission(); renderCurrent();
       admitMsg('', 'ok');
     }catch(err){ admitMsg(err.message, 'err'); go.disabled = false; }
   }
@@ -529,19 +552,21 @@
   // ---------- live aggregate + restore own reservation ----------
   async function loadState(){
     if (!EP) return;
-    try{ const r = await fetch(EP); const d = await r.json();
+    const q = (CUR && CUR.date) ? ('?date=' + encodeURIComponent(CUR.date)) : '';
+    try{ const r = await fetch(EP + q); const d = await r.json();
       if (d && d.interest){ interestCounts = d.interest; renderUpcoming(); }
       if (d && typeof d.confirmed==='number'){ agg={confirmed:d.confirmed, capacity:d.capacity}; renderCurrent(); } }catch(_){}
   }
   async function restoreMine(){
     if (!EP || !mine) return;
     try{
-      const d = await post('mine', { reservationId:mine.reservationId, editToken:mine.editToken });
+      const d = await post('mine', { reservationId:mine.reservationId, editToken:mine.editToken, date: (CUR && CUR.date) || '' });
+      if (d.stale){ mine=null; store.clear(); renderAdmission(); return; }
       slip = { names:d.names, party:d.party, date:d.date };
       if (typeof d.confirmed==='number') agg={confirmed:d.confirmed, capacity:d.capacity};
       roster = d.coming || null;
       reveal({ venue:d.venue, houseNote:d.houseNote });
-      renderAdmission();
+      renderAdmission(); renderCurrent();
     }catch(_){ mine=null; store.clear(); renderAdmission(); }
   }
 
