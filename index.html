@@ -45,10 +45,16 @@
   /* schedule + capacity */
   .sched{ margin-top:calc(var(--u)*2); font-size:12px; color:var(--soft); line-height:1.85; }
   .sched b{ color:var(--ink); font-weight:400; }
-  .roster{ margin-top:8px; font-size:12px; color:var(--soft); }
-  .room{ margin-top:calc(var(--u)*2.5); display:flex; gap:12px; align-items:baseline; }
-  .room-k{ font-size:11px; color:var(--soft); }
-  .room-bar{ font-size:13px; letter-spacing:2px; color:var(--ink); }
+  .roster{ margin-top:10px; font-size:12px; color:var(--soft); }
+  /* RSVP access state as a receipt tear line (no counts, no meters) */
+  .rsvp{ margin-top:calc(var(--u)*2.75); display:flex; align-items:center; gap:12px; }
+  .rsvp .edge{ flex:1; height:0; }
+  .rsvp .lbl{ font-size:11px; letter-spacing:0.2em; white-space:nowrap; color:var(--soft); }
+  .rsvp.open .edge{ border-top:1px dashed var(--rule); }
+  .rsvp.closing .edge{ border-top:1px dashed var(--ink); }
+  .rsvp.closing .lbl{ color:var(--ink); }
+  .rsvp.closed .edge{ border-top:2px solid var(--ink); }
+  .rsvp.closed .lbl{ color:#9a3b3b; }
   .roster span{ color:var(--ink); }
 
   /* protected info */
@@ -269,7 +275,10 @@
     let cap = '';
     if (agg && typeof agg.confirmed === 'number'){
       const conf = agg.confirmed, capn = agg.capacity;
-      if (capn != null){ let bar=''; for(let i=0;i<capn;i++) bar += (i<conf?'\u2588':'\u2591'); cap = `<div class="room" aria-label="room, ${conf} in"><span class="room-k">room</span><span class="room-bar">${bar}</span></div>`; }
+      const st = (capn == null) ? 'open' : (conf >= capn ? 'closed' : (capn - conf <= 2 ? 'closing' : 'open'));
+      const lb = st === 'closed' ? 'RSVP CLOSED' : (st === 'closing' ? 'RSVP CLOSING' : 'RSVP OPEN');
+      const mk = st === 'closed' ? 'XXXX' : (st === 'closing' ? '//' : '');
+      cap = `<div class="rsvp ${st}" role="status"><span class="edge"></span><span class="lbl">${mk?mk+' ':''}${lb}${mk?' '+mk:''}</span><span class="edge"></span></div>`;
       if (gated && roster && roster.length) cap += `<div class="roster"><span>${roster.map(esc).join('</span> \u00b7 <span>')}</span></div>`;
     }
     $('#current').innerHTML = `
