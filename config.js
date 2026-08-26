@@ -3,7 +3,7 @@ window.CONFIG = {
   "wordmark": "Heimkino",
   "city": "Berlin",
   "endpoint": "https://script.google.com/macros/s/AKfycbzWOPUE457C64VapEH8x-QOfpdRv3YBxhseFnGubpX9ZKzcIQiL1rDBkDiSYXfnXDOW/exec",
-  "language": "Original, English subtitles",
+  "language": "OmU",
   "schedule": {
     "doors": "1915",
     "trailers": "",
@@ -15,8 +15,7 @@ window.CONFIG = {
     "director": "Andrzej Żuławski",
     "year": 1981,
     "runtime": "124",
-    "synopsis": "A woman starts exhibiting increasingly disturbing behavior after asking her husband for a divorce. Suspicions of infidelity soon give way to something much more sinister.",
-    "lang": "German, with English subtitles"
+    "synopsis": "A woman starts exhibiting increasingly disturbing behavior after asking her husband for a divorce. Suspicions of infidelity soon give way to something much more sinister."
   },
   "upcoming": [
     {
