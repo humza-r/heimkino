@@ -167,13 +167,11 @@
   function icsHref(n, sch){
     if (!n || !n.date) return '';
     const place = (gated && gated.venue) ? gated.venue : '';
-    const doorsT = ((sch && sch.doors) || n.time || (sch && sch.film) || '20:00');
-    const filmT = (n.time || (sch && sch.film) || doorsT);
-    const dh = parseInt(doorsT.split(':')[0],10)||20, dm = parseInt(doorsT.split(':')[1],10)||0;
-    const fh = parseInt(filmT.split(':')[0],10)||dh, fm = parseInt(filmT.split(':')[1],10)||dm;
-    const dur = (n.runtime ? parseInt((String(n.runtime).match(/\d+/)||['150'])[0],10) : 150) + 20;
-    const s = new Date(n.date + 'T' + pad(dh) + ':' + pad(dm) + ':00');
-    const e = new Date(new Date(n.date + 'T' + pad(fh) + ':' + pad(fm) + ':00').getTime() + dur*60000);
+    const filmT = (n.time || (sch && sch.film) || (sch && sch.doors) || '20:00');
+    const fh = parseInt(filmT.split(':')[0],10)||20, fm = parseInt(filmT.split(':')[1],10)||0;
+    const dur = n.runtime ? parseInt((String(n.runtime).match(/\d+/)||['120'])[0],10) : 120;
+    const s = new Date(n.date + 'T' + pad(fh) + ':' + pad(fm) + ':00');
+    const e = new Date(s.getTime() + dur*60000);
     const f = d => d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'T'+pad(d.getHours())+pad(d.getMinutes())+'00';
     const ie = t => String(t).replace(/[\\,;]/g, m=>'\\'+m).replace(/\r?\n/g,'\\n');
     const body = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Heimkino//EN','BEGIN:VEVENT',
