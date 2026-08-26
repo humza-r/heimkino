@@ -3,6 +3,7 @@ window.CONFIG = {
   "wordmark": "Heimkino",
   "city": "Berlin",
   "endpoint": "https://script.google.com/macros/s/AKfycbzOzhiugVHdb_sCFxhMyVw6lRGGR9t854t7I-z9jtiPFJFsxTIO8UN-5k7FXWAQma2g/exec",
+  "language": "Original, English subtitles",
   "schedule": {
     "doors": "1915",
     "trailers": "",
@@ -77,7 +78,7 @@ window.CONFIG = {
       "rec": "Soedeh"
     },
     {
-      "date": "2026-08-28",
+      "date": "2026-08-27",
       "title": "Titane",
       "director": "Julia Ducournau",
       "year": 2021,
