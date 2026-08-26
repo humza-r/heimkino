@@ -3,7 +3,7 @@ window.CONFIG = {
   "wordmark": "Heimkino",
   "city": "Berlin",
   "endpoint": "https://script.google.com/macros/s/AKfycbzWOPUE457C64VapEH8x-QOfpdRv3YBxhseFnGubpX9ZKzcIQiL1rDBkDiSYXfnXDOW/exec",
-  "language": "OmU",
+  "language": "Original, English subtitles",
   "schedule": {
     "doors": "1915",
     "trailers": "",
