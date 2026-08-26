@@ -24,7 +24,7 @@ window.CONFIG = {
       "director": "Pier Paolo Pasolini",
       "year": 1968,
       "edition": "CC",
-      "synopsis": "A mysterious visitor enters the home of a wealthy Milanese family and forms an intimate bond with each member before abruptly leaving, destabilising the household.",
+      "synopsis": "A wealthy Italian household is turned upside down when a handsome stranger arrives, seduces every family member and then disappears. Each has an epiphany of sorts, but none can figure out who the seductive visitor was or why he came.",
       "rec": "Fynn"
     },
     {
@@ -57,7 +57,7 @@ window.CONFIG = {
       "director": "Gilles Mimouni",
       "year": 1996,
       "runtime": "116",
-      "synopsis": "A recently engaged man sees a former lover and becomes obsessed with meeting her again."
+      "synopsis": "When Max catches a glimpse of the great lost love of his life, he becomes obsessed with rekindling their relationship."
     },
     {
       "date": "",
