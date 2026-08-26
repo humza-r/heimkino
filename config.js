@@ -71,7 +71,7 @@ window.CONFIG = {
       "rec": "Soedeh"
     },
     {
-      "date": "2026-08-27",
+      "date": "",
       "title": "Titane",
       "director": "Julia Ducournau",
       "year": 2021,
