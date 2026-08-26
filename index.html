@@ -46,7 +46,9 @@
   .sched{ margin-top:calc(var(--u)*2); font-size:12px; color:var(--soft); line-height:1.85; }
   .sched b{ color:var(--ink); font-weight:400; }
   .roster{ margin-top:8px; font-size:12px; color:var(--soft); }
-  .dots{ margin-top:calc(var(--u)*2.5); font-size:13px; letter-spacing:3px; color:var(--ink); }
+  .room{ margin-top:calc(var(--u)*2.5); display:flex; gap:12px; align-items:baseline; }
+  .room-k{ font-size:11px; color:var(--soft); }
+  .room-bar{ font-size:13px; letter-spacing:2px; color:var(--ink); }
   .roster span{ color:var(--ink); }
 
   /* protected info */
@@ -250,8 +252,8 @@
     let cap = '';
     if (agg && typeof agg.confirmed === 'number'){
       const conf = agg.confirmed, capn = agg.capacity;
-      if (capn != null){ let d=''; for(let i=0;i<capn;i++) d += (i<conf?'\u25cf':'\u25cb'); cap = `<div class="dots" aria-label="${conf} of ${capn} seats taken">${d}</div>`; }
-      if (gated && roster && roster.length) cap += `<div class="roster"><span>${roster.map(esc).join('</span> / <span>')}</span></div>`;
+      if (capn != null){ let bar=''; for(let i=0;i<capn;i++) bar += (i<conf?'\u2588':'\u2591'); cap = `<div class="room" aria-label="room, ${conf} in"><span class="room-k">room</span><span class="room-bar">${bar}</span></div>`; }
+      if (gated && roster && roster.length) cap += `<div class="roster"><span>${roster.map(esc).join('</span> \u00b7 <span>')}</span></div>`;
     }
     $('#current').innerHTML = `
       <div class="sec-h">Next screening<span class="sec-date">${dateLine}</span></div><hr class="rule">
