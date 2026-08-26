@@ -51,12 +51,39 @@ window.CONFIG = {
       "rec": "Deleuze / Cinema II"
     },
     {
-      "date": "2026-09-02",
+      "date": "",
       "title": "L'Appartement",
       "director": "Gilles Mimouni",
       "year": 1996,
       "runtime": "116",
       "synopsis": "A recently engaged man sees a former lover and becomes obsessed with meeting her again."
+    },
+    {
+      "date": "",
+      "title": "The Pledge",
+      "director": "Sean Penn",
+      "year": 2001,
+      "runtime": "124",
+      "synopsis": "A retired police detective becomes obsessed with fulfilling a promise to find the killer of a murdered child.",
+      "rec": "Linda"
+    },
+    {
+      "date": "",
+      "title": "In the Basement",
+      "director": "Ulrich Seidl",
+      "year": 2014,
+      "runtime": "81",
+      "synopsis": "A documentary explores the private activities, obsessions and rituals that people pursue in the basements of their Austrian homes.",
+      "rec": "Soedeh"
+    },
+    {
+      "date": "",
+      "title": "Titane",
+      "director": "Julia Ducournau",
+      "year": 2021,
+      "runtime": "108",
+      "synopsis": "After a series of violent events, a young woman with a metal plate in her head assumes a new identity and forms an unexpected bond with a grieving fire chief.",
+      "rec": "Chloe"
     }
   ],
   "past": [
