@@ -32,7 +32,7 @@ window.CONFIG = {
       "title": "The Gospel According to St. Matthew",
       "director": "Pier Paolo Pasolini",
       "year": 1964,
-      "synopsis": "The life of Jesus Christ is retold from his birth through his ministry, crucifixion and resurrection, closely following the Gospel of Matthew."
+      "synopsis": "Along a rocky, barren coastline, Jesus begins teaching, primarily using parables. He attracts disciples; he’s stern, brusque, and demanding. His parables often take on the powers that be, so he and his teachings come to the attention of the Pharisees, the chief priests, and elders. They conspire to have him arrested, beaten, tried, and crucified, just as he prophesied to his followers."
     },
     {
       "date": "",
