@@ -82,8 +82,16 @@ window.CONFIG = {
       "director": "Julia Ducournau",
       "year": 2021,
       "runtime": "108",
-      "synopsis": "After a series of violent events, a young woman with a metal plate in her head assumes a new identity and forms an unexpected bond with a grieving fire chief.",
+      "synopsis": "A woman with a titanium plate fitted in her head and murderous intent on her mind embarks on a bizarre journey of identity and unconditional love when she's forced to go on the run.",
       "rec": "Chloe"
+    },
+    {
+      "date": "2026-08-27",
+      "title": "Breathless",
+      "director": "Jean-Luc Godard",
+      "year": 1960,
+      "runtime": "90",
+      "synopsis": "After killing a police officer, a young man returns to Paris, where he spends time with an American journalism student while trying to evade the authorities and persuade her to leave with him."
     }
   ],
   "past": [
@@ -137,6 +145,20 @@ window.CONFIG = {
       "attendees": [
         "Fynn",
         "Linda"
+      ]
+    },
+    {
+      "date": "2026-08-01",
+      "title": "The Following",
+      "director": "Christopher Nolan",
+      "year": 1998,
+      "edition": "Mubi",
+      "runtime": "152",
+      "synopsis": "A 1998 British independent neo-noir film written, directed, photographed and edited by Christopher Nolan in his feature film directorial debut.",
+      "away": true,
+      "attendees": [
+        "Soedeh",
+        "Lukas"
       ]
     },
     {
