@@ -1,6 +1,6 @@
 /* Generated from the content Sheet by generate.gs. Do not hand-edit. */
 window.CONFIG = {
-  "wordmark": "Heimkino",
+  "wordmark": "movienights",
   "city": "Berlin",
   "endpoint": "https://script.google.com/macros/s/AKfycbzWOPUE457C64VapEH8x-QOfpdRv3YBxhseFnGubpX9ZKzcIQiL1rDBkDiSYXfnXDOW/exec",
   "language": "Original, English subtitles",
@@ -19,8 +19,7 @@ window.CONFIG = {
       "edition": "CC",
       "synopsis": "A wealthy Italian household is turned upside down when a handsome stranger arrives, seduces every family member and then disappears. Each has an epiphany of sorts, but none can figure out who the seductive visitor was or why he came.",
       "rec": "Fynn",
-      "seatSelectionEnabled": true,
-      "openSeats": []
+      "seatSelectionEnabled": true
     },
     {
       "date": "",
@@ -100,8 +99,7 @@ window.CONFIG = {
       "runtime": "111",
       "synopsis": "A reserved housekeeper takes a job with an affluent family in Brittany and forms a close friendship with a local postal worker, as class tensions and mutual resentment gradually build toward violence.",
       "lang": "OmU",
-      "seatSelectionEnabled": true,
-      "openSeats": []
+      "seatSelectionEnabled": true
     }
   ],
   "past": [
@@ -243,5 +241,6 @@ window.CONFIG = {
     "black chair",
     "sofa",
     "chaise"
-  ]
+  ],
+  "seatSelection": true
 };
