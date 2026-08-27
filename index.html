@@ -52,6 +52,8 @@
   .rsvp .lbl{ font-size:11px; letter-spacing:0.16em; white-space:nowrap; color:var(--soft); }
   .rsvp.closed .edge{ border-top-style:solid; }
   /* seat plan (kept in the receipt aesthetic; outlined furniture, fixed orientation) */
+  .sug-present{ display:flex; align-items:center; gap:8px; margin-top:calc(var(--u)*1.25); font-size:12px; color:var(--soft); cursor:pointer; }
+  .sug-present input{ width:auto; margin:0; }
   .seat-who{ margin-top:calc(var(--u)*1.5); font-size:13px; }
   .seat-hint{ margin-top:calc(var(--u)*1.25); font-size:12px; color:var(--soft); }
   .plan{ margin-top:calc(var(--u)*2); overflow-x:auto; }
@@ -195,40 +197,13 @@
   const pad = n => String(n).padStart(2,'0');
   const fmt = (iso, opts) => { const d = new Date(iso + 'T00:00:00'); return isNaN(d) ? iso : d.toLocaleDateString('en-GB', opts); };
   const rt = (v, unit) => { const m = String(v==null?'':v).match(/\d+/); return m ? (unit==='min' ? m[0]+' min' : m[0]+'\u2032') : esc(v||''); };
-  function icsText(n, sch){
-    if (!n || !n.date) return '';
-    const place = (gated && gated.venue) ? gated.venue : '';
-    const filmT = (n.time || (sch && sch.film) || (sch && sch.doors) || '20:00');
-    const fh = parseInt(filmT.split(':')[0],10)||20, fm = parseInt(filmT.split(':')[1],10)||0;
-    const dur = n.runtime ? parseInt((String(n.runtime).match(/\d+/)||['120'])[0],10) : 120;
-    const s = new Date(n.date + 'T' + pad(fh) + ':' + pad(fm) + ':00');
-    const e = new Date(s.getTime() + dur*60000);
-    const f = d => d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'T'+pad(d.getHours())+pad(d.getMinutes())+'00';
-    const z = d => d.getUTCFullYear()+pad(d.getUTCMonth()+1)+pad(d.getUTCDate())+'T'+pad(d.getUTCHours())+pad(d.getUTCMinutes())+pad(d.getUTCSeconds())+'Z';
-    const ie = t => String(t).replace(/[\\,;]/g, m=>'\\'+m).replace(/\r?\n/g,'\\n');
-    const host = (typeof location !== 'undefined' && location.hostname) ? location.hostname : 'heimkino';
-    const body = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Heimkino//Screening//EN','CALSCALE:GREGORIAN','METHOD:PUBLISH','BEGIN:VEVENT',
-      'UID:'+f(s)+'-heimkino@'+host,'DTSTAMP:'+z(new Date()),'DTSTART:'+f(s),'DTEND:'+f(e),
-      'SUMMARY:'+ie('Heimkino: '+n.title)];
-    if (place) body.push('LOCATION:'+ie(place));
-    body.push('END:VEVENT','END:VCALENDAR');
-    return body.join('\r\n');
-  }
-  function saveIcs(){
-    if (!CUR) return;
-    const text = icsText(CUR, C.schedule || {});
-    if (!text) return;
-    track('calendar');
-    const ua = navigator.userAgent || '';
-    const isIOS = /iP(hone|od|ad)/.test(ua) || (/Macintosh/.test(ua) && 'ontouchend' in document);
-    let url;
-    try{ url = URL.createObjectURL(new Blob([text], { type:'text/calendar;charset=utf-8' })); }
-    catch(_){ window.location.href = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(text); return; }
-    if (isIOS){ window.location.href = url; setTimeout(()=>URL.revokeObjectURL(url), 8000); return; }
-    const a = document.createElement('a');
-    a.href = url; a.download = 'heimkino.ics';
-    document.body.appendChild(a); a.click();
-    setTimeout(()=>{ a.remove(); URL.revokeObjectURL(url); }, 2000);
+  function icsHref(){
+    const n = CUR, sch = C.schedule || {}; if (!n || !n.date || !EP) return '#';
+    const t = n.time || sch.film || sch.doors || '20:00';
+    const rtm = n.runtime ? (String(n.runtime).match(/\d+/)||['120'])[0] : '120';
+    return EP + '?ics=1&date=' + encodeURIComponent(n.date) + '&title=' + encodeURIComponent(n.title)
+      + '&time=' + encodeURIComponent(t) + '&runtime=' + encodeURIComponent(rtm)
+      + (sessionCode ? '&code=' + encodeURIComponent(sessionCode) : '');
   }
   function gcalUrl(){
     const n = CUR, sch = C.schedule || {}; if (!n || !n.date) return '';
@@ -274,7 +249,19 @@
   function seatLabel(id){ return SEAT_LABEL[String(id).split('-')[0]] || id; }
   function firstName(n){ return String(n||'').trim().split(/\s+/)[0]; }
   function initials(n){ const p=String(n||'').trim().split(/\s+/); return ((p[0]?p[0][0]:'')+(p[1]?p[1][0]:'')).toUpperCase(); }
-  function seatMode(){ return !!(CUR && CUR.seatSelectionEnabled); }
+  function seatMode(){
+    if (CUR && CUR.seatSelectionEnabled != null) return !!CUR.seatSelectionEnabled;   // per-screening wins
+    return !!C.seatSelection;                                                          // else house default
+  }
+  function seatTaken(id){ return takenIds.indexOf(id) >= 0 || seatMap.hasOwnProperty(id); }
+  function rsvpState(){
+    const ov = (CUR && CUR.rsvp) || C.rsvp || 'auto';
+    if (ov === 'closed') return 'closed';
+    if (ov === 'open') return 'open';
+    if (seatMode()) return openSeats().filter(id => !seatTaken(id)).length > 0 ? 'open' : 'closed';
+    if (agg && agg.capacity != null) return agg.confirmed >= agg.capacity ? 'closed' : (agg.capacity - agg.confirmed <= 2 ? 'closing' : 'open');
+    return 'open';
+  }
   function allSeats(){ const ids=[]; ROOM.forEach(o=>{ const c=Math.max(1, o.count||1); for(let i=1;i<=c;i++) ids.push(o.key+'-'+i); }); return ids; }
   function expandOpen(list){
     const out=[];
@@ -294,7 +281,6 @@
     if (seatMode() && list.indexOf('floor-1') < 0 && ROOM.some(o=>o.key==='floor')) list.push('floor-1');
     return list;
   }
-  function seatTaken(id){ return takenIds.indexOf(id) >= 0 || seatMap.hasOwnProperty(id); }
 
   function todayISO(){ const d=new Date(), p=x=>String(x).padStart(2,'0'); return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate()); }
   function pickCurrent(){
@@ -352,17 +338,8 @@
     const dateLine = esc(fmt(n.date, {weekday:'short', day:'numeric', month:'short', year:'numeric'})).toUpperCase();
     let cap = '';
     if (agg && typeof agg.confirmed === 'number'){
-      const conf = agg.confirmed, capn = agg.capacity;
-      let st, lb;
-      if (seatMode()){
-        // the plan carries "how full"; the seam is just open vs closed by remaining open seats
-        const free = openSeats().filter(id => !seatTaken(id)).length;
-        st = free > 0 ? 'open' : 'closed';
-        lb = free > 0 ? 'rsvp open' : 'rsvp closed';
-      } else {
-        st = (capn == null) ? 'open' : (conf >= capn ? 'closed' : (capn - conf <= 2 ? 'closing' : 'open'));
-        lb = st === 'closed' ? 'rsvp closed' : (st === 'closing' ? 'nearly full' : 'rsvp open');
-      }
+      const rs = rsvpState();
+      const st = rs, lb = rs === 'closed' ? 'rsvp closed' : (rs === 'closing' ? 'nearly full' : 'rsvp open');
       cap = `<div class="rsvp ${st}" role="status"><span class="edge"></span><span class="lbl">${lb}</span><span class="edge"></span></div>`;
       if (gated && seatMode()){
         const seated = Object.keys(seatMap).map(id => `<div class="cm"><span class="cm-n">${esc(seatMap[id])}</span><span class="cm-lead"></span><span class="cm-s">${esc(seatLabel(id))}</span></div>`);
@@ -409,7 +386,7 @@
         + `<ul id="slip-names">${slip.names.map((nm,i)=>`<li><span>${esc(nm)}${slip.seats&&slip.seats[i]?` <span class="gt">/</span> ${esc(seatLabel(slip.seats[i]))}`:''}</span><button class="rm" data-rm="${i}" aria-label="Remove">\u00d7</button></li>`).join('')}</ul>`
         + `<form class="int-form" id="add-line" hidden autocomplete="off"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow" id="add-name" type="text" aria-label="Add a name" enterkeyhint="done" autocapitalize="words" autocorrect="off" spellcheck="false"><button class="lnk" id="add-go" type="submit">[add]</button></form>`
         + `<div class="slip-foot"><span>${slip.party} ${slip.party===1?'seat':'seats'}</span><span>doors ${esc((C.schedule||{}).doors||'')}</span></div>`
-        + `<div class="cal"><button class="lnk" id="cal-go" type="button">[add to calendar]</button> <button class="lnk cal-alt" id="cal-goog" type="button">[google]</button></div>`
+        + `<div class="cal"><a class="lnk" id="cal-go" href="${icsHref()}" target="_blank" rel="noopener">[add to calendar]</a> <button class="lnk cal-alt" id="cal-goog" type="button">[google]</button></div>`
         + `<div class="acts"><button class="lnk" id="change-res">[change]</button><button class="lnk" id="cancel-res">[cancel]</button></div>`
         + msg + `</div>` + locBlk;
     } else if (sessionCode){
@@ -428,15 +405,18 @@
           + `<div class="acts"><button class="lnk" id="seat-restart">[back]</button><button class="lnk" id="seat-confirm">[confirm]</button></div>`
           + msg + locBlk;
       } else {
-        html += `<div class="sec-h">Coming?</div><hr class="rule">`
-          + noteBlk + planBlk('view')
-          + (sm ? `<div class="seat-hint">add name(s), then you'll pick a place for each</div>` : '')
+        html += `<div class="sec-h">Coming?</div><hr class="rule">` + noteBlk + planBlk('view');
+        if (rsvpState() === 'closed'){
+          html += `<div class="seat-hint">rsvp is closed for this screening.</div>` + msg + locBlk;
+        } else {
+          html += (sm ? `<div class="seat-hint">add name(s), then you'll pick a place for each</div>` : '')
           + `<form id="admit-form" autocomplete="off">`
           + `<div class="rows" id="name-rows"><div class="row"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow rn" type="text" required aria-label="Name" enterkeyhint="send" autocapitalize="words" autocorrect="off" spellcheck="false"></div></div>`
           + `<div class="addmore"><button type="button" class="lnk" id="add-row">+ add another person</button></div>`
           + `<div class="hp" aria-hidden="true"><input id="website" type="text" tabindex="-1" autocomplete="off"></div>`
           + `<div class="acts"><button class="lnk" type="submit" id="confirm-go">${sm?'[continue]':'[confirm]'}</button></div>`
           + msg + `</form>` + locBlk;
+        }
       }
     } else {
       html += `<form id="unlock-form" autocomplete="off">`
@@ -523,9 +503,9 @@
     if (!names.length) return admitMsg('add a name', 'err');
     if (names.length > 6) return admitMsg('max 6', 'err');
     if (!sessionCode) return admitMsg('enter code first', 'err');
+    if (rsvpState() === 'closed') return admitMsg('rsvp closed', 'err');
 
     if (seatMode()){
-      if (openSeats().filter(id => !seatTaken(id)).length === 0) return admitMsg('rsvp closed', 'err');
       pendNames = names; pendSeats = []; pendIdx = 0; rsvpStage = 'seats'; renderAdmission(); return;
     }
 
@@ -587,7 +567,7 @@
       else if (t.id === 'change-res'){ const s=$('#slip'); if(s){ const on=!s.classList.contains('editing'); s.classList.toggle('editing',on); const f=$('#add-line'); if(f) f.hidden=!on; if(on){ const i=$('#add-name'); if(i) i.focus(); } } }
       else if (t.dataset.rm !== undefined){ removeName(parseInt(t.dataset.rm,10)); }
       else if (t.id === 'cancel-res'){ cancelRes(); }
-      else if (t.id === 'cal-go'){ saveIcs(); }
+      else if (t.id === 'cal-go'){ track('calendar'); }
       else if (t.id === 'cal-goog'){ openGcal(); }
       else if (t.dataset.seat){ pickSeat(t.dataset.seat); }
       else if (t.id === 'seat-back'){ if (pendIdx>0){ pendIdx--; pendSeats.pop(); } else { rsvpStage='names'; } renderAdmission(); }
@@ -675,14 +655,16 @@
   async function sendWish(form){
     const film = $('#w-film').value.trim(), director = $('#w-dir').value.trim();
     const by = $('#w-by').value.trim(), note = $('#w-note').value.trim(), hp = $('#w-hp').value;
+    const present = !!($('#w-present') && $('#w-present').checked);
     const set = (t,cls)=>{ const m=$('#wish-msg'); m.textContent=t; m.className='nmsg '+(cls||''); };
     if (hp) return;
     if (!film) return set('film?','err');
     if (!EP) return set('offline','err');
     const go=$('#wish-go'); go.disabled=true; set('','ok');
-    try{ await post('wish', { film, director, by, note });
-      set('recorded','ok'); track('suggest');
-      $('#w-film').value=''; $('#w-dir').value=''; $('#w-by').value=''; $('#w-note').value=''; }
+    try{ const d = await post('wish', { film, director, by, note, present });
+      if (d && d.interest){ interestCounts = d.interest; renderUpcoming(); }
+      set(present ? 'recorded, interest noted' : 'recorded','ok'); track('suggest');
+      $('#w-film').value=''; $('#w-dir').value=''; $('#w-by').value=''; $('#w-note').value=''; if($('#w-present')) $('#w-present').checked=false; }
     catch(err){ set(err.message,'err'); }
     finally{ go.disabled=false; }
   }
@@ -727,6 +709,7 @@
         <div class="line"><span class="inl">director</span><span class="gt">&gt;</span><input class="grow" id="w-dir" type="text" aria-label="Director" enterkeyhint="next" autocapitalize="words" autocorrect="off"></div>
         <div class="line"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow" id="w-by" type="text" aria-label="Your name" enterkeyhint="next" autocapitalize="words" autocorrect="off" spellcheck="false"></div>
         <div class="line"><span class="inl">note</span><span class="gt">&gt;</span><input class="grow" id="w-note" type="text" aria-label="Note" enterkeyhint="send" autocapitalize="sentences"></div>
+        <label class="sug-present"><input type="checkbox" id="w-present"> I'd like to be there when it screens</label>
         <div class="hp" aria-hidden="true"><input id="w-hp" type="text" tabindex="-1" autocomplete="off"></div>
         <div class="acts"><button class="lnk" type="submit" id="wish-go">[send]</button></div>
         <div class="nmsg" id="wish-msg" aria-live="polite"></div>
