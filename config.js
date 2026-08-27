@@ -9,17 +9,7 @@ window.CONFIG = {
     "trailers": "",
     "film": "1955"
   },
-  "next": {
-    "date": "2026-08-27",
-    "title": "Breathless",
-    "director": "Jean-Luc Godard",
-    "year": 1960,
-    "runtime": "90",
-    "synopsis": "After killing a police officer, a young man returns to Paris, where he spends time with an American journalism student while trying to evade the authorities and persuade her to leave with him.",
-    "lang": "OmU",
-    "seatSelectionEnabled": true,
-    "openSeats": []
-  },
+  "next": null,
   "upcoming": [
     {
       "date": "2026-09-09",
@@ -55,7 +45,7 @@ window.CONFIG = {
       "rec": "Deleuze / Cinema II"
     },
     {
-      "date": "2026-09-02",
+      "date": "2026-09-16",
       "title": "L'Appartement",
       "director": "Gilles Mimouni",
       "year": 1996,
@@ -87,7 +77,8 @@ window.CONFIG = {
       "year": 2021,
       "runtime": "108",
       "synopsis": "A woman with a titanium plate fitted in her head and murderous intent on her mind embarks on a bizarre journey of identity and unconditional love when she's forced to go on the run.",
-      "rec": "Chloe"
+      "rec": "Chloe",
+      "lang": "OmU"
     },
     {
       "date": "",
@@ -103,10 +94,25 @@ window.CONFIG = {
       "date": "",
       "title": "La Cérémonie",
       "director": "Claude Chabrol",
-      "year": null
+      "year": 1995,
+      "runtime": "111",
+      "synopsis": "A reserved housekeeper takes a job with an affluent family in Brittany and forms a close friendship with a local postal worker, as class tensions and mutual resentment gradually build toward violence.",
+      "lang": "OmU",
+      "seatSelectionEnabled": true,
+      "openSeats": []
     }
   ],
   "past": [
+    {
+      "date": "2026-08-31",
+      "title": "Breathless",
+      "director": "Jean-Luc Godard",
+      "year": 1960,
+      "runtime": "90",
+      "synopsis": "After killing a police officer, a young man returns to Paris, where he spends time with an American journalism student while trying to evade the authorities and persuade her to leave with him.",
+      "lang": "OmU",
+      "private": true
+    },
     {
       "date": "2026-08-26",
       "title": "Possession",
