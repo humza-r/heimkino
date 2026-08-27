@@ -61,6 +61,10 @@
   .seat{ width:26px; height:20px; border:1px solid var(--ink); background:transparent; border-radius:0; cursor:pointer; padding:0; }
   .seat.taken{ border-color:var(--faint); opacity:.4; cursor:default; }
   .seat.sel{ border-width:2px; background:var(--ink); }
+  .seatwrap{ display:inline-flex; flex-direction:column; align-items:center; gap:3px; }
+  .seatn{ font-size:9px; color:var(--soft); max-width:40px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .plan-wrap{ margin-top:calc(var(--u)*2.5); }
+  .plan-view .seat{ cursor:default; }
   .plan-floor{ margin-top:16px; text-align:center; }
   .plan-floor .seat{ width:96px; }
   .plan-screen{ margin-top:16px; border-top:1px dashed var(--rule); text-align:center; font-size:10px; letter-spacing:0.32em; color:var(--soft); padding-top:6px; }
@@ -244,10 +248,13 @@
   let rsvpStage = 'names';          // names | seats | review
   let pendNames = [], pendSeats = [], pendIdx = 0;
 
-  const SEAT_LABEL = { sofa:'sofa', black:'black chair', chaise:'chaise', fold:'fold', churchBench:'church bench', floor:'floor' };
-  // display order left->right in the back row, then floor
-  const ROOM_ORDER = ['churchBench','fold','chaise','black','sofa'];
+  const DEF_ROOM = [ {key:'churchBench',label:'church bench',count:2},{key:'fold',label:'folding',count:1},{key:'chaise',label:'chaise',count:1},{key:'black',label:'black chair',count:1},{key:'sofa',label:'sofa',count:2},{key:'floor',label:'floor',count:1} ];
+  const ROOM = (C.roomPlan && C.roomPlan.length) ? C.roomPlan : DEF_ROOM;
+  const SEAT_LABEL = {}; ROOM.forEach(o => { SEAT_LABEL[o.key] = o.label; });
+  // back-row order (everything except the floor, which renders below), left -> right as listed in house
+  const ROOM_ORDER = ROOM.filter(o => o.key !== 'floor').map(o => o.key);
   function seatLabel(id){ return SEAT_LABEL[String(id).split('-')[0]] || id; }
+  function firstName(n){ return String(n||'').trim().split(/\s+/)[0]; }
   function seatMode(){ return !!(CUR && CUR.seatSelectionEnabled); }
   function openSeats(){ const o=(CUR && CUR.openSeats) ? CUR.openSeats.slice() : []; if(seatMode() && o.indexOf('floor-1')<0) o.push('floor-1'); return o; }
   function seatTaken(id){ return takenIds.indexOf(id) >= 0 || seatMap.hasOwnProperty(id); }
@@ -312,12 +319,10 @@
       const st = (capn == null) ? 'open' : (conf >= capn ? 'closed' : (capn - conf <= 2 ? 'closing' : 'open'));
       const lb = st === 'closed' ? 'rsvp closed' : (st === 'closing' ? 'nearly full' : 'rsvp open');
       cap = `<div class="rsvp ${st}" role="status"><span class="edge"></span><span class="lbl">${lb}</span><span class="edge"></span></div>`;
-      if (gated && roster && roster.length){
-        if (seatMode() && Object.keys(seatMap).length){
-          cap += `<div class="roster">${Object.keys(seatMap).map(id=>`${esc(seatMap[id])} <span class="gt">/</span> ${esc(seatLabel(id))}`).join('<br>')}</div>`;
-        } else {
-          cap += `<div class="roster"><span>${roster.map(esc).join('</span> \u00b7 <span>')}</span></div>`;
-        }
+      if (gated && seatMode()){
+        cap += `<div class="plan-wrap">${roomPlanHtml('view')}</div>`;
+      } else if (gated && roster && roster.length){
+        cap += `<div class="roster"><span>${roster.map(esc).join('</span> \u00b7 <span>')}</span></div>`;
       }
     }
     $('#current').innerHTML = `
@@ -406,23 +411,26 @@
     }catch(err){ admitMsg(err.message, 'err'); go.disabled = false; }
   }
 
-  function roomPlanHtml(){
+  function roomPlanHtml(mode){
+    mode = mode || 'pick';
     const open = openSeats();
     const cell = obj => {
       const ids = open.filter(id => String(id).split('-')[0] === obj);
       if (!ids.length) return '';
       const boxes = ids.map(id => {
-        const chosen = pendSeats.indexOf(id) >= 0;
+        const chosen = mode === 'pick' && pendSeats.indexOf(id) >= 0;
         const taken = seatTaken(id) && !chosen;
         const cls = taken ? 'taken' : (chosen ? 'sel' : 'avail');
-        const occ = (taken && seatMap[id]) ? ` title="${esc(seatMap[id])}"` : '';
-        return `<button type="button" class="seat ${cls}" data-seat="${esc(id)}"${taken?' disabled':''}${occ}></button>`;
+        const nm = (taken && seatMap[id]) ? seatMap[id] : '';
+        const dis = (mode === 'view' || taken) ? ' disabled' : '';
+        const occ = nm ? ` title="${esc(nm)}"` : '';
+        return `<span class="seatwrap"><button type="button" class="seat ${cls}" data-seat="${esc(id)}"${dis}${occ}></button>${nm?`<span class="seatn">${esc(firstName(nm))}</span>`:''}</span>`;
       }).join('');
-      return `<div class="furn"><div class="furn-l">${esc(SEAT_LABEL[obj])}</div><div class="furn-b">${boxes}</div></div>`;
+      return `<div class="furn"><div class="furn-l">${esc(SEAT_LABEL[obj]||obj)}</div><div class="furn-b">${boxes}</div></div>`;
     };
     const back = ROOM_ORDER.map(cell).filter(Boolean).join('');
     const floor = cell('floor');
-    return `<div class="plan"><div class="plan-row">${back}</div>${floor?`<div class="plan-floor">${floor}</div>`:''}<div class="plan-screen">SCREEN</div></div>`;
+    return `<div class="plan${mode==='view'?' plan-view':''}"><div class="plan-row">${back}</div>${floor?`<div class="plan-floor">${floor}</div>`:''}<div class="plan-screen">SCREEN</div></div>`;
   }
   function pickSeat(id){
     if (rsvpStage !== 'seats') return;
