@@ -16,7 +16,16 @@ window.CONFIG = {
     "year": 1960,
     "runtime": "90",
     "synopsis": "After killing a police officer, a young man returns to Paris, where he spends time with an American journalism student while trying to evade the authorities and persuade her to leave with him.",
-    "lang": "OmU"
+    "lang": "OmU",
+    "seatSelectionEnabled": true,
+    "openSeats": [
+      "sofa-1",
+      "black-1",
+      "chaise-1",
+      "fold-1",
+      "churchBench-1",
+      "floor-1"
+    ]
   },
   "upcoming": [
     {
