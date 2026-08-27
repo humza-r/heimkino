@@ -61,10 +61,14 @@
   .seat{ width:26px; height:20px; border:1px solid var(--ink); background:transparent; border-radius:0; cursor:pointer; padding:0; }
   .seat.taken{ border-color:var(--faint); opacity:.4; cursor:default; }
   .seat.sel{ border-width:2px; background:var(--ink); }
-  .seatwrap{ display:inline-flex; flex-direction:column; align-items:center; gap:3px; }
-  .seatn{ font-size:9px; color:var(--soft); max-width:40px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .plan-wrap{ margin-top:calc(var(--u)*2.5); }
   .plan-view .seat{ cursor:default; }
+  .plan-view .seat.taken{ background:var(--ink); border-color:var(--ink); opacity:1; }
+  .plan-wrap{ margin-top:calc(var(--u)*2.5); }
+  .roster.seated{ margin-top:calc(var(--u)*2.5); }
+  .roster.seated .cm{ margin-top:9px; }
+  .roster.seated .cm:first-child{ margin-top:0; }
+  .roster.seated .cm-n{ display:block; color:var(--ink); }
+  .roster.seated .cm-s{ display:block; margin-left:14px; font-size:11px; color:var(--soft); }
   .plan-floor{ margin-top:16px; text-align:center; }
   .plan-floor .seat{ width:96px; }
   .plan-screen{ margin-top:16px; border-top:1px dashed var(--rule); text-align:center; font-size:10px; letter-spacing:0.32em; color:var(--soft); padding-top:6px; }
@@ -255,6 +259,7 @@
   const ROOM_ORDER = ROOM.filter(o => o.key !== 'floor').map(o => o.key);
   function seatLabel(id){ return SEAT_LABEL[String(id).split('-')[0]] || id; }
   function firstName(n){ return String(n||'').trim().split(/\s+/)[0]; }
+  function initials(n){ const p=String(n||'').trim().split(/\s+/); return ((p[0]?p[0][0]:'')+(p[1]?p[1][0]:'')).toUpperCase(); }
   function seatMode(){ return !!(CUR && CUR.seatSelectionEnabled); }
   function openSeats(){ const o=(CUR && CUR.openSeats) ? CUR.openSeats.slice() : []; if(seatMode() && o.indexOf('floor-1')<0) o.push('floor-1'); return o; }
   function seatTaken(id){ return takenIds.indexOf(id) >= 0 || seatMap.hasOwnProperty(id); }
@@ -321,6 +326,11 @@
       cap = `<div class="rsvp ${st}" role="status"><span class="edge"></span><span class="lbl">${lb}</span><span class="edge"></span></div>`;
       if (gated && seatMode()){
         cap += `<div class="plan-wrap">${roomPlanHtml('view')}</div>`;
+        const seated = Object.keys(seatMap).map(id => `<div class="cm"><span class="cm-n">${esc(seatMap[id])}</span><span class="cm-s">(${esc(seatLabel(id))})</span></div>`);
+        const seatedNames = Object.keys(seatMap).map(id => seatMap[id]);
+        const plain = (roster||[]).filter(n => seatedNames.indexOf(n) < 0).map(n => `<div class="cm"><span class="cm-n">${esc(n)}</span></div>`);
+        const list = seated.concat(plain);
+        if (list.length) cap += `<div class="roster seated">${list.join('')}</div>`;
       } else if (gated && roster && roster.length){
         cap += `<div class="roster"><span>${roster.map(esc).join('</span> \u00b7 <span>')}</span></div>`;
       }
@@ -352,7 +362,7 @@
     if (slip){
       html += `<div class="sec-h">Coming</div><hr class="rule">`
         + `<div class="slip" id="slip">`
-        + `<ul id="slip-names">${slip.names.map((nm,i)=>`<li><span>${esc(nm)}${slip.seats&&slip.seats[i]?' <span class="gt">/</span> '+esc(seatLabel(slip.seats[i])):''}</span><button class="rm" data-rm="${i}" aria-label="Remove">\u00d7</button></li>`).join('')}</ul>`
+        + `<ul id="slip-names">${slip.names.map((nm,i)=>`<li><span>${esc(nm)}</span><button class="rm" data-rm="${i}" aria-label="Remove">\u00d7</button></li>`).join('')}</ul>`
         + `<form class="int-form" id="add-line" hidden autocomplete="off"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow" id="add-name" type="text" aria-label="Add a name" enterkeyhint="done" autocapitalize="words" autocorrect="off" spellcheck="false"><button class="lnk" id="add-go" type="submit">[add]</button></form>`
         + `<div class="slip-foot"><span>${slip.party} ${slip.party===1?'seat':'seats'}</span><span>doors ${esc((C.schedule||{}).doors||'')}</span></div>`
         + `<div class="cal"><button class="lnk" id="cal-go" type="button">[add to calendar]</button></div>`
@@ -421,10 +431,8 @@
         const chosen = mode === 'pick' && pendSeats.indexOf(id) >= 0;
         const taken = seatTaken(id) && !chosen;
         const cls = taken ? 'taken' : (chosen ? 'sel' : 'avail');
-        const nm = (taken && seatMap[id]) ? seatMap[id] : '';
-        const dis = (mode === 'view' || taken) ? ' disabled' : '';
-        const occ = nm ? ` title="${esc(nm)}"` : '';
-        return `<span class="seatwrap"><button type="button" class="seat ${cls}" data-seat="${esc(id)}"${dis}${occ}></button>${nm?`<span class="seatn">${esc(firstName(nm))}</span>`:''}</span>`;
+        const dis = (mode === 'pick' && taken) ? ' disabled' : '';
+        return `<button type="button" class="seat ${cls}" data-seat="${esc(id)}"${dis}></button>`;
       }).join('');
       return `<div class="furn"><div class="furn-l">${esc(SEAT_LABEL[obj]||obj)}</div><div class="furn-b">${boxes}</div></div>`;
     };
