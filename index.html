@@ -203,9 +203,11 @@
     const s = new Date(n.date + 'T' + pad(fh) + ':' + pad(fm) + ':00');
     const e = new Date(s.getTime() + dur*60000);
     const f = d => d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'T'+pad(d.getHours())+pad(d.getMinutes())+'00';
+    const z = d => d.getUTCFullYear()+pad(d.getUTCMonth()+1)+pad(d.getUTCDate())+'T'+pad(d.getUTCHours())+pad(d.getUTCMinutes())+pad(d.getUTCSeconds())+'Z';
     const ie = t => String(t).replace(/[\\,;]/g, m=>'\\'+m).replace(/\r?\n/g,'\\n');
-    const body = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Heimkino//EN','BEGIN:VEVENT',
-      'UID:'+f(s)+'-heimkino','DTSTAMP:'+f(new Date()),'DTSTART:'+f(s),'DTEND:'+f(e),
+    const host = (typeof location !== 'undefined' && location.hostname) ? location.hostname : 'heimkino';
+    const body = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Heimkino//Screening//EN','CALSCALE:GREGORIAN','METHOD:PUBLISH','BEGIN:VEVENT',
+      'UID:'+f(s)+'-heimkino@'+host,'DTSTAMP:'+z(new Date()),'DTSTART:'+f(s),'DTEND:'+f(e),
       'SUMMARY:'+ie('Heimkino: '+n.title)];
     if (place) body.push('LOCATION:'+ie(place));
     body.push('END:VEVENT','END:VCALENDAR');
@@ -216,22 +218,31 @@
     const text = icsText(CUR, C.schedule || {});
     if (!text) return;
     track('calendar');
-    const ua = navigator.userAgent || '';
-    const isIOS = /iP(hone|od|ad)/.test(ua) || (/Macintosh/.test(ua) && 'ontouchend' in document);
-    let url;
-    try{ url = URL.createObjectURL(new Blob([text], { type:'text/calendar;charset=utf-8' })); }
-    catch(_){ window.location.href = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(text); return; }
-    if (isIOS){
-      // Safari has no reliable download for .ics; navigating to the file opens the Add-to-Calendar sheet
-      window.location.href = url;
-      setTimeout(()=>URL.revokeObjectURL(url), 8000);
-      return;
+    try{
+      const url = URL.createObjectURL(new Blob([text], { type:'text/calendar;charset=utf-8' }));
+      const a = document.createElement('a');
+      a.href = url; a.download = 'heimkino.ics';
+      document.body.appendChild(a); a.click();
+      setTimeout(()=>{ a.remove(); URL.revokeObjectURL(url); }, 2000);
+    }catch(_){
+      window.location.href = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(text);
     }
-    const a = document.createElement('a');
-    a.href = url; a.download = 'heimkino.ics';
-    document.body.appendChild(a); a.click();
-    setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); }, 1500);
   }
+  function gcalUrl(){
+    const n = CUR, sch = C.schedule || {}; if (!n || !n.date) return '';
+    const place = (gated && gated.venue) ? gated.venue : '';
+    const filmT = (n.time || sch.film || sch.doors || '20:00');
+    const fh = parseInt(filmT.split(':')[0],10)||20, fm = parseInt(filmT.split(':')[1],10)||0;
+    const dur = n.runtime ? parseInt((String(n.runtime).match(/\d+/)||['120'])[0],10) : 120;
+    const s = new Date(n.date + 'T' + pad(fh) + ':' + pad(fm) + ':00');
+    const e = new Date(s.getTime() + dur*60000);
+    const L = d => d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'T'+pad(d.getHours())+pad(d.getMinutes())+'00';
+    return 'https://calendar.google.com/calendar/render?action=TEMPLATE'
+      + '&text=' + encodeURIComponent('Heimkino: ' + n.title)
+      + '&dates=' + L(s) + '/' + L(e) + '&ctz=Europe/Berlin'
+      + (place ? '&location=' + encodeURIComponent(place) : '');
+  }
+  function openGcal(){ const u = gcalUrl(); if (!u) return; track('calendar'); window.open(u, '_blank', 'noopener'); }
 
   const KEY = 'heimkino:res';
   const store = {
@@ -364,8 +375,9 @@
       ${n.away ? `<div class="tags"><span class="tag">away screening</span></div>` : ''}
       ${n.synopsis ? `<p class="syn">${esc(n.synopsis)}</p>` : ''}
       <div class="sched">${sch.doors ? `doors <b>${esc(sch.doors)}</b><br>` : ''}${filmStart ? `film&nbsp; <b>${esc(filmStart)}</b>` : ''}</div>
+      ${gated && gated.houseNote ? `<div class="proto"><div class="k">house note</div><div class="note">${esc(gated.houseNote)}</div></div>` : ''}
       ${cap}
-      ${gated && (gated.houseNote || gated.venue) ? `<div class="proto">${gated.houseNote?`<div class="k">house note</div><div class="note">${esc(gated.houseNote)}</div>`:''}${gated.venue?`<div class="k">location</div><div class="v">${esc(gated.venue)}</div>`:''}</div>` : ''}`;
+      ${gated && gated.venue ? `<div class="proto proto-loc"><div class="k">location</div><div class="v">${esc(gated.venue)}</div></div>` : ''}`;
   }
 
   // ---------- admission ----------
@@ -384,7 +396,7 @@
         + `<ul id="slip-names">${slip.names.map((nm,i)=>`<li><span>${esc(nm)}</span><button class="rm" data-rm="${i}" aria-label="Remove">\u00d7</button></li>`).join('')}</ul>`
         + `<form class="int-form" id="add-line" hidden autocomplete="off"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow" id="add-name" type="text" aria-label="Add a name" enterkeyhint="done" autocapitalize="words" autocorrect="off" spellcheck="false"><button class="lnk" id="add-go" type="submit">[add]</button></form>`
         + `<div class="slip-foot"><span>${slip.party} ${slip.party===1?'seat':'seats'}</span><span>doors ${esc((C.schedule||{}).doors||'')}</span></div>`
-        + `<div class="cal"><button class="lnk" id="cal-go" type="button">[add to calendar]</button></div>`
+        + `<div class="cal"><button class="lnk" id="cal-go" type="button">[add to calendar]</button> <button class="lnk cal-alt" id="cal-goog" type="button">[google]</button></div>`
         + `<div class="acts"><button class="lnk" id="change-res">[change]</button><button class="lnk" id="cancel-res">[cancel]</button></div>`
         + `<div class="msg" id="admit-msg" role="status" aria-live="polite"></div></div>`;
     } else if (sessionCode){
@@ -554,6 +566,7 @@
       else if (t.dataset.rm !== undefined){ removeName(parseInt(t.dataset.rm,10)); }
       else if (t.id === 'cancel-res'){ cancelRes(); }
       else if (t.id === 'cal-go'){ saveIcs(); }
+      else if (t.id === 'cal-goog'){ openGcal(); }
       else if (t.dataset.seat){ pickSeat(t.dataset.seat); }
       else if (t.id === 'seat-back'){ if (pendIdx>0){ pendIdx--; pendSeats.pop(); } else { rsvpStage='names'; } renderAdmission(); }
       else if (t.id === 'seat-restart'){ rsvpStage='seats'; pendIdx=0; pendSeats=[]; renderCurrent(); renderAdmission(); }
