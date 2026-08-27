@@ -52,7 +52,8 @@
   .rsvp .lbl{ font-size:11px; letter-spacing:0.16em; white-space:nowrap; color:var(--soft); }
   .rsvp.closed .edge{ border-top-style:solid; }
   /* seat plan (kept in the receipt aesthetic; outlined furniture, fixed orientation) */
-  .seat-who{ margin-top:calc(var(--u)*1.5); font-size:12px; color:var(--soft); }
+  .seat-who{ margin-top:calc(var(--u)*1.5); font-size:13px; }
+  .seat-hint{ margin-top:calc(var(--u)*1.25); font-size:12px; color:var(--soft); }
   .plan{ margin-top:calc(var(--u)*2); overflow-x:auto; }
   .plan-row{ display:flex; gap:12px; align-items:flex-end; justify-content:space-between; min-width:260px; }
   .furn{ text-align:center; }
@@ -218,15 +219,16 @@
     const text = icsText(CUR, C.schedule || {});
     if (!text) return;
     track('calendar');
-    try{
-      const url = URL.createObjectURL(new Blob([text], { type:'text/calendar;charset=utf-8' }));
-      const a = document.createElement('a');
-      a.href = url; a.download = 'heimkino.ics';
-      document.body.appendChild(a); a.click();
-      setTimeout(()=>{ a.remove(); URL.revokeObjectURL(url); }, 2000);
-    }catch(_){
-      window.location.href = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(text);
-    }
+    const ua = navigator.userAgent || '';
+    const isIOS = /iP(hone|od|ad)/.test(ua) || (/Macintosh/.test(ua) && 'ontouchend' in document);
+    let url;
+    try{ url = URL.createObjectURL(new Blob([text], { type:'text/calendar;charset=utf-8' })); }
+    catch(_){ window.location.href = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(text); return; }
+    if (isIOS){ window.location.href = url; setTimeout(()=>URL.revokeObjectURL(url), 8000); return; }
+    const a = document.createElement('a');
+    a.href = url; a.download = 'heimkino.ics';
+    document.body.appendChild(a); a.click();
+    setTimeout(()=>{ a.remove(); URL.revokeObjectURL(url); }, 2000);
   }
   function gcalUrl(){
     const n = CUR, sch = C.schedule || {}; if (!n || !n.date) return '';
@@ -357,10 +359,6 @@
         const plain = (roster||[]).filter(n => seatedNames.indexOf(n) < 0).map(n => `<div class="cm"><span class="cm-n">${esc(n)}</span></div>`);
         const list = seated.concat(plain);
         if (list.length) cap += `<div class="roster seated">${list.join('')}</div>`;
-        const picking = sessionCode && !slip && rsvpStage === 'seats';
-        if (picking) cap += `<div class="seat-who">${esc(pendNames[pendIdx]||'')} <span class="gt">&gt;</span> choose a place</div>`;
-        cap += `<div class="plan-wrap">${roomPlanHtml(picking ? 'pick' : 'view')}</div>`;
-        if (picking) cap += `<div class="acts"><button class="lnk" id="seat-back2">[back]</button></div><div class="msg" id="admit-msg" role="status" aria-live="polite"></div>`;
       } else if (gated && roster && roster.length){
         cap += `<div class="roster"><span>${roster.map(esc).join('</span> \u00b7 <span>')}</span></div>`;
       }
@@ -375,9 +373,7 @@
       ${n.away ? `<div class="tags"><span class="tag">away screening</span></div>` : ''}
       ${n.synopsis ? `<p class="syn">${esc(n.synopsis)}</p>` : ''}
       <div class="sched">${sch.doors ? `doors <b>${esc(sch.doors)}</b><br>` : ''}${filmStart ? `film&nbsp; <b>${esc(filmStart)}</b>` : ''}</div>
-      ${gated && gated.houseNote ? `<div class="proto"><div class="k">house note</div><div class="note">${esc(gated.houseNote)}</div></div>` : ''}
-      ${cap}
-      ${gated && gated.venue ? `<div class="proto proto-loc"><div class="k">location</div><div class="v">${esc(gated.venue)}</div></div>` : ''}`;
+      ${cap}`;
   }
 
   // ---------- admission ----------
@@ -388,40 +384,55 @@
     if (!CUR){ return; }
     if (!EP){ body.innerHTML = `<div class="small">reservations offline</div>`; return; }
 
+    const sm = seatMode();
+    const noteBlk = (gated && gated.houseNote) ? `<div class="proto"><div class="k">house note</div><div class="note">${esc(gated.houseNote)}</div></div>` : '';
+    const locBlk  = (gated && gated.venue) ? `<div class="proto proto-loc"><div class="k">location</div><div class="v">${esc(gated.venue)}</div></div>` : '';
+    const planBlk = m => sm ? `<div class="plan-wrap">${roomPlanHtml(m)}</div>` : '';
+    const msg = `<div class="msg" id="admit-msg" role="status" aria-live="polite"></div>`;
     let html = '';
 
     if (slip){
       html += `<div class="sec-h">Coming</div><hr class="rule">`
+        + noteBlk + planBlk('view')
         + `<div class="slip" id="slip">`
-        + `<ul id="slip-names">${slip.names.map((nm,i)=>`<li><span>${esc(nm)}</span><button class="rm" data-rm="${i}" aria-label="Remove">\u00d7</button></li>`).join('')}</ul>`
+        + `<ul id="slip-names">${slip.names.map((nm,i)=>`<li><span>${esc(nm)}${slip.seats&&slip.seats[i]?` <span class="gt">/</span> ${esc(seatLabel(slip.seats[i]))}`:''}</span><button class="rm" data-rm="${i}" aria-label="Remove">\u00d7</button></li>`).join('')}</ul>`
         + `<form class="int-form" id="add-line" hidden autocomplete="off"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow" id="add-name" type="text" aria-label="Add a name" enterkeyhint="done" autocapitalize="words" autocorrect="off" spellcheck="false"><button class="lnk" id="add-go" type="submit">[add]</button></form>`
         + `<div class="slip-foot"><span>${slip.party} ${slip.party===1?'seat':'seats'}</span><span>doors ${esc((C.schedule||{}).doors||'')}</span></div>`
         + `<div class="cal"><button class="lnk" id="cal-go" type="button">[add to calendar]</button> <button class="lnk cal-alt" id="cal-goog" type="button">[google]</button></div>`
         + `<div class="acts"><button class="lnk" id="change-res">[change]</button><button class="lnk" id="cancel-res">[cancel]</button></div>`
-        + `<div class="msg" id="admit-msg" role="status" aria-live="polite"></div></div>`;
+        + msg + `</div>` + locBlk;
     } else if (sessionCode){
-      if (seatMode() && rsvpStage === 'seats'){
-        html += '';   // seat picking happens on the plan under Next screening
-      } else if (seatMode() && rsvpStage === 'review'){
-        html += `<div class="sec-h">Coming?</div><hr class="rule">`
-          + `<ul class="review">${pendNames.map((nm,i)=>`<li>${esc(nm)} <span class="gt">/</span> ${esc(seatLabel(pendSeats[i]))}</li>`).join('')}</ul>`
+      if (sm && rsvpStage === 'seats'){
+        const step = (pendIdx+1) + ' / ' + pendNames.length;
+        html += `<div class="sec-h">Pick a place<span class="sec-date">${esc(step)}</span></div><hr class="rule">`
+          + noteBlk
+          + `<div class="seat-who">tap a place for <b>${esc(pendNames[pendIdx]||'')}</b></div>`
+          + planBlk('pick')
+          + `<div class="acts"><button class="lnk" id="seat-back">[back]</button></div>`
+          + msg + locBlk;
+      } else if (sm && rsvpStage === 'review'){
+        html += `<div class="sec-h">Confirm</div><hr class="rule">`
+          + noteBlk + planBlk('pick')
+          + `<div class="roster seated">${pendNames.map((nm,i)=>`<div class="cm"><span class="cm-n">${esc(nm)}</span><span class="cm-lead"></span><span class="cm-s">${esc(seatLabel(pendSeats[i]))}</span></div>`).join('')}</div>`
           + `<div class="acts"><button class="lnk" id="seat-restart">[back]</button><button class="lnk" id="seat-confirm">[confirm]</button></div>`
-          + `<div class="msg" id="admit-msg" role="status" aria-live="polite"></div>`;
+          + msg + locBlk;
       } else {
         html += `<div class="sec-h">Coming?</div><hr class="rule">`
+          + noteBlk + planBlk('view')
+          + (sm ? `<div class="seat-hint">add name(s), then you'll pick a place for each</div>` : '')
           + `<form id="admit-form" autocomplete="off">`
           + `<div class="rows" id="name-rows"><div class="row"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow rn" type="text" required aria-label="Name" enterkeyhint="send" autocapitalize="words" autocorrect="off" spellcheck="false"></div></div>`
           + `<div class="addmore"><button type="button" class="lnk" id="add-row">+ add another person</button></div>`
           + `<div class="hp" aria-hidden="true"><input id="website" type="text" tabindex="-1" autocomplete="off"></div>`
-          + `<div class="acts"><button class="lnk" type="submit" id="confirm-go">${seatMode()?'[continue]':'[confirm]'}</button></div>`
-          + `<div class="msg" id="admit-msg" role="status" aria-live="polite"></div></form>`;
+          + `<div class="acts"><button class="lnk" type="submit" id="confirm-go">${sm?'[continue]':'[confirm]'}</button></div>`
+          + msg + `</form>` + locBlk;
       }
     } else {
       html += `<form id="unlock-form" autocomplete="off">`
         + `<div class="line"><span class="inl">code</span><span class="gt">&gt;</span><input class="grow" id="code" type="text" required aria-label="Code" enterkeyhint="go" autocapitalize="none" autocorrect="off" spellcheck="false" autocomplete="off"></div>`
         + `<div class="hp" aria-hidden="true"><input id="u-hp" type="text" tabindex="-1" autocomplete="off"></div>`
         + `<div class="acts"><button class="lnk" type="submit" id="unlock-go">[enter]</button></div>`
-        + `<div class="msg" id="admit-msg" role="status" aria-live="polite"></div></form>`;
+        + msg + `</form>`;
     }
 
     body.innerHTML = html;
@@ -474,7 +485,7 @@
     if (seatTaken(id) || pendSeats.indexOf(id) >= 0) return;
     pendSeats[pendIdx] = id; pendIdx++;
     if (pendIdx >= pendNames.length) rsvpStage = 'review';
-    renderCurrent(); renderAdmission();
+    renderAdmission();
   }
   async function doCreateSeats(){
     const go = $('#seat-confirm'); if (go) go.disabled = true; admitMsg('', 'ok');
@@ -488,7 +499,7 @@
       rsvpStage = 'names'; pendNames = []; pendSeats = []; pendIdx = 0;
       renderAdmission(); admitMsg('recorded', 'ok'); track('rsvp');
     }catch(err){
-      if (/just taken/i.test(err.message)){ await loadState(); rsvpStage='seats'; pendIdx=0; pendSeats=[]; renderCurrent(); renderAdmission(); admitMsg('a place was just taken, choose again','err'); }
+      if (/just taken/i.test(err.message)){ await loadState(); rsvpStage='seats'; pendIdx=0; pendSeats=[]; renderAdmission(); admitMsg('a place was just taken, choose again','err'); }
       else { admitMsg(err.message, 'err'); if (go) go.disabled = false; }
     }
   }
@@ -504,7 +515,7 @@
 
     if (seatMode()){
       if (openSeats().filter(id => !seatTaken(id)).length === 0) return admitMsg('rsvp closed', 'err');
-      pendNames = names; pendSeats = []; pendIdx = 0; rsvpStage = 'seats'; renderCurrent(); renderAdmission(); return;
+      pendNames = names; pendSeats = []; pendIdx = 0; rsvpStage = 'seats'; renderAdmission(); return;
     }
 
     const go = form.querySelector('#confirm-go'); go.disabled = true; admitMsg('', 'ok');
@@ -569,7 +580,7 @@
       else if (t.id === 'cal-goog'){ openGcal(); }
       else if (t.dataset.seat){ pickSeat(t.dataset.seat); }
       else if (t.id === 'seat-back'){ if (pendIdx>0){ pendIdx--; pendSeats.pop(); } else { rsvpStage='names'; } renderAdmission(); }
-      else if (t.id === 'seat-restart'){ rsvpStage='seats'; pendIdx=0; pendSeats=[]; renderCurrent(); renderAdmission(); }
+      else if (t.id === 'seat-restart'){ rsvpStage='seats'; pendIdx=0; pendSeats=[]; renderAdmission(); }
       else if (t.id === 'seat-confirm'){ doCreateSeats(); }
     });
     root.addEventListener('keydown', e => {
@@ -750,19 +761,9 @@
     }catch(_){ mine=null; store.clear(); renderAdmission(); }
   }
 
-  function wireCurrentPlan(){
-    $('#current').addEventListener('click', e => {
-      if (!(sessionCode && !slip && seatMode() && rsvpStage === 'seats')) return;
-      const t = e.target;
-      if (t.id === 'seat-back2'){ if (pendIdx>0){ pendIdx--; pendSeats.pop(); } else { rsvpStage='names'; } renderCurrent(); renderAdmission(); return; }
-      const b = t.closest && t.closest('.seat[data-seat]'); if (!b || b.disabled) return;
-      pickSeat(b.dataset.seat);
-    });
-  }
-
   // ---------- init ----------
   renderChrome(); renderVenue(); renderCurrent(); renderAdmission(); renderUpcoming(); renderSuggest(); renderPast();
-  wireAdmission(); wireUpcoming(); wireSuggest(); wirePeek(); wireCurrentPlan();
+  wireAdmission(); wireUpcoming(); wireSuggest(); wirePeek();
   loadState(); restoreMine(); track('open');
 })();
 </script>
