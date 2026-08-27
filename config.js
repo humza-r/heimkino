@@ -88,6 +88,16 @@ window.CONFIG = {
       "runtime": "108",
       "synopsis": "A woman with a titanium plate fitted in her head and murderous intent on her mind embarks on a bizarre journey of identity and unconditional love when she's forced to go on the run.",
       "rec": "Chloe"
+    },
+    {
+      "date": "",
+      "title": "Dinner For Adele",
+      "director": "Oldřich Lipský",
+      "year": 1978,
+      "runtime": "102",
+      "synopsis": "The celebrated detective Nick Carter travels to Prague to investigate the disappearance of a countess’s dog and is drawn into a series of strange crimes involving a mysterious botanist and a carnivorous plant named Adele.",
+      "rec": "Hande",
+      "lang": "OmU"
     }
   ],
   "past": [
