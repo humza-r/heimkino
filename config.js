@@ -188,5 +188,37 @@ window.CONFIG = {
         "Fynn"
       ]
     }
+  ],
+  "roomPlan": [
+    {
+      "key": "churchBench",
+      "label": "church bench",
+      "count": 2
+    },
+    {
+      "key": "fold",
+      "label": "folding",
+      "count": 1
+    },
+    {
+      "key": "chaise",
+      "label": "chaise",
+      "count": 1
+    },
+    {
+      "key": "black",
+      "label": "black chair",
+      "count": 1
+    },
+    {
+      "key": "sofa",
+      "label": "sofa",
+      "count": 2
+    },
+    {
+      "key": "floor",
+      "label": "floor",
+      "count": 1
+    }
   ]
 };
