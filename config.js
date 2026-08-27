@@ -18,7 +18,9 @@ window.CONFIG = {
       "year": 1968,
       "edition": "CC",
       "synopsis": "A wealthy Italian household is turned upside down when a handsome stranger arrives, seduces every family member and then disappears. Each has an epiphany of sorts, but none can figure out who the seductive visitor was or why he came.",
-      "rec": "Fynn"
+      "rec": "Fynn",
+      "seatSelectionEnabled": true,
+      "openSeats": []
     },
     {
       "date": "",
