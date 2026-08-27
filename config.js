@@ -216,10 +216,8 @@ window.CONFIG = {
   ],
   "openSeats": [
     "churchBench:church bench:2",
-    "fold:folding:0",
     "chaise:chaise:1",
     "black:black chair:1",
-    "sofa:sofa:2",
-    "floor:floor:1"
+    "sofa:sofa:2"
   ]
 };
