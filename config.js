@@ -98,6 +98,12 @@ window.CONFIG = {
       "synopsis": "The celebrated detective Nick Carter travels to Prague to investigate the disappearance of a countess’s dog and is drawn into a series of strange crimes involving a mysterious botanist and a carnivorous plant named Adele.",
       "rec": "Hande",
       "lang": "OmU"
+    },
+    {
+      "date": "",
+      "title": "La Cérémonie",
+      "director": "Claude Chabrol",
+      "year": null
     }
   ],
   "past": [
