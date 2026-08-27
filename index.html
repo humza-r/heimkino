@@ -321,8 +321,16 @@
     let cap = '';
     if (agg && typeof agg.confirmed === 'number'){
       const conf = agg.confirmed, capn = agg.capacity;
-      const st = (capn == null) ? 'open' : (conf >= capn ? 'closed' : (capn - conf <= 2 ? 'closing' : 'open'));
-      const lb = st === 'closed' ? 'rsvp closed' : (st === 'closing' ? 'nearly full' : 'rsvp open');
+      let st, lb;
+      if (seatMode()){
+        // the plan carries "how full"; the seam is just open vs closed by remaining open seats
+        const free = openSeats().filter(id => !seatTaken(id)).length;
+        st = free > 0 ? 'open' : 'closed';
+        lb = free > 0 ? 'rsvp open' : 'rsvp closed';
+      } else {
+        st = (capn == null) ? 'open' : (conf >= capn ? 'closed' : (capn - conf <= 2 ? 'closing' : 'open'));
+        lb = st === 'closed' ? 'rsvp closed' : (st === 'closing' ? 'nearly full' : 'rsvp open');
+      }
       cap = `<div class="rsvp ${st}" role="status"><span class="edge"></span><span class="lbl">${lb}</span><span class="edge"></span></div>`;
       if (gated && seatMode()){
         cap += `<div class="plan-wrap">${roomPlanHtml('view')}</div>`;
@@ -474,7 +482,7 @@
     if (!sessionCode) return admitMsg('enter code first', 'err');
 
     if (seatMode()){
-      if (agg && agg.capacity != null && agg.confirmed >= agg.capacity) return admitMsg('rsvp closed', 'err');
+      if (openSeats().filter(id => !seatTaken(id)).length === 0) return admitMsg('rsvp closed', 'err');
       pendNames = names; pendSeats = []; pendIdx = 0; rsvpStage = 'seats'; renderAdmission(); return;
     }
 
