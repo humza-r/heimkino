@@ -65,10 +65,11 @@
   .plan-view .seat.taken{ background:var(--ink); border-color:var(--ink); opacity:1; }
   .plan-wrap{ margin-top:calc(var(--u)*2.5); }
   .roster.seated{ margin-top:calc(var(--u)*2.5); }
-  .roster.seated .cm{ margin-top:9px; }
+  .roster.seated .cm{ display:flex; align-items:baseline; gap:10px; margin-top:9px; }
   .roster.seated .cm:first-child{ margin-top:0; }
-  .roster.seated .cm-n{ display:block; color:var(--ink); }
-  .roster.seated .cm-s{ display:block; margin-left:14px; font-size:11px; color:var(--soft); }
+  .roster.seated .cm-n{ color:var(--ink); white-space:nowrap; }
+  .roster.seated .cm-lead{ flex:1; align-self:center; height:0; border-bottom:1px dotted var(--rule); }
+  .roster.seated .cm-s{ font-size:11px; color:var(--soft); white-space:nowrap; letter-spacing:0.06em; }
   .plan-floor{ margin-top:16px; text-align:center; }
   .plan-floor .seat{ width:96px; }
   .plan-screen{ margin-top:16px; border-top:1px dashed var(--rule); text-align:center; font-size:10px; letter-spacing:0.32em; color:var(--soft); padding-top:6px; }
@@ -334,7 +335,7 @@
       cap = `<div class="rsvp ${st}" role="status"><span class="edge"></span><span class="lbl">${lb}</span><span class="edge"></span></div>`;
       if (gated && seatMode()){
         cap += `<div class="plan-wrap">${roomPlanHtml('view')}</div>`;
-        const seated = Object.keys(seatMap).map(id => `<div class="cm"><span class="cm-n">${esc(seatMap[id])}</span><span class="cm-s">(${esc(seatLabel(id))})</span></div>`);
+        const seated = Object.keys(seatMap).map(id => `<div class="cm"><span class="cm-n">${esc(seatMap[id])}</span><span class="cm-lead"></span><span class="cm-s">${esc(seatLabel(id))}</span></div>`);
         const seatedNames = Object.keys(seatMap).map(id => seatMap[id]);
         const plain = (roster||[]).filter(n => seatedNames.indexOf(n) < 0).map(n => `<div class="cm"><span class="cm-n">${esc(n)}</span></div>`);
         const list = seated.concat(plain);
@@ -444,7 +445,10 @@
       }).join('');
       return `<div class="furn"><div class="furn-l">${esc(SEAT_LABEL[obj]||obj)}</div><div class="furn-b">${boxes}</div></div>`;
     };
-    const back = ROOM_ORDER.map(cell).filter(Boolean).join('');
+    const prefixes = [];
+    open.forEach(id => { const p = String(id).split('-')[0]; if (p !== 'floor' && prefixes.indexOf(p) < 0) prefixes.push(p); });
+    const ordered = ROOM_ORDER.filter(k => prefixes.indexOf(k) >= 0).concat(prefixes.filter(k => ROOM_ORDER.indexOf(k) < 0));
+    const back = ordered.map(cell).filter(Boolean).join('');
     const floor = cell('floor');
     return `<div class="plan${mode==='view'?' plan-view':''}"><div class="plan-row">${back}</div>${floor?`<div class="plan-floor">${floor}</div>`:''}<div class="plan-screen">SCREEN</div></div>`;
   }
