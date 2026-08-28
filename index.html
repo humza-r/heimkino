@@ -263,14 +263,22 @@
     return 'open';
   }
   function allSeats(){ const ids=[]; ROOM.forEach(o=>{ const c=Math.max(1, o.count||1); for(let i=1;i<=c;i++) ids.push(o.key+'-'+i); }); return ids; }
+  function objForToken(tok){
+    tok = String(tok).trim().toLowerCase(); if(!tok) return null;
+    return ROOM.filter(o => { const k=String(o.key).toLowerCase(), l=String(o.label).toLowerCase();
+      return k===tok || l===tok || l.split(/\s+/).indexOf(tok) >= 0; })[0] || null;
+  }
   function expandOpen(list){
     const out=[];
-    (list||[]).forEach(tok => {
-      tok = String(tok).trim(); if(!tok) return;
-      if (tok.indexOf('-') >= 0){ out.push(tok); return; }         // explicit id like sofa-1
-      const o = ROOM.filter(x => x.key === tok)[0];                // a furniture key -> expand to all its seats
+    (list||[]).forEach(raw => {
+      const tok = String(raw).trim(); if(!tok) return;
+      if (tok.indexOf('-') >= 0){                                   // explicit id like sofa-1
+        if (ROOM.some(o => o.key === tok.split('-')[0])) out.push(tok);
+        return;
+      }
+      const o = objForToken(tok);                                   // key / label / label-word
       if (o){ const c=Math.max(1,o.count||1); for(let i=1;i<=c;i++) out.push(o.key+'-'+i); }
-      else out.push(tok);
+      // unresolved token: ignore, so a typo can never spawn a stray box or break order
     });
     return out;
   }
@@ -464,10 +472,7 @@
       }).join('');
       return `<div class="furn"><div class="furn-l">${esc(SEAT_LABEL[obj]||obj)}</div><div class="furn-b">${boxes}</div></div>`;
     };
-    const prefixes = [];
-    open.forEach(id => { const p = String(id).split('-')[0]; if (p !== 'floor' && prefixes.indexOf(p) < 0) prefixes.push(p); });
-    const ordered = ROOM_ORDER.filter(k => prefixes.indexOf(k) >= 0).concat(prefixes.filter(k => ROOM_ORDER.indexOf(k) < 0));
-    const back = ordered.map(cell).filter(Boolean).join('');
+    const back = ROOM_ORDER.map(cell).filter(Boolean).join('');
     const floor = cell('floor');
     return `<div class="plan${mode==='view'?' plan-view':''}"><div class="plan-row">${back}</div>${floor?`<div class="plan-floor">${floor}</div>`:''}<div class="plan-screen">SCREEN</div></div>`;
   }
