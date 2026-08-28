@@ -199,7 +199,7 @@ window.CONFIG = {
     {
       "key": "churchBench",
       "label": "church bench",
-      "count": 2
+      "count": 1
     },
     {
       "key": "fold",
@@ -219,7 +219,7 @@ window.CONFIG = {
     {
       "key": "sofa",
       "label": "sofa",
-      "count": 2
+      "count": 1
     },
     {
       "key": "floor",
@@ -230,8 +230,8 @@ window.CONFIG = {
   "openSeats": [
     "bench",
     "black chair",
-    "sofa",
-    "chaise"
+    "chaise",
+    "sofa"
   ],
   "seatSelection": true
 };
