@@ -58,6 +58,9 @@
   .seat-who{ margin-top:calc(var(--u)*1.5); font-size:13px; }
   .seat-hint{ margin-top:calc(var(--u)*1.25); font-size:12px; color:var(--soft); }
   .plan{ margin-top:calc(var(--u)*2); overflow-x:auto; }
+  .banner{ text-align:center; font-size:11px; letter-spacing:0.16em; text-transform:uppercase; color:var(--soft); padding-bottom:calc(var(--u)*2); margin-bottom:calc(var(--u)*2.5); border-bottom:1px dashed var(--rule); }
+  .banner[hidden]{ display:none; }
+  .banner b{ color:var(--ink); font-weight:normal; }
   .plan-row{ display:flex; gap:12px; align-items:flex-start; justify-content:space-between; min-width:260px; }
   .furn{ text-align:center; }
   .furn-l{ font-size:9px; letter-spacing:0.06em; text-transform:uppercase; color:var(--soft); margin-bottom:5px; white-space:nowrap; }
@@ -188,6 +191,7 @@
 </head>
 <body>
 <div class="wrap">
+  <div id="banner" class="banner" hidden aria-live="polite"></div>
   <section id="current"></section>
   <section id="admission"><div id="admit-body"></div></section>
   <section id="upcoming"></section>
@@ -326,6 +330,33 @@
     document.title = (CUR ? CUR.title : (C.wordmark || 'Programme'));
     const d = new Date(), p = x => String(x).padStart(2,'0');
     const foot = $('#foot'); if (foot) foot.textContent = 'updated ' + p(d.getDate()) + '.' + p(d.getMonth()+1) + '.' + String(d.getFullYear()).slice(2);
+    renderCountdown();
+  }
+  function screeningStart_(){
+    const n = CUR, sch = C.schedule || {}; if (!n || !n.date) return null;
+    const t = n.time || sch.film || sch.doors || '20:00';
+    const dp = String(n.date).split('-').map(Number);
+    const hh = parseInt(String(t).split(':')[0], 10) || 20, mm = parseInt(String(t).split(':')[1], 10) || 0;
+    return new Date(dp[0] || 1970, (dp[1] || 1) - 1, dp[2] || 1, hh, mm, 0);
+  }
+  function renderCountdown(){
+    const b = $('#banner'); if (!b) return;
+    const s = screeningStart_();
+    if (!s){ b.hidden = true; return; }
+    const now = Date.now(), start = s.getTime();
+    const rt = CUR.runtime ? parseInt((String(CUR.runtime).match(/\d+/)||['120'])[0], 10) : 120;
+    let txt;
+    if (now >= start && now <= start + rt*60000) txt = 'screening now';
+    else if (now > start + rt*60000){ b.hidden = true; return; }
+    else {
+      const mins = Math.round((start - now) / 60000);
+      if (mins >= 2880) txt = 'in ' + Math.floor(mins/1440) + ' days';
+      else if (mins >= 1440) txt = 'tomorrow';
+      else if (mins >= 60){ const h = Math.floor(mins/60), m = mins%60; txt = 'in ' + h + 'h' + (m ? ' ' + m + 'm' : ''); }
+      else txt = 'in ' + Math.max(1, mins) + ' min';
+    }
+    b.hidden = false;
+    b.innerHTML = (CUR.title ? esc(CUR.title) + ' &nbsp;·&nbsp; ' : '') + '<b>' + esc(txt) + '</b>';
   }
 
   function renderVenue(){}
@@ -785,6 +816,7 @@
 
   // ---------- init ----------
   renderChrome(); renderVenue(); renderCurrent(); renderAdmission(); renderUpcoming(); renderSuggest(); renderPast();
+  setInterval(renderCountdown, 30000);
   wireAdmission(); wireUpcoming(); wireSuggest(); wirePeek();
   loadState(); restoreMine(); track('open');
 })();
