@@ -332,28 +332,39 @@
     const foot = $('#foot'); if (foot) foot.textContent = 'updated ' + p(d.getDate()) + '.' + p(d.getMonth()+1) + '.' + String(d.getFullYear()).slice(2);
     renderCountdown();
   }
-  function screeningStart_(){
+  function parseHM_(t){
+    t = String(t||'').trim();
+    if (t.indexOf(':') >= 0){ const a=t.split(':'); return [parseInt(a[0],10)||0, parseInt(a[1],10)||0]; }
+    const d = t.replace(/\D/g,'');
+    if (d.length >= 3) return [parseInt(d.slice(0, d.length-2),10)||0, parseInt(d.slice(-2),10)||0];
+    return [parseInt(d,10)||20, 0];
+  }
+  function schedTime_(which){
     const n = CUR, sch = C.schedule || {}; if (!n || !n.date) return null;
-    const t = n.time || sch.film || sch.doors || '20:00';
-    const dp = String(n.date).split('-').map(Number);
-    const hh = parseInt(String(t).split(':')[0], 10) || 20, mm = parseInt(String(t).split(':')[1], 10) || 0;
-    return new Date(dp[0] || 1970, (dp[1] || 1) - 1, dp[2] || 1, hh, mm, 0);
+    const t = which === 'doors' ? (sch.doors || sch.film || n.time || '20:00') : (n.time || sch.film || sch.doors || '20:00');
+    const hm = parseHM_(t), dp = String(n.date).split('-').map(Number);
+    return new Date(dp[0] || 1970, (dp[1] || 1) - 1, dp[2] || 1, hm[0], hm[1], 0);
   }
   function renderCountdown(){
     const b = $('#banner'); if (!b) return;
-    const s = screeningStart_();
-    if (!s){ b.hidden = true; return; }
-    const now = Date.now(), start = s.getTime();
+    const doors = schedTime_('doors');
+    if (!doors){ b.hidden = true; return; }
+    const film = schedTime_('film');
+    const now = Date.now(), doorsMs = doors.getTime();
     const rt = CUR.runtime ? parseInt((String(CUR.runtime).match(/\d+/)||['120'])[0], 10) : 120;
+    const end = (film ? film.getTime() : doorsMs) + rt*60000;
     let txt;
-    if (now >= start && now <= start + rt*60000) txt = 'screening now';
-    else if (now > start + rt*60000){ b.hidden = true; return; }
+    if (now >= doorsMs && now <= end) txt = 'on now';
+    else if (now > end){ b.hidden = true; return; }
     else {
-      const mins = Math.round((start - now) / 60000);
-      if (mins >= 2880) txt = 'in ' + Math.floor(mins/1440) + ' days';
-      else if (mins >= 1440) txt = 'tomorrow';
-      else if (mins >= 60){ const h = Math.floor(mins/60), m = mins%60; txt = 'in ' + h + 'h' + (m ? ' ' + m + 'm' : ''); }
-      else txt = 'in ' + Math.max(1, mins) + ' min';
+      let mins = Math.round((doorsMs - now) / 60000);
+      const d = Math.floor(mins/1440); mins -= d*1440;
+      const h = Math.floor(mins/60), m = mins % 60;
+      const parts = [];
+      if (d) parts.push(d + 'd');
+      if (h) parts.push(h + 'h');
+      if (m) parts.push(m + 'm');
+      txt = 'doors in ' + (parts.length ? parts.join(' ') : '1m');
     }
     b.hidden = false;
     b.innerHTML = (CUR.title ? esc(CUR.title) + ' &nbsp;·&nbsp; ' : '') + '<b>' + esc(txt) + '</b>';
