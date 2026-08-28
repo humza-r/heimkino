@@ -55,15 +55,6 @@ window.CONFIG = {
     },
     {
       "date": "",
-      "title": "The Pledge",
-      "director": "Sean Penn",
-      "year": 2001,
-      "runtime": "124",
-      "synopsis": "A retired police detective becomes obsessed with fulfilling a promise to find the killer of a murdered child.",
-      "rec": "Linda"
-    },
-    {
-      "date": "",
       "title": "In the Basement",
       "director": "Ulrich Seidl",
       "year": 2014,
