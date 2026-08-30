@@ -53,6 +53,16 @@
   .rsvp.closed .edge{ border-top-style:solid; }
   /* seat plan (kept in the receipt aesthetic; outlined furniture, fixed orientation) */
   .present-toggle{ display:block; margin-top:calc(var(--u)*1.5); font-size:13px; text-align:left; color:var(--soft); }
+  .poll{ margin-top:calc(var(--u)*1.25); }
+  .poll-h{ font-size:11px; color:var(--soft); margin-bottom:5px; letter-spacing:0.04em; }
+  .chip{ display:flex; align-items:baseline; gap:8px; width:100%; text-align:left; padding:4px 0; background:none; border:0; font:inherit; color:var(--soft); cursor:pointer; }
+  .chip .chip-rule{ flex:1; align-self:center; height:0; border-bottom:1px dotted var(--rule); }
+  .chip .chip-n{ white-space:nowrap; min-width:1.4em; text-align:right; }
+  .chip.on{ color:var(--ink); }
+  .chip.on .chip-d::before{ content:'\2713 '; }
+  .chip.carried .chip-n::after{ content:' carried'; color:var(--ink); letter-spacing:0.06em; }
+  .chip.busy{ opacity:.45; }
+  .poll-name{ display:flex; align-items:baseline; gap:6px; margin-top:6px; }
   .present-toggle[aria-pressed="true"]{ color:var(--ink); }
   .loc-copy{ background:none; border:0; padding:0; margin:0; font:inherit; color:inherit; text-align:left; cursor:pointer; }
   .seat-who{ margin-top:calc(var(--u)*1.5); font-size:13px; }
@@ -250,6 +260,15 @@
   let admInited = false;
   let flashed = false;
   let interestCounts = {};
+  let pledges = {};
+  const NKEY = 'heimkino:name', PKEY = 'heimkino:pledged';
+  function myName(){ try{ return localStorage.getItem(NKEY) || ''; }catch(_){ return ''; } }
+  function setMyName(n){ try{ localStorage.setItem(NKEY, n); }catch(_){ } }
+  function pledgedSet(){ try{ return JSON.parse(localStorage.getItem(PKEY)) || {}; }catch(_){ return {}; } }
+  function hasPledged(f,d){ return !!pledgedSet()[f+'|'+d]; }
+  function setPledged(f,d,on){ const s=pledgedSet(); if(on) s[f+'|'+d]=1; else delete s[f+'|'+d]; try{ localStorage.setItem(PKEY, JSON.stringify(s)); }catch(_){ } }
+  // disable + relabel a button for the duration of an async action; returns a restore fn (null if already busy)
+  function busy(btn, label){ if(!btn) return ()=>{}; if(btn.dataset.busy) return null; btn.dataset.busy='1'; const o=btn.textContent; btn.disabled=true; btn.textContent=label||'[ … ]'; return ()=>{ btn.disabled=false; btn.textContent=o; delete btn.dataset.busy; }; }
   let seatMap = {};                 // seatId -> occupant name (names only after unlock)
   let takenIds = [];                // seat ids taken (public, pre-unlock)
   let rsvpStage = 'names';          // names | seats | review
@@ -497,8 +516,8 @@
     const code = form.querySelector('#code').value.trim();
     const hp = form.querySelector('#u-hp').value;
     if (hp) return;
-    if (!code) return admitMsg('enter code', 'err');
-    const go = form.querySelector('#unlock-go'); go.disabled = true; admitMsg('', 'ok');
+    if (!code) return admitMsg('code?', 'err');
+    const go = form.querySelector('#unlock-go'); const done = busy(go, '[ … ]'); if(!done) return;
     try{
       const d = await post('unlock', { code, website:hp, date: (CUR && CUR.date) || '' });
       sessionCode = code;
@@ -506,9 +525,8 @@
       if (d.seatMap) seatMap = d.seatMap;
       if (typeof d.confirmed === 'number') agg = { confirmed:d.confirmed, capacity:d.capacity };
       reveal({ venue:d.venue, houseNote:d.houseNote });
-      renderAdmission(); renderCurrent();
-      admitMsg('', 'ok'); track('code');
-    }catch(err){ admitMsg(err.message, 'err'); go.disabled = false; }
+      renderAdmission(); renderCurrent(); track('code');
+    }catch(err){ done(); admitMsg('wrong code', 'err'); }
   }
 
   function roomPlanHtml(mode){
@@ -545,7 +563,7 @@
     renderAdmission();
   }
   async function doCreateSeats(){
-    const go = $('#seat-confirm'); if (go) go.disabled = true; admitMsg('', 'ok');
+    const go = $('#seat-confirm'); const done = busy(go, '[ … ]'); if(!done) return;
     try{
       const d = await post('create', { names:pendNames, seats:pendSeats, code:sessionCode, date:CUR.date, title:CUR.title });
       mine = { reservationId:d.reservationId, editToken:d.editToken }; store.set(mine);
@@ -554,10 +572,11 @@
       if (d.seatMap) seatMap = d.seatMap;
       reveal({ venue:d.venue, houseNote:d.houseNote });
       rsvpStage = 'names'; pendNames = []; pendSeats = []; pendIdx = 0;
-      renderAdmission(); admitMsg('recorded', 'ok'); track('rsvp'); showSlip_();
+      renderAdmission(); track('rsvp'); showSlip_();
     }catch(err){
-      if (/just taken/i.test(err.message)){ await loadState(); rsvpStage='seats'; pendIdx=0; pendSeats=[]; renderAdmission(); admitMsg('a place was just taken, choose again','err'); }
-      else { admitMsg(err.message, 'err'); if (go) go.disabled = false; }
+      done();
+      if (/just taken/i.test(err.message)){ await loadState(); rsvpStage='seats'; pendIdx=0; pendSeats=[]; renderAdmission(); admitMsg('place taken, pick again','err'); }
+      else admitMsg(err.message, 'err');
     }
   }
 
@@ -575,7 +594,7 @@
       pendNames = names; pendSeats = []; pendIdx = 0; rsvpStage = 'seats'; renderAdmission(); return;
     }
 
-    const go = form.querySelector('#confirm-go'); go.disabled = true; admitMsg('', 'ok');
+    const go = form.querySelector('#confirm-go'); const done = busy(go, '[ … ]'); if(!done) return;
     try{
       const d = await post('create', { names, code:sessionCode, website:hp, date:CUR.date, title:CUR.title });
       mine = { reservationId:d.reservationId, editToken:d.editToken }; store.set(mine);
@@ -583,9 +602,8 @@
       agg = { confirmed:d.confirmed, capacity:d.capacity };
       roster = d.coming || roster;
       reveal({ venue:d.venue, houseNote:d.houseNote });
-      renderAdmission();
-      admitMsg('recorded', 'ok'); track('rsvp'); showSlip_();
-    }catch(err){ admitMsg(err.message, 'err'); go.disabled = false; }
+      renderAdmission(); track('rsvp'); showSlip_();
+    }catch(err){ done(); admitMsg(err.message, 'err'); }
   }
   function showSlip_(){ const s = $('#slip'); if (s && s.scrollIntoView){ try{ s.scrollIntoView({ behavior:'smooth', block:'nearest' }); }catch(_){} } }
 
@@ -649,10 +667,20 @@
     });
   }
 
+  function filmMom(u){ if(!u.pollDates || !pledges[u.title]) return 0; let m=0; u.pollDates.forEach(dt=>{ const c=(pledges[u.title]&&pledges[u.title][dt])||0; if(c>m) m=c; }); return m; }
+  function pollHtml(u){
+    const q = C.quorum || 3;
+    const chips = u.pollDates.map(dt=>{
+      const cnt = (pledges[u.title] && pledges[u.title][dt]) || 0;
+      const on = hasPledged(u.title, dt), carried = cnt >= q;
+      return `<button class="chip${on?' on':''}${carried?' carried':''}" data-date="${esc(dt)}"><span class="chip-d">${esc(fmt(dt,{weekday:'short',day:'numeric',month:'short'}))}</span><span class="chip-rule"></span><span class="chip-n">${cnt}</span></button>`;
+    }).join('');
+    return `<div class="poll" data-film="${esc(u.title)}"><div class="poll-h">which night?</div>${chips}<form class="poll-name" hidden autocomplete="off"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow pn-name" type="text" aria-label="Your name" enterkeyhint="send" autocapitalize="words" autocorrect="off" spellcheck="false"><button class="lnk pn-go" type="submit">[enter]</button></form></div>`;
+  }
   function renderUpcoming(){
     const base = (C.upcoming||[]).filter(u=>u && u.title && u !== PICK.promoted).map((u,idx)=>({u,idx}));
     const dated = base.filter(x=>x.u.date).sort((a,b)=> a.u.date<b.u.date?-1:(a.u.date>b.u.date?1:a.idx-b.idx));
-    const undated = base.filter(x=>!x.u.date).sort((a,b)=>{ const va=interestCounts[a.u.title]||0, vb=interestCounts[b.u.title]||0; return (vb-va) || (a.idx-b.idx); });
+    const undated = base.filter(x=>!x.u.date).sort((a,b)=>{ const ma=filmMom(a.u), mb=filmMom(b.u); if(mb!==ma) return mb-ma; const va=interestCounts[a.u.title]||0, vb=interestCounts[b.u.title]||0; return (vb-va) || (a.idx-b.idx); });
     const list = dated.concat(undated).map(x=>x.u);
     $('#upcoming').innerHTML = `
       <div class="sec-h">Upcoming</div><hr class="rule">
@@ -674,6 +702,7 @@
               <form class="int-form" hidden autocomplete="off"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow ni-name" type="text" aria-label="Your name" enterkeyhint="send" autocapitalize="words" autocorrect="off" spellcheck="false"><input class="nhp" type="text" tabindex="-1" autocomplete="off" aria-hidden="true"><button class="lnk int-go" type="submit">[enter]</button></form>
               <div class="nmsg" aria-live="polite"></div>
             </div>
+            ${(u.pollDates && u.pollDates.length && !u.date) ? pollHtml(u) : ''}
           </div>`;}).join('')
         : `<div class="up-film"><div class="meta">nothing listed</div></div>`}
       </div>`;
@@ -688,7 +717,7 @@
     if (hasVoted(film)) return set('noted','ok');
     if (!name) return set('name?','err');
     if (!EP) return set('offline','err');
-    const go = form.querySelector('.int-go'); go.disabled=true;
+    const go = form.querySelector('.int-go'); const done = busy(go, '[ … ]'); if(!done) return;
     try{
       const d = await post('interest', { name, film, website:hp });
       if (d.interest) interestCounts = d.interest; else interestCounts[film] = (interestCounts[film]||0)+1;
@@ -698,17 +727,40 @@
       box.querySelector('.int-label').textContent = 'interested \u2713';
       btn.disabled = true; btn.hidden = false; btn.setAttribute('aria-expanded','false');
       form.hidden = true; set('',''); track('interest');
-    }catch(err){ set(err.message,'err'); go.disabled=false; }
+    }catch(err){ done(); set(err.message,'err'); }
+  }
+  async function sendPledge(chip, film, date, on){
+    if (!EP || (chip && chip.dataset.busy)) return;
+    if (chip){ chip.dataset.busy='1'; chip.classList.add('busy'); }
+    try{
+      const d = await post(on ? 'pledge' : 'unpledge', { film, date, name: myName() });
+      if (d.pledges) pledges = d.pledges;
+      if (d.interest) interestCounts = d.interest;
+      setPledged(film, date, on); track('pledge'); renderUpcoming();
+    }catch(_){ if (chip){ chip.classList.remove('busy'); delete chip.dataset.busy; } }
   }
   function wireUpcoming(){
     const root = $('#upcoming');
     root.addEventListener('click', e => {
+      const chip = e.target.closest('.chip');
+      if (chip){
+        const poll = chip.closest('.poll'), film = poll.dataset.film, date = chip.dataset.date;
+        if (hasPledged(film, date)) return sendPledge(chip, film, date, false);
+        if (myName()) return sendPledge(chip, film, date, true);
+        const f = poll.querySelector('.poll-name'); f.hidden=false; f.dataset.date=date; f.querySelector('.pn-name').focus();
+        return;
+      }
       const b = e.target.closest('.int-btn'); if(!b || b.disabled) return;
       const box = b.closest('.int'), form = box.querySelector('.int-form');
       b.hidden = true; form.hidden = false; b.setAttribute('aria-expanded','true');
       form.querySelector('.ni-name').focus();
     });
     root.addEventListener('submit', e => {
+      if (e.target.classList.contains('poll-name')){
+        e.preventDefault(); const f=e.target, poll=f.closest('.poll'), name=f.querySelector('.pn-name').value.trim();
+        if(!name) return; setMyName(name); const date=f.dataset.date;
+        f.hidden=true; sendPledge(poll.querySelector('.chip[data-date="'+date+'"]'), poll.dataset.film, date, true); return;
+      }
       if(!e.target.classList.contains('int-form')) return;
       e.preventDefault(); const box = e.target.closest('.int'); sendInterest(box, box.dataset.film);
     });
@@ -728,13 +780,13 @@
     if (hp) return;
     if (!film) return set('film?','err');
     if (!EP) return set('offline','err');
-    const go=$('#wish-go'); go.disabled=true; set('','ok');
+    const go=$('#wish-go'); const done=busy(go,'[ … ]'); if(!done) return; set('','ok');
     try{ const d = await post('wish', { film, director, by, note, present });
       if (d && d.interest){ interestCounts = d.interest; renderUpcoming(); }
-      set(present ? 'recorded, interest noted' : 'recorded','ok'); track('suggest');
+      set('sent','ok'); track('suggest');
       $('#w-film').value=''; $('#w-dir').value=''; $('#w-by').value=''; $('#w-note').value=''; if($('#w-present')){ const b=$('#w-present'); b.setAttribute('aria-pressed','false'); b.textContent="[ ] i'd like to be there when it screens"; } }
     catch(err){ set(err.message,'err'); }
-    finally{ go.disabled=false; }
+    finally{ done(); }
   }
 
   // ---------- past ----------
@@ -813,6 +865,7 @@
     const q = (CUR && CUR.date) ? ('?date=' + encodeURIComponent(CUR.date)) : '';
     try{ const r = await fetch(EP + q); const d = await r.json();
       if (d && d.interest){ interestCounts = d.interest; renderUpcoming(); }
+      if (d && d.pledges){ pledges = d.pledges; renderUpcoming(); }
       if (d && Array.isArray(d.taken)) takenIds = d.taken;
       if (d && typeof d.confirmed==='number'){ agg={confirmed:d.confirmed, capacity:d.capacity}; renderCurrent(); } }catch(_){}
   }
