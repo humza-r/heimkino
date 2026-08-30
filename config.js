@@ -19,7 +19,19 @@ window.CONFIG = {
       "edition": "CC",
       "synopsis": "A wealthy Italian household is turned upside down when a handsome stranger arrives, seduces every family member and then disappears. Each has an epiphany of sorts, but none can figure out who the seductive visitor was or why he came.",
       "rec": "Fynn",
-      "seatSelectionEnabled": true
+      "seatSelectionEnabled": true,
+      "pollDates": [
+        "2026-09-12",
+        "2026-09-19"
+      ]
+    },
+    {
+      "date": "2026-09-16",
+      "title": "L'Appartement",
+      "director": "Gilles Mimouni",
+      "year": 1996,
+      "runtime": "116",
+      "synopsis": "When Max catches a glimpse of the great lost love of his life, he becomes obsessed with rekindling their relationship."
     },
     {
       "date": "",
@@ -44,14 +56,6 @@ window.CONFIG = {
       "runtime": "85",
       "synopsis": "A forged banknote passes through a chain of transactions and sets in motion consequences that transform the life of an innocent man.",
       "rec": "Deleuze / Cinema II"
-    },
-    {
-      "date": "2026-09-16",
-      "title": "L'Appartement",
-      "director": "Gilles Mimouni",
-      "year": 1996,
-      "runtime": "116",
-      "synopsis": "When Max catches a glimpse of the great lost love of his life, he becomes obsessed with rekindling their relationship."
     },
     {
       "date": "",
