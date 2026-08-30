@@ -1,4 +1,4 @@
-/* Generated from the content Sheet by generate.gs. Do not hand-edit. */
+/* published 2026-08-31 01:53 */
 window.CONFIG = {
   "wordmark": "movienights",
   "city": "Berlin",
