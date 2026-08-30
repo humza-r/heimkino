@@ -19,11 +19,7 @@ window.CONFIG = {
       "edition": "CC",
       "synopsis": "A wealthy Italian household is turned upside down when a handsome stranger arrives, seduces every family member and then disappears. Each has an epiphany of sorts, but none can figure out who the seductive visitor was or why he came.",
       "rec": "Fynn",
-      "seatSelectionEnabled": true,
-      "pollDates": [
-        "2026-09-12",
-        "2026-09-19"
-      ]
+      "seatSelectionEnabled": true
     },
     {
       "date": "2026-09-16",
@@ -42,7 +38,11 @@ window.CONFIG = {
       "title": "The Gospel According to St. Matthew",
       "director": "Pier Paolo Pasolini",
       "year": 1964,
-      "synopsis": "Along a rocky, barren coastline, Jesus begins teaching, primarily using parables. He attracts disciples; he’s stern, brusque, and demanding. His parables often take on the powers that be, so he and his teachings come to the attention of the Pharisees, the chief priests, and elders. They conspire to have him arrested, beaten, tried, and crucified, just as he prophesied to his followers."
+      "synopsis": "Along a rocky, barren coastline, Jesus begins teaching, primarily using parables. He attracts disciples; he’s stern, brusque, and demanding. His parables often take on the powers that be, so he and his teachings come to the attention of the Pharisees, the chief priests, and elders. They conspire to have him arrested, beaten, tried, and crucified, just as he prophesied to his followers.",
+      "pollDates": [
+        "2026-09-12",
+        "2026-09-19"
+      ]
     },
     {
       "date": "",
