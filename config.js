@@ -31,7 +31,11 @@ window.CONFIG = {
       "director": "Gilles Mimouni",
       "year": 1996,
       "runtime": "116",
-      "synopsis": "When Max catches a glimpse of the great lost love of his life, he becomes obsessed with rekindling their relationship."
+      "synopsis": "When Max catches a glimpse of the great lost love of his life, he becomes obsessed with rekindling their relationship.",
+      "pollDates": [
+        "2026-09-25",
+        "2026-09-26"
+      ]
     },
     {
       "date": "",
