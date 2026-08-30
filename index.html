@@ -54,15 +54,21 @@
   /* seat plan (kept in the receipt aesthetic; outlined furniture, fixed orientation) */
   .present-toggle{ display:block; margin-top:calc(var(--u)*1.5); font-size:13px; text-align:left; color:var(--soft); }
   .poll{ margin-top:calc(var(--u)*1.25); }
-  .poll-h{ font-size:11px; color:var(--soft); margin-bottom:5px; letter-spacing:0.04em; }
-  .chip{ display:flex; align-items:baseline; gap:8px; width:100%; text-align:left; padding:4px 0; background:none; border:0; font:inherit; color:var(--soft); cursor:pointer; }
-  .chip .chip-rule{ flex:1; align-self:center; height:0; border-bottom:1px dotted var(--rule); }
-  .chip .chip-n{ white-space:nowrap; min-width:1.4em; text-align:right; }
-  .chip.on{ color:var(--ink); }
-  .chip.on .chip-d::before{ content:'\2713 '; }
-  .chip.carried .chip-n::after{ content:' carried'; color:var(--ink); letter-spacing:0.06em; }
-  .chip.busy{ opacity:.45; }
-  .poll-name{ display:flex; align-items:baseline; gap:6px; margin-top:6px; }
+  .poll-h{ font-size:10px; letter-spacing:0.16em; text-transform:uppercase; color:var(--soft); margin-bottom:7px; }
+  .dtiles{ display:flex; flex-wrap:wrap; gap:6px; }
+  .dtile{ display:flex; flex-direction:column; align-items:center; gap:1px; min-width:48px; padding:6px 8px 5px; border:1px solid var(--rule); background:none; font:inherit; line-height:1.15; color:var(--ink); cursor:pointer; }
+  .dt-wd{ font-size:9px; letter-spacing:0.1em; text-transform:uppercase; color:var(--soft); }
+  .dt-day{ font-size:17px; }
+  .dt-mo{ font-size:9px; letter-spacing:0.1em; text-transform:uppercase; color:var(--soft); }
+  .dt-n{ font-size:10px; color:var(--soft); min-height:12px; margin-top:2px; }
+  .dtile.on{ background:var(--ink); border-color:var(--ink); color:var(--paper); }
+  .dtile.on .dt-wd, .dtile.on .dt-mo, .dtile.on .dt-n{ color:var(--paper); }
+  .dtile.carried{ border-width:2px; border-color:var(--ink); }
+  .dtile.carried .dt-n{ color:var(--ink); }
+  .dtile.on.carried .dt-n{ color:var(--paper); }
+  .dtile.busy{ opacity:.45; }
+  .poll-name{ display:flex; align-items:baseline; gap:6px; margin-top:8px; }
+  .up .syn{ display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
   .present-toggle[aria-pressed="true"]{ color:var(--ink); }
   .loc-copy{ background:none; border:0; padding:0; margin:0; font:inherit; color:inherit; text-align:left; cursor:pointer; }
   .seat-who{ margin-top:calc(var(--u)*1.5); font-size:13px; }
@@ -453,7 +459,7 @@
 
     const sm = seatMode();
     const noteBlk = (gated && gated.houseNote) ? `<div class="proto"><div class="k">house note</div><div class="note">${esc(gated.houseNote)}</div></div>` : '';
-    const locBlk  = (gated && gated.venue) ? `<div class="proto proto-loc"><div class="k">location</div><button type="button" class="v loc-copy" id="loc-copy" title="tap to copy">${esc(gated.venue)}</button></div>` : '';
+    const locBlk  = (gated && gated.venue) ? `<div class="proto proto-loc"><div class="k">address</div><button type="button" class="v loc-copy" id="loc-copy" title="tap to copy">${esc(gated.venue)}</button></div>` : '';
     const planBlk = m => sm ? `<div class="plan-wrap">${roomPlanHtml(m)}</div>` : '';
     const msg = `<div class="msg" id="admit-msg" role="status" aria-live="polite"></div>`;
     let html = '';
@@ -488,7 +494,7 @@
         if (rsvpState() === 'closed'){
           html += `<div class="seat-hint">rsvp is closed for this screening.</div>` + msg + locBlk;
         } else {
-          html += (sm ? `<div class="seat-hint">add name(s), then you'll pick a place for each</div>` : '')
+          html += (sm ? `<div class="seat-hint">names, then a place for each</div>` : '')
           + `<form id="admit-form" autocomplete="off">`
           + `<div class="rows" id="name-rows"><div class="row"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow rn" type="text" required aria-label="Name" enterkeyhint="send" autocapitalize="words" autocorrect="off" spellcheck="false"></div></div>`
           + `<div class="addmore"><button type="button" class="lnk" id="add-row">+ add another person</button></div>`
@@ -670,12 +676,12 @@
   function filmMom(u){ if(!u.pollDates || !pledges[u.title]) return 0; let m=0; u.pollDates.forEach(dt=>{ const c=(pledges[u.title]&&pledges[u.title][dt])||0; if(c>m) m=c; }); return m; }
   function pollHtml(u){
     const q = C.quorum || 3;
-    const chips = u.pollDates.map(dt=>{
+    const tiles = u.pollDates.map(dt=>{
       const cnt = (pledges[u.title] && pledges[u.title][dt]) || 0;
       const on = hasPledged(u.title, dt), carried = cnt >= q;
-      return `<button class="chip${on?' on':''}${carried?' carried':''}" data-date="${esc(dt)}"><span class="chip-d">${esc(fmt(dt,{weekday:'short',day:'numeric',month:'short'}))}</span><span class="chip-rule"></span><span class="chip-n">${cnt}</span></button>`;
+      return `<button class="dtile${on?' on':''}${carried?' carried':''}" data-date="${esc(dt)}"><span class="dt-wd">${esc(fmt(dt,{weekday:'short'}))}</span><span class="dt-day">${esc(fmt(dt,{day:'numeric'}))}</span><span class="dt-mo">${esc(fmt(dt,{month:'short'}))}</span><span class="dt-n">${cnt||''}</span></button>`;
     }).join('');
-    return `<div class="poll" data-film="${esc(u.title)}"><div class="poll-h">which night?</div>${chips}<form class="poll-name" hidden autocomplete="off"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow pn-name" type="text" aria-label="Your name" enterkeyhint="send" autocapitalize="words" autocorrect="off" spellcheck="false"><button class="lnk pn-go" type="submit">[enter]</button></form></div>`;
+    return `<div class="poll" data-film="${esc(u.title)}"><div class="poll-h">when</div><div class="dtiles">${tiles}</div><form class="poll-name" hidden autocomplete="off"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow pn-name" type="text" aria-label="name" enterkeyhint="send" autocapitalize="words" autocorrect="off" spellcheck="false"><button class="lnk pn-go" type="submit">[enter]</button></form></div>`;
   }
   function renderUpcoming(){
     const base = (C.upcoming||[]).filter(u=>u && u.title && u !== PICK.promoted).map((u,idx)=>({u,idx}));
@@ -699,7 +705,7 @@
             ${u.synopsis ? `<p class="syn">${esc(u.synopsis)}</p>` : ''}
             <div class="int" data-film="${esc(u.title)}">
               <button class="int-btn"${voted?' disabled':''} aria-expanded="false"><span class="int-label">interested${voted?' \u2713':''}</span><span class="int-rule"></span><span class="int-n">${c}</span></button>
-              <form class="int-form" hidden autocomplete="off"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow ni-name" type="text" aria-label="Your name" enterkeyhint="send" autocapitalize="words" autocorrect="off" spellcheck="false"><input class="nhp" type="text" tabindex="-1" autocomplete="off" aria-hidden="true"><button class="lnk int-go" type="submit">[enter]</button></form>
+              <form class="int-form" hidden autocomplete="off"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow ni-name" type="text" aria-label="name" enterkeyhint="send" autocapitalize="words" autocorrect="off" spellcheck="false"><input class="nhp" type="text" tabindex="-1" autocomplete="off" aria-hidden="true"><button class="lnk int-go" type="submit">[enter]</button></form>
               <div class="nmsg" aria-live="polite"></div>
             </div>
             ${(u.pollDates && u.pollDates.length && !u.date) ? pollHtml(u) : ''}
@@ -742,7 +748,7 @@
   function wireUpcoming(){
     const root = $('#upcoming');
     root.addEventListener('click', e => {
-      const chip = e.target.closest('.chip');
+      const chip = e.target.closest('.dtile');
       if (chip){
         const poll = chip.closest('.poll'), film = poll.dataset.film, date = chip.dataset.date;
         if (hasPledged(film, date)) return sendPledge(chip, film, date, false);
@@ -759,7 +765,7 @@
       if (e.target.classList.contains('poll-name')){
         e.preventDefault(); const f=e.target, poll=f.closest('.poll'), name=f.querySelector('.pn-name').value.trim();
         if(!name) return; setMyName(name); const date=f.dataset.date;
-        f.hidden=true; sendPledge(poll.querySelector('.chip[data-date="'+date+'"]'), poll.dataset.film, date, true); return;
+        f.hidden=true; sendPledge(poll.querySelector('.dtile[data-date="'+date+'"]'), poll.dataset.film, date, true); return;
       }
       if(!e.target.classList.contains('int-form')) return;
       e.preventDefault(); const box = e.target.closest('.int'); sendInterest(box, box.dataset.film);
@@ -784,7 +790,7 @@
     try{ const d = await post('wish', { film, director, by, note, present });
       if (d && d.interest){ interestCounts = d.interest; renderUpcoming(); }
       set('sent','ok'); track('suggest');
-      $('#w-film').value=''; $('#w-dir').value=''; $('#w-by').value=''; $('#w-note').value=''; if($('#w-present')){ const b=$('#w-present'); b.setAttribute('aria-pressed','false'); b.textContent="[ ] i'd like to be there when it screens"; } }
+      $('#w-film').value=''; $('#w-dir').value=''; $('#w-by').value=''; $('#w-note').value=''; if($('#w-present')){ const b=$('#w-present'); b.setAttribute('aria-pressed','false'); b.textContent="[ ] attend if it screens"; } }
     catch(err){ set(err.message,'err'); }
     finally{ done(); }
   }
@@ -827,9 +833,9 @@
       <form class="sug-form" id="wish-form" hidden autocomplete="off">
         <div class="line"><span class="inl">film</span><span class="gt">&gt;</span><input class="grow" id="w-film" type="text" required aria-label="Film" enterkeyhint="next" autocapitalize="words" autocorrect="off"></div>
         <div class="line"><span class="inl">director</span><span class="gt">&gt;</span><input class="grow" id="w-dir" type="text" aria-label="Director" enterkeyhint="next" autocapitalize="words" autocorrect="off"></div>
-        <div class="line"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow" id="w-by" type="text" aria-label="Your name" enterkeyhint="next" autocapitalize="words" autocorrect="off" spellcheck="false"></div>
+        <div class="line"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow" id="w-by" type="text" aria-label="name" enterkeyhint="next" autocapitalize="words" autocorrect="off" spellcheck="false"></div>
         <div class="line"><span class="inl">note</span><span class="gt">&gt;</span><input class="grow" id="w-note" type="text" aria-label="Note" enterkeyhint="send" autocapitalize="sentences"></div>
-        <button type="button" class="lnk present-toggle" id="w-present" aria-pressed="false">[ ] i'd like to be there when it screens</button>
+        <button type="button" class="lnk present-toggle" id="w-present" aria-pressed="false">[ ] attend if it screens</button>
         <div class="hp" aria-hidden="true"><input id="w-hp" type="text" tabindex="-1" autocomplete="off"></div>
         <div class="acts"><button class="lnk" type="submit" id="wish-go">[send]</button></div>
         <div class="nmsg" id="wish-msg" aria-live="polite"></div>
@@ -841,7 +847,7 @@
       if (e.target.id === 'w-present'){
         const on = e.target.getAttribute('aria-pressed') !== 'true';
         e.target.setAttribute('aria-pressed', on ? 'true' : 'false');
-        e.target.textContent = (on ? '[x]' : '[ ]') + " i'd like to be there when it screens";
+        e.target.textContent = (on ? '[x]' : '[ ]') + ' attend if it screens';
         return;
       }
       if (e.target.id !== 'wish-toggle') return;
