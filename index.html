@@ -57,11 +57,11 @@
   .loc-copy{ background:none; border:0; padding:0; margin:0; font:inherit; color:inherit; text-align:left; cursor:pointer; }
   .seat-who{ margin-top:calc(var(--u)*1.5); font-size:13px; }
   .seat-hint{ margin-top:calc(var(--u)*1.25); font-size:12px; color:var(--soft); }
-  .plan{ margin-top:calc(var(--u)*2); overflow-x:auto; }
+  .plan{ margin-top:calc(var(--u)*2.5); overflow-x:auto; }
   .banner{ text-align:center; font-size:11px; letter-spacing:0.16em; text-transform:uppercase; color:var(--soft); padding-bottom:calc(var(--u)*2); margin-bottom:calc(var(--u)*2.5); border-bottom:1px dashed var(--rule); }
   .banner[hidden]{ display:none; }
   .banner b{ color:var(--ink); font-weight:normal; }
-  .plan-row{ display:flex; gap:12px; align-items:flex-start; justify-content:space-between; min-width:260px; }
+  .plan-row{ display:flex; gap:16px; align-items:flex-start; justify-content:space-between; min-width:260px; }
   .furn{ text-align:center; }
   .furn-l{ font-size:9px; letter-spacing:0.06em; text-transform:uppercase; color:var(--soft); margin-bottom:5px; white-space:nowrap; }
   .furn-b{ display:flex; flex-direction:column; gap:5px; align-items:center; }
@@ -84,10 +84,10 @@
   .roster.seated .cm-n{ color:var(--ink); white-space:nowrap; }
   .roster.seated .cm-lead{ flex:1; align-self:center; height:0; border-bottom:1px dotted var(--rule); }
   .roster.seated .cm-s{ font-size:11px; color:var(--soft); white-space:nowrap; letter-spacing:0.06em; }
-  .plan-floor{ margin-top:16px; text-align:center; }
+  .plan-floor{ margin-top:30px; text-align:center; }
   .plan-floor .furn-b{ flex-direction:row; justify-content:center; }
   .plan-floor .seat{ width:120px; }
-  .plan-screen{ margin-top:16px; border-top:1px dashed var(--rule); text-align:center; font-size:10px; letter-spacing:0.32em; color:var(--soft); padding-top:6px; }
+  .plan-screen{ margin-top:44px; border-top:2px solid var(--ink); text-align:center; font-size:10px; letter-spacing:0.4em; color:var(--soft); padding-top:8px; }
   .review{ list-style:none; margin:calc(var(--u)*1.5) 0 0; padding:0; font-size:13px; }
   .review li{ padding:2px 0; }
   .roster span{ color:var(--ink); }
@@ -277,6 +277,11 @@
     return 'open';
   }
   function allSeats(){ const ids=[]; ROOM.forEach(o=>{ const c=Math.max(1, o.count||1); for(let i=1;i<=c;i++) ids.push(o.key+'-'+i); }); return ids; }
+  function objForToken(tok){
+    tok = String(tok).trim().toLowerCase(); if(!tok) return null;
+    return ROOM.filter(o => { const k=String(o.key).toLowerCase(), l=String(o.label).toLowerCase();
+      return k===tok || l===tok || l.split(/\s+/).indexOf(tok) >= 0; })[0] || null;
+  }
   function expandOpen(list){
     const out=[];
     (list||[]).forEach(raw => {
@@ -285,9 +290,9 @@
         if (ROOM.some(o => o.key === tok.split('-')[0])) out.push(tok);
         return;
       }
-      const o = ROOM.filter(x => String(x.key).toLowerCase() === tok.toLowerCase())[0];   // match the seats key
+      const o = objForToken(tok);                                   // key / full label / label word
       if (o){ const c=Math.max(1,o.count||1); for(let i=1;i<=c;i++) out.push(o.key+'-'+i); }
-      // unknown key: ignored (so a typo can't spawn a stray box or break order)
+      // unknown token: ignored (so a typo can't spawn a stray box or break order)
     });
     return out;
   }
