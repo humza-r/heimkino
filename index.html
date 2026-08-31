@@ -690,7 +690,7 @@
     const dfmt = dt => esc(fmt(dt,{weekday:'short',day:'numeric'}));
     const count = `<div class="poll-count">${c} interested</div>`;
     const cells = dts.map(dt=>`<button class="ballot-cell${mine===dt?' on':''}"${locked?' disabled':''} data-date="${esc(dt)}">${dfmt(dt)}</button>`).join('');
-    const ballot = `<div class="ballot-row"><span class="ballot-cap">${locked?'your night':'when'}</span><div class="ballot${locked?' locked':''}${pendingPoll===u.title?' saving':''}" role="group" aria-label="pick a night">${cells}</div></div>`;
+    const ballot = `<div class="ballot-row"><span class="ballot-cap">${locked?'preference':'when'}</span><div class="ballot${locked?' locked':''}${pendingPoll===u.title?' saving':''}" role="group" aria-label="pick a night">${cells}</div></div>`;
     const nameForm = `<form class="poll-name" hidden autocomplete="off"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow pn-name" type="text" aria-label="name" enterkeyhint="send" autocapitalize="words" autocorrect="off" spellcheck="false"><button class="lnk pn-go" type="submit">[pick]</button></form>`;
     return `<div class="poll" data-film="${esc(u.title)}">${count}${ballot}${nameForm}</div>`;
   }
@@ -753,7 +753,7 @@
       if (cd){
         if (cd.disabled) return;
         const poll = cd.closest('.poll'), film = poll.dataset.film, date = cd.dataset.date;
-        if (pledgeChoice(film)) return;                 // one pick per film — already chosen
+        if (pledgeChoice(film)) return;                 // one pick per film, already chosen
         if (myName()) return optIn(film, date);         // one-tap register
         const f = poll.querySelector('.poll-name'); f.hidden=false; f.dataset.date = date; f.querySelector('.pn-name').focus();
         return;
