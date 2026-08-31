@@ -1,4 +1,4 @@
-/* published 2026-08-31 01:53 */
+/* published 2026-08-31 02:00 */
 window.CONFIG = {
   "wordmark": "movienights",
   "city": "Berlin",
@@ -9,7 +9,17 @@ window.CONFIG = {
     "trailers": "",
     "film": "1955"
   },
-  "next": null,
+  "next": {
+    "date": "2026-09-03",
+    "title": "Titane",
+    "director": "Julia Ducournau",
+    "year": 2021,
+    "runtime": "108",
+    "synopsis": "A woman with a titanium plate fitted in her head and murderous intent on her mind embarks on a bizarre journey of identity and unconditional love when she's forced to go on the run.",
+    "rec": "Chloe",
+    "lang": "OmU",
+    "seatSelectionEnabled": true
+  },
   "upcoming": [
     {
       "date": "2026-09-09",
@@ -19,7 +29,11 @@ window.CONFIG = {
       "edition": "CC",
       "synopsis": "A wealthy Italian household is turned upside down when a handsome stranger arrives, seduces every family member and then disappears. Each has an epiphany of sorts, but none can figure out who the seductive visitor was or why he came.",
       "rec": "Fynn",
-      "seatSelectionEnabled": true
+      "seatSelectionEnabled": true,
+      "pollDates": [
+        "2026-09-12",
+        "2026-09-19"
+      ]
     },
     {
       "date": "2026-09-16",
@@ -38,11 +52,7 @@ window.CONFIG = {
       "title": "The Gospel According to St. Matthew",
       "director": "Pier Paolo Pasolini",
       "year": 1964,
-      "synopsis": "Along a rocky, barren coastline, Jesus begins teaching, primarily using parables. He attracts disciples; he’s stern, brusque, and demanding. His parables often take on the powers that be, so he and his teachings come to the attention of the Pharisees, the chief priests, and elders. They conspire to have him arrested, beaten, tried, and crucified, just as he prophesied to his followers.",
-      "pollDates": [
-        "2026-09-12",
-        "2026-09-19"
-      ]
+      "synopsis": "Along a rocky, barren coastline, Jesus begins teaching, primarily using parables. He attracts disciples; he’s stern, brusque, and demanding. His parables often take on the powers that be, so he and his teachings come to the attention of the Pharisees, the chief priests, and elders. They conspire to have him arrested, beaten, tried, and crucified, just as he prophesied to his followers."
     },
     {
       "date": "",
@@ -69,16 +79,6 @@ window.CONFIG = {
       "runtime": "81",
       "synopsis": "A documentary explores the private activities, obsessions and rituals that people pursue in the basements of their Austrian homes.",
       "rec": "Soedeh"
-    },
-    {
-      "date": "",
-      "title": "Titane",
-      "director": "Julia Ducournau",
-      "year": 2021,
-      "runtime": "108",
-      "synopsis": "A woman with a titanium plate fitted in her head and murderous intent on her mind embarks on a bizarre journey of identity and unconditional love when she's forced to go on the run.",
-      "rec": "Chloe",
-      "lang": "OmU"
     },
     {
       "date": "",
