@@ -57,18 +57,14 @@
   /* seat plan (kept in the receipt aesthetic; outlined furniture, fixed orientation) */
   .present-toggle{ display:block; margin-top:calc(var(--u)*1.5); font-size:13px; text-align:left; color:var(--soft); }
   .poll{ margin-top:calc(var(--u)*1.25); }
-  .poll-h{ font-size:10px; letter-spacing:0.16em; text-transform:uppercase; color:var(--soft); margin-bottom:7px; }
-  .dtiles{ display:flex; flex-direction:column; gap:6px; }
-  .dtile{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; width:100%; padding:10px 12px; border:1px solid var(--rule); background:none; font:inherit; color:var(--ink); cursor:pointer; text-align:left; }
-  .dt-when{ display:inline-flex; align-items:baseline; gap:7px; }
-  .dt-wd{ font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:var(--soft); }
-  .dt-day{ font-size:15px; }
-  .dt-mo{ font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:var(--soft); }
-  .dt-cta{ font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:var(--soft); white-space:nowrap; }
-  .dtile.on{ background:var(--ink); border-color:var(--ink); color:var(--paper); }
-  .dtile.on .dt-wd, .dtile.on .dt-mo, .dtile.on .dt-cta{ color:var(--paper); }
-  .dtile.busy{ opacity:.45; }
-  .poll-tot{ margin-top:8px; font-size:11px; letter-spacing:0.04em; color:var(--soft); }
+  .cmi{ display:flex; align-items:baseline; gap:10px; width:100%; text-align:left; background:none; border:0; padding:4px 0; font:inherit; color:var(--ink); cursor:pointer; }
+  .cmi .int-rule{ flex:1; align-self:center; height:0; border-bottom:1px dotted var(--rule); }
+  .cmi .int-n{ white-space:nowrap; min-width:1.4em; text-align:right; color:var(--soft); }
+  .cmi.on .cmi-lbl{ color:var(--ink); }
+  .cmi-dates{ margin-top:8px; font-size:13px; color:var(--soft); display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
+  .cmi-d{ background:none; border:0; padding:2px 0; font:inherit; color:var(--soft); cursor:pointer; }
+  .cmi-d.on{ color:var(--ink); border-bottom:1px solid var(--ink); }
+  .cmi-dates .sep{ color:var(--faint); }
   .poll-name{ display:flex; align-items:baseline; gap:6px; margin-top:8px; }
   .seatwrap{ display:inline-flex; flex-direction:column; align-items:center; gap:2px; }
   .seatn{ font-size:9px; color:var(--soft); max-width:64px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -684,18 +680,22 @@
   function pollDatesOf(u){ const p=u&&u.pollDates; return Array.isArray(p)?p:(p?String(p).split(/[;,]/).map(s=>s.trim()).filter(Boolean):[]); }
   function filmMom(u){ const dts=pollDatesOf(u); if(!dts.length || !pledges[u.title]) return 0; let m=0; dts.forEach(dt=>{ const c=(pledges[u.title]&&pledges[u.title][dt])||0; if(c>m) m=c; }); return m; }
   function pollHtml(u){
-    const dts = pollDatesOf(u), mine = pledgeChoice(u.title);
-    const when = dt => `<span class="dt-when"><span class="dt-wd">${esc(fmt(dt,{weekday:'short'}))}</span><span class="dt-day">${esc(fmt(dt,{day:'numeric'}))}</span><span class="dt-mo">${esc(fmt(dt,{month:'short'}))}</span></span>`;
+    const dts = pollDatesOf(u), mine = pledgeChoice(u.title), inIt = hasVoted(u.title) || !!mine;
+    const c = interestCounts[u.title]||0, single = dts.length===1;
+    const dfmt = dt => esc(fmt(dt,{weekday:'short',day:'numeric'}));
+    const lbl = !inIt ? 'count me in' : ('coming \u2713' + (mine && !single ? ' \u00b7 ' + dfmt(mine) : ''));
+    const cmi = `<button class="cmi${inIt?' on':''}" data-single="${single?esc(dts[0]):''}"><span class="cmi-lbl">${lbl}</span><span class="int-rule"></span><span class="int-n">${c}</span></button>`;
+    const datesRow = single ? '' : `<div class="cmi-dates"${inIt?'':' hidden'}>coming? ${dts.map(dt=>`<button class="cmi-d${mine===dt?' on':''}" data-date="${esc(dt)}">${dfmt(dt)}</button>`).join(' <span class="sep">/</span> ')}</div>`;
     const nameForm = `<form class="poll-name" hidden autocomplete="off"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow pn-name" type="text" aria-label="name" enterkeyhint="send" autocapitalize="words" autocorrect="off" spellcheck="false"><button class="lnk pn-go" type="submit">[enter]</button></form>`;
-    if (dts.length === 1){
-      const dt = dts[0], on = mine === dt;
-      return `<div class="poll" data-film="${esc(u.title)}"><button class="dtile one${on?' on':''}" data-date="${esc(dt)}">${when(dt)}<span class="dt-cta">${on?'coming \u2713':'count me in'}</span></button>${nameForm}</div>`;
-    }
-    const tiles = dts.map(dt=>{ const on = mine===dt;
-      return `<button class="dtile${on?' on':''}" data-date="${esc(dt)}">${when(dt)}${on?'<span class="dt-cta">picked</span>':''}</button>`;
-    }).join('');
-    return `<div class="poll" data-film="${esc(u.title)}"><div class="poll-h">when</div><div class="dtiles">${tiles}</div>${nameForm}</div>`;
+    return `<div class="poll" data-film="${esc(u.title)}">${cmi}${datesRow}${nameForm}</div>`;
   }
+  function optIn(film, date){ interestCounts[film]=(interestCounts[film]||0)+1; markVoted(film); setPledgeChoice(film, date||''); renderUpcoming(); track('interest');
+    post('interest', { name:myName(), film, date:date||'' }).then(d=>{ if(d.interest){ interestCounts=d.interest; renderUpcoming(); } })
+      .catch(()=>{ interestCounts[film]=Math.max(0,(interestCounts[film]||1)-1); unmarkVoted(film); setPledgeChoice(film,''); renderUpcoming(); }); }
+  function pickDate(film, date){ const cur=pledgeChoice(film), nd = cur===date?'':date; setPledgeChoice(film, nd); renderUpcoming(); track('interest');
+    post('interest', { name:myName(), film, date:nd }).then(d=>{ if(d.interest){ interestCounts=d.interest; renderUpcoming(); } }).catch(()=>{ setPledgeChoice(film, cur); renderUpcoming(); }); }
+  function withdraw(film){ interestCounts[film]=Math.max(0,(interestCounts[film]||1)-1); unmarkVoted(film); setPledgeChoice(film,''); renderUpcoming(); track('interest');
+    post('interest', { name:myName(), film, remove:true }).then(d=>{ if(d.interest){ interestCounts=d.interest; renderUpcoming(); } }).catch(()=>{ interestCounts[film]=(interestCounts[film]||0)+1; markVoted(film); renderUpcoming(); }); }
   function renderUpcoming(){
     const base = (C.upcoming||[]).filter(u=>u && u.title && u !== PICK.promoted).map((u,idx)=>({u,idx}));
     const dated = base.filter(x=>x.u.date).sort((a,b)=> a.u.date<b.u.date?-1:(a.u.date>b.u.date?1:a.idx-b.idx));
@@ -716,12 +716,11 @@
             ${u.rec ? `<div class="rec">rec: <span>${esc(u.rec)}</span></div>` : ''}
             ${u.away ? `<div class="tags"><span class="tag">away screening</span></div>` : ''}
             ${u.synopsis ? `<p class="syn">${esc(u.synopsis)}</p>` : ''}
-            <div class="int" data-film="${esc(u.title)}">
+            ${(pollDatesOf(u).length && !u.date) ? pollHtml(u) : `<div class="int" data-film="${esc(u.title)}">
               <button class="int-btn"${voted?' disabled':''} aria-expanded="false"><span class="int-label">interested${voted?' \u2713':''}</span><span class="int-rule"></span><span class="int-n">${c}</span></button>
               <form class="int-form" hidden autocomplete="off"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow ni-name" type="text" aria-label="name" enterkeyhint="send" autocapitalize="words" autocorrect="off" spellcheck="false"><input class="nhp" type="text" tabindex="-1" autocomplete="off" aria-hidden="true"><button class="lnk int-go" type="submit">[enter]</button></form>
               <div class="nmsg" aria-live="polite"></div>
-            </div>
-            ${(pollDatesOf(u).length && !u.date) ? pollHtml(u) : ''}
+            </div>`}
           </div>`;}).join('')
         : `<div class="up-film"><div class="meta">nothing listed</div></div>`}
       </div>`;
@@ -746,24 +745,23 @@
       .then(d => { if (d.interest){ interestCounts = d.interest; const n=box.querySelector('.int-n'); if(n) n.textContent = interestCounts[film]||0; } })
       .catch(() => { interestCounts[film]=Math.max(0,(interestCounts[film]||1)-1); unmarkVoted(film); renderUpcoming(); });
   }
-  function sendPledge(film, date){
-    if (!EP) return;
-    const cur = pledgeChoice(film), on = cur !== date, wasIn = !!cur;
-    if (on && !wasIn) interestCounts[film] = (interestCounts[film]||0) + 1;   // first pledge counts as interest
-    setPledgeChoice(film, on ? date : '');
-    renderUpcoming(); track('pledge');
-    post(on ? 'pledge' : 'unpledge', { film, date, name: myName() })
-      .then(d => { if (d.interest){ interestCounts = d.interest; renderUpcoming(); } })
-      .catch(() => { setPledgeChoice(film, cur); if (on && !wasIn) interestCounts[film] = Math.max(0,(interestCounts[film]||1)-1); renderUpcoming(); });
-  }
   function wireUpcoming(){
     const root = $('#upcoming');
     root.addEventListener('click', e => {
-      const chip = e.target.closest('.dtile');
-      if (chip){
-        const poll = chip.closest('.poll'), film = poll.dataset.film, date = chip.dataset.date;
-        if (myName()) return sendPledge(film, date);
-        const f = poll.querySelector('.poll-name'); f.hidden=false; f.dataset.date=date; f.querySelector('.pn-name').focus();
+      const cmi = e.target.closest('.cmi');
+      if (cmi){
+        const poll = cmi.closest('.poll'), film = poll.dataset.film, single = cmi.dataset.single;
+        const inIt = hasVoted(film) || !!pledgeChoice(film);
+        if (inIt) return withdraw(film);
+        if (myName()) return optIn(film, single || '');
+        const f = poll.querySelector('.poll-name'); f.hidden=false; f.dataset.date = single || ''; f.querySelector('.pn-name').focus();
+        return;
+      }
+      const cd = e.target.closest('.cmi-d');
+      if (cd){
+        const poll = cd.closest('.poll'), film = poll.dataset.film, date = cd.dataset.date;
+        if (myName()) return pickDate(film, date);
+        const f = poll.querySelector('.poll-name'); f.hidden=false; f.dataset.date = date; f.querySelector('.pn-name').focus();
         return;
       }
       const b = e.target.closest('.int-btn'); if(!b || b.disabled) return;
@@ -774,8 +772,9 @@
     root.addEventListener('submit', e => {
       if (e.target.classList.contains('poll-name')){
         e.preventDefault(); const f=e.target, poll=f.closest('.poll'), name=f.querySelector('.pn-name').value.trim();
-        if(!name) return; setMyName(name); const date=f.dataset.date;
-        f.hidden=true; sendPledge(poll.dataset.film, date); return;
+        if(!name) return; setMyName(name); const film=poll.dataset.film, date=f.dataset.date; f.hidden=true;
+        if (hasVoted(film) || pledgeChoice(film)) pickDate(film, date); else optIn(film, date);
+        return;
       }
       if(!e.target.classList.contains('int-form')) return;
       e.preventDefault(); const box = e.target.closest('.int'); sendInterest(box, box.dataset.film);
