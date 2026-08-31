@@ -494,7 +494,7 @@
         if (rsvpState() === 'closed'){
           html += `<div class="seat-hint">rsvp is closed for this screening.</div>` + msg + locBlk;
         } else {
-          html += (sm ? `<div class="seat-hint">names, then a place for each</div>` : '')
+          html += (sm ? `` : '')
           + `<form id="admit-form" autocomplete="off">`
           + `<div class="rows" id="name-rows"><div class="row"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow rn" type="text" required aria-label="Name" enterkeyhint="send" autocapitalize="words" autocorrect="off" spellcheck="false"></div></div>`
           + `<div class="addmore"><button type="button" class="lnk" id="add-row">+ add another person</button></div>`
