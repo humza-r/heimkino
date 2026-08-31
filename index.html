@@ -55,12 +55,13 @@
   .present-toggle{ display:block; margin-top:calc(var(--u)*1.5); font-size:13px; text-align:left; color:var(--soft); }
   .poll{ margin-top:calc(var(--u)*1.25); }
   .poll-h{ font-size:10px; letter-spacing:0.16em; text-transform:uppercase; color:var(--soft); margin-bottom:7px; }
-  .dtiles{ display:flex; flex-wrap:wrap; gap:6px; }
-  .dtile{ display:flex; flex-direction:column; align-items:center; gap:1px; min-width:48px; padding:6px 8px 5px; border:1px solid var(--rule); background:none; font:inherit; line-height:1.15; color:var(--ink); cursor:pointer; }
-  .dt-wd{ font-size:9px; letter-spacing:0.1em; text-transform:uppercase; color:var(--soft); }
-  .dt-day{ font-size:17px; }
-  .dt-mo{ font-size:9px; letter-spacing:0.1em; text-transform:uppercase; color:var(--soft); }
-  .dt-n{ font-size:10px; color:var(--soft); min-height:12px; margin-top:2px; }
+  .dtiles{ display:flex; flex-direction:column; gap:6px; }
+  .dtile{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; width:100%; padding:10px 12px; border:1px solid var(--rule); background:none; font:inherit; color:var(--ink); cursor:pointer; text-align:left; }
+  .dt-when{ display:inline-flex; align-items:baseline; gap:7px; }
+  .dt-wd{ font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:var(--soft); }
+  .dt-day{ font-size:15px; }
+  .dt-mo{ font-size:11px; letter-spacing:0.08em; text-transform:uppercase; color:var(--soft); }
+  .dt-n{ font-size:12px; color:var(--soft); white-space:nowrap; }
   .dtile.on{ background:var(--ink); border-color:var(--ink); color:var(--paper); }
   .dtile.on .dt-wd, .dtile.on .dt-mo, .dtile.on .dt-n{ color:var(--paper); }
   .dtile.carried{ border-width:2px; border-color:var(--ink); }
@@ -131,6 +132,13 @@
   .lnk[disabled]{ color:var(--faint); cursor:default; text-decoration:none; }
   /* generous tap targets for the inline submit + action controls on touch */
   .int-go, #add-go, .acts .lnk, #confirm-go, #unlock-go, #wish-go, #cal-go{ padding:8px 6px; margin:-8px -6px; font-size:15px; }
+  /* obvious primary actions + instant tap feedback (network can lag; the tap must register now) */
+  button, .lnk, .seat, .dtile{ touch-action:manipulation; -webkit-tap-highlight-color:transparent; }
+  .lnk:active{ opacity:.5; }
+  .seat:active:not(:disabled), .dtile:active{ opacity:.5; }
+  #unlock-go, #confirm-go, #seat-confirm, .int-go, .pn-go, #wish-go, #add-go{ border:1px solid var(--ink); padding:9px 16px; margin:0; font-size:15px; line-height:1; }
+  #unlock-go[disabled], #confirm-go[disabled], #seat-confirm[disabled], .int-go[disabled], .pn-go[disabled], #wish-go[disabled], #add-go[disabled]{ border-color:var(--faint); color:var(--faint); background:none; }
+  #unlock-go:active, #confirm-go:active, #seat-confirm:active, .int-go:active, .pn-go:active, #wish-go:active, #add-go:active{ background:var(--ink); color:var(--paper); text-decoration:none; opacity:1; }
   .acts{ margin-top:calc(var(--u)*2); display:flex; gap:20px; }
 
   /* RSVP name rows */
@@ -680,7 +688,7 @@
     const tiles = pollDatesOf(u).map(dt=>{
       const cnt = (pledges[u.title] && pledges[u.title][dt]) || 0;
       const on = hasPledged(u.title, dt), carried = cnt >= q;
-      return `<button class="dtile${on?' on':''}${carried?' carried':''}" data-date="${esc(dt)}"><span class="dt-wd">${esc(fmt(dt,{weekday:'short'}))}</span><span class="dt-day">${esc(fmt(dt,{day:'numeric'}))}</span><span class="dt-mo">${esc(fmt(dt,{month:'short'}))}</span><span class="dt-n">${cnt||''}</span></button>`;
+      return `<button class="dtile${on?' on':''}${carried?' carried':''}" data-date="${esc(dt)}"><span class="dt-when"><span class="dt-wd">${esc(fmt(dt,{weekday:'short'}))}</span><span class="dt-day">${esc(fmt(dt,{day:'numeric'}))}</span><span class="dt-mo">${esc(fmt(dt,{month:'short'}))}</span></span><span class="dt-n">${cnt||''}</span></button>`;
     }).join('');
     return `<div class="poll" data-film="${esc(u.title)}"><div class="poll-h">when</div><div class="dtiles">${tiles}</div><form class="poll-name" hidden autocomplete="off"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow pn-name" type="text" aria-label="name" enterkeyhint="send" autocapitalize="words" autocorrect="off" spellcheck="false"><button class="lnk pn-go" type="submit">[enter]</button></form></div>`;
   }
