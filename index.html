@@ -56,16 +56,17 @@
   .rsvp.closed .edge{ border-top-style:solid; }
   /* seat plan (kept in the receipt aesthetic; outlined furniture, fixed orientation) */
   .present-toggle{ display:block; margin-top:calc(var(--u)*1.5); font-size:13px; text-align:left; color:var(--soft); }
-  .poll{ margin-top:calc(var(--u)*1.25); }
-  .poll-head{ display:flex; align-items:baseline; gap:10px; }
-  .poll-lbl{ color:var(--soft); }
-  .poll-head .int-rule{ flex:1; align-self:center; height:0; border-bottom:1px dotted var(--rule); }
-  .poll-head .int-n{ white-space:nowrap; min-width:1.4em; text-align:right; color:var(--soft); }
-  .cmi-dates{ margin-top:9px; font-size:13px; color:var(--soft); display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
-  .cmi-q{ color:var(--faint); }
-  .cmi-d{ background:none; border:0; padding:2px 0; font:inherit; color:var(--soft); cursor:pointer; }
-  .cmi-d.on{ color:var(--ink); border-bottom:1px solid var(--ink); }
-  .cmi-dates .sep{ color:var(--faint); }
+  .poll{ margin-top:calc(var(--u)*1.5); }
+  .poll-count{ font-size:12px; color:var(--soft); }
+  .ballot-row{ display:flex; align-items:center; gap:10px; margin-top:9px; flex-wrap:wrap; }
+  .ballot-cap{ font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--faint); }
+  .ballot{ display:inline-flex; border:1px solid var(--ink); }
+  .ballot-cell{ background:none; border:0; border-left:1px solid var(--ink); padding:8px 13px; font:inherit; font-size:14px; color:var(--ink); cursor:pointer; white-space:nowrap; }
+  .ballot-cell:first-child{ border-left:0; }
+  .ballot-cell.on{ background:var(--ink); color:var(--paper); }
+  .ballot-cell:active{ opacity:.6; }
+  .ballot.saving{ animation:ballotpulse 1s ease-in-out infinite; }
+  @keyframes ballotpulse{ 50%{ opacity:.4; } }
   .poll-name{ display:flex; align-items:baseline; gap:6px; margin-top:8px; }
   .seatwrap{ display:inline-flex; flex-direction:column; align-items:center; gap:2px; }
   .seatn{ font-size:9px; color:var(--soft); max-width:64px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -275,6 +276,7 @@
   let flashed = false;
   let interestCounts = {};
   let pledges = {};
+  let pendingPoll = '';
   const NKEY = 'heimkino:name', PKEY = 'heimkino:pledged';
   function myName(){ try{ return localStorage.getItem(NKEY) || ''; }catch(_){ return ''; } }
   function setMyName(n){ try{ localStorage.setItem(NKEY, n); }catch(_){ } }
@@ -683,16 +685,17 @@
   function pollHtml(u){
     const dts = pollDatesOf(u), mine = pledgeChoice(u.title), c = interestCounts[u.title]||0;
     const dfmt = dt => esc(fmt(dt,{weekday:'short',day:'numeric'}));
-    const head = `<div class="poll-head"><span class="poll-lbl">interested</span><span class="int-rule"></span><span class="int-n">${c}</span></div>`;
-    const days = `<div class="cmi-dates"><span class="cmi-q">which night?</span> ${dts.map(dt=>`<button class="cmi-d${mine===dt?' on':''}" data-date="${esc(dt)}">${dfmt(dt)}</button>`).join(' <span class="sep">/</span> ')}</div>`;
+    const count = `<div class="poll-count">${c} interested</div>`;
+    const cells = dts.map(dt=>`<button class="ballot-cell${mine===dt?' on':''}" data-date="${esc(dt)}">${dfmt(dt)}</button>`).join('');
+    const ballot = `<div class="ballot-row"><span class="ballot-cap">when</span><div class="ballot${pendingPoll===u.title?' saving':''}" role="group" aria-label="pick a night">${cells}</div></div>`;
     const nameForm = `<form class="poll-name" hidden autocomplete="off"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow pn-name" type="text" aria-label="name" enterkeyhint="send" autocapitalize="words" autocorrect="off" spellcheck="false"><button class="lnk pn-go" type="submit">[enter]</button></form>`;
-    return `<div class="poll" data-film="${esc(u.title)}">${head}${days}${nameForm}</div>`;
+    return `<div class="poll" data-film="${esc(u.title)}">${count}${ballot}${nameForm}</div>`;
   }
-  function optIn(film, date){ interestCounts[film]=(interestCounts[film]||0)+1; markVoted(film); setPledgeChoice(film, date||''); renderUpcoming(); track('interest');
-    post('interest', { name:myName(), film, date:date||'' }).then(d=>{ if(d.interest){ interestCounts=d.interest; renderUpcoming(); } })
-      .catch(()=>{ interestCounts[film]=Math.max(0,(interestCounts[film]||1)-1); unmarkVoted(film); setPledgeChoice(film,''); renderUpcoming(); }); }
-  function pickDate(film, date){ const cur=pledgeChoice(film), nd = cur===date?'':date; setPledgeChoice(film, nd); renderUpcoming(); track('interest');
-    post('interest', { name:myName(), film, date:nd }).then(d=>{ if(d.interest){ interestCounts=d.interest; renderUpcoming(); } }).catch(()=>{ setPledgeChoice(film, cur); renderUpcoming(); }); }
+  function optIn(film, date){ interestCounts[film]=(interestCounts[film]||0)+1; markVoted(film); setPledgeChoice(film, date||''); pendingPoll=film; renderUpcoming(); track('interest');
+    post('interest', { name:myName(), film, date:date||'' }).then(d=>{ pendingPoll=''; if(d.interest){ interestCounts=d.interest; } renderUpcoming(); })
+      .catch(()=>{ pendingPoll=''; interestCounts[film]=Math.max(0,(interestCounts[film]||1)-1); unmarkVoted(film); setPledgeChoice(film,''); renderUpcoming(); }); }
+  function pickDate(film, date){ const cur=pledgeChoice(film), nd = cur===date?'':date; setPledgeChoice(film, nd); pendingPoll=film; renderUpcoming(); track('interest');
+    post('interest', { name:myName(), film, date:nd }).then(d=>{ pendingPoll=''; if(d.interest){ interestCounts=d.interest; } renderUpcoming(); }).catch(()=>{ pendingPoll=''; setPledgeChoice(film, cur); renderUpcoming(); }); }
   function renderUpcoming(){
     const base = (C.upcoming||[]).filter(u=>u && u.title && u !== PICK.promoted).map((u,idx)=>({u,idx}));
     const dated = base.filter(x=>x.u.date).sort((a,b)=> a.u.date<b.u.date?-1:(a.u.date>b.u.date?1:a.idx-b.idx));
@@ -745,7 +748,7 @@
   function wireUpcoming(){
     const root = $('#upcoming');
     root.addEventListener('click', e => {
-      const cd = e.target.closest('.cmi-d');
+      const cd = e.target.closest('.ballot-cell');
       if (cd){
         const poll = cd.closest('.poll'), film = poll.dataset.film, date = cd.dataset.date;
         if (myName()) return (hasVoted(film) || pledgeChoice(film)) ? pickDate(film, date) : optIn(film, date);
@@ -867,8 +870,10 @@
     if (!EP) return;
     const q = (CUR && CUR.date) ? ('?date=' + encodeURIComponent(CUR.date)) : '';
     try{ const r = await fetch(EP + q); const d = await r.json();
-      if (d && d.interest){ interestCounts = d.interest; renderUpcoming(); }
-      if (d && d.pledges){ pledges = d.pledges; renderUpcoming(); }
+      let up = false;
+      if (d && d.interest){ interestCounts = d.interest; up = true; }
+      if (d && d.pledges){ pledges = d.pledges; up = true; }
+      if (up && !document.querySelector('#upcoming .poll-name:not([hidden])')) renderUpcoming();
       if (d && Array.isArray(d.taken)) takenIds = d.taken;
       if (d && typeof d.confirmed==='number'){ agg={confirmed:d.confirmed, capacity:d.capacity}; renderCurrent(); } }catch(_){}
   }
