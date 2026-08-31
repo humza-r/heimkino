@@ -673,10 +673,11 @@
     });
   }
 
-  function filmMom(u){ if(!u.pollDates || !pledges[u.title]) return 0; let m=0; u.pollDates.forEach(dt=>{ const c=(pledges[u.title]&&pledges[u.title][dt])||0; if(c>m) m=c; }); return m; }
+  function pollDatesOf(u){ const p=u&&u.pollDates; return Array.isArray(p)?p:(p?String(p).split(/[;,]/).map(s=>s.trim()).filter(Boolean):[]); }
+  function filmMom(u){ const dts=pollDatesOf(u); if(!dts.length || !pledges[u.title]) return 0; let m=0; dts.forEach(dt=>{ const c=(pledges[u.title]&&pledges[u.title][dt])||0; if(c>m) m=c; }); return m; }
   function pollHtml(u){
     const q = C.quorum || 3;
-    const tiles = u.pollDates.map(dt=>{
+    const tiles = pollDatesOf(u).map(dt=>{
       const cnt = (pledges[u.title] && pledges[u.title][dt]) || 0;
       const on = hasPledged(u.title, dt), carried = cnt >= q;
       return `<button class="dtile${on?' on':''}${carried?' carried':''}" data-date="${esc(dt)}"><span class="dt-wd">${esc(fmt(dt,{weekday:'short'}))}</span><span class="dt-day">${esc(fmt(dt,{day:'numeric'}))}</span><span class="dt-mo">${esc(fmt(dt,{month:'short'}))}</span><span class="dt-n">${cnt||''}</span></button>`;
@@ -708,7 +709,7 @@
               <form class="int-form" hidden autocomplete="off"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow ni-name" type="text" aria-label="name" enterkeyhint="send" autocapitalize="words" autocorrect="off" spellcheck="false"><input class="nhp" type="text" tabindex="-1" autocomplete="off" aria-hidden="true"><button class="lnk int-go" type="submit">[enter]</button></form>
               <div class="nmsg" aria-live="polite"></div>
             </div>
-            ${(u.pollDates && u.pollDates.length && !u.date) ? pollHtml(u) : ''}
+            ${(pollDatesOf(u).length && !u.date) ? pollHtml(u) : ''}
           </div>`;}).join('')
         : `<div class="up-film"><div class="meta">nothing listed</div></div>`}
       </div>`;
