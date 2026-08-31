@@ -1,4 +1,4 @@
-/* published 2026-08-31 02:06 */
+/* published 2026-08-31 02:08 */
 window.CONFIG = {
   "wordmark": "movienights",
   "city": "Berlin",
@@ -9,17 +9,7 @@ window.CONFIG = {
     "trailers": "",
     "film": "1955"
   },
-  "next": {
-    "date": "2026-09-03",
-    "title": "Titane",
-    "director": "Julia Ducournau",
-    "year": 2021,
-    "runtime": "108",
-    "synopsis": "A woman with a titanium plate fitted in her head and murderous intent on her mind embarks on a bizarre journey of identity and unconditional love when she's forced to go on the run.",
-    "rec": "Chloe",
-    "lang": "OmU",
-    "seatSelectionEnabled": true
-  },
+  "next": null,
   "upcoming": [
     {
       "date": "2026-09-09",
@@ -82,6 +72,17 @@ window.CONFIG = {
     },
     {
       "date": "",
+      "title": "Titane",
+      "director": "Julia Ducournau",
+      "year": 2021,
+      "runtime": "108",
+      "synopsis": "A woman with a titanium plate fitted in her head and murderous intent on her mind embarks on a bizarre journey of identity and unconditional love when she's forced to go on the run.",
+      "rec": "Chloe",
+      "lang": "OmU",
+      "seatSelectionEnabled": true
+    },
+    {
+      "date": "",
       "title": "Dinner For Adele",
       "director": "Oldřich Lipský",
       "year": 1978,
@@ -103,7 +104,7 @@ window.CONFIG = {
   ],
   "past": [
     {
-      "date": "2026-08-31",
+      "date": "2026-09-03",
       "title": "Breathless",
       "director": "Jean-Luc Godard",
       "year": 1960,
