@@ -684,18 +684,17 @@
   function pollDatesOf(u){ const p=u&&u.pollDates; return Array.isArray(p)?p:(p?String(p).split(/[;,]/).map(s=>s.trim()).filter(Boolean):[]); }
   function filmMom(u){ const dts=pollDatesOf(u); if(!dts.length || !pledges[u.title]) return 0; let m=0; dts.forEach(dt=>{ const c=(pledges[u.title]&&pledges[u.title][dt])||0; if(c>m) m=c; }); return m; }
   function pollHtml(u){
-    const dts = pollDatesOf(u), mine = pledgeChoice(u.title), total = interestCounts[u.title] || 0;
-    const totLine = total ? `<div class="poll-tot">${total} interested</div>` : '';
+    const dts = pollDatesOf(u), mine = pledgeChoice(u.title);
     const when = dt => `<span class="dt-when"><span class="dt-wd">${esc(fmt(dt,{weekday:'short'}))}</span><span class="dt-day">${esc(fmt(dt,{day:'numeric'}))}</span><span class="dt-mo">${esc(fmt(dt,{month:'short'}))}</span></span>`;
     const nameForm = `<form class="poll-name" hidden autocomplete="off"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow pn-name" type="text" aria-label="name" enterkeyhint="send" autocapitalize="words" autocorrect="off" spellcheck="false"><button class="lnk pn-go" type="submit">[enter]</button></form>`;
     if (dts.length === 1){
       const dt = dts[0], on = mine === dt;
-      return `<div class="poll" data-film="${esc(u.title)}"><button class="dtile one${on?' on':''}" data-date="${esc(dt)}">${when(dt)}<span class="dt-cta">${on?'coming \u2713':'count me in'}</span></button>${totLine}${nameForm}</div>`;
+      return `<div class="poll" data-film="${esc(u.title)}"><button class="dtile one${on?' on':''}" data-date="${esc(dt)}">${when(dt)}<span class="dt-cta">${on?'coming \u2713':'count me in'}</span></button>${nameForm}</div>`;
     }
     const tiles = dts.map(dt=>{ const on = mine===dt;
       return `<button class="dtile${on?' on':''}" data-date="${esc(dt)}">${when(dt)}${on?'<span class="dt-cta">picked</span>':''}</button>`;
     }).join('');
-    return `<div class="poll" data-film="${esc(u.title)}"><div class="poll-h">which night suits?</div><div class="dtiles">${tiles}</div>${totLine}${nameForm}</div>`;
+    return `<div class="poll" data-film="${esc(u.title)}"><div class="poll-h">when</div><div class="dtiles">${tiles}</div>${nameForm}</div>`;
   }
   function renderUpcoming(){
     const base = (C.upcoming||[]).filter(u=>u && u.title && u !== PICK.promoted).map((u,idx)=>({u,idx}));
