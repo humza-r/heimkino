@@ -1,4 +1,4 @@
-/* published 2026-08-31 13:13 */
+/* published 2026-08-31 16:29 */
 window.CONFIG = {
   "wordmark": "movienights",
   "city": "Berlin",
@@ -30,7 +30,8 @@ window.CONFIG = {
       "seatSelectionEnabled": true,
       "pollDates": [
         "2026-09-12",
-        "2026-09-19"
+        "2026-09-19",
+        "2026-09-09"
       ]
     },
     {
