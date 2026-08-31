@@ -1,4 +1,4 @@
-/* published 2026-08-31 02:10 */
+/* published 2026-08-31 02:11 */
 window.CONFIG = {
   "wordmark": "movienights",
   "city": "Berlin",
@@ -9,7 +9,15 @@ window.CONFIG = {
     "trailers": "",
     "film": "1955"
   },
-  "next": null,
+  "next": {
+    "date": "2026-09-03",
+    "title": "Breathless",
+    "director": "Jean-Luc Godard",
+    "year": 1960,
+    "runtime": "90",
+    "synopsis": "After killing a police officer, a young man returns to Paris, where he spends time with an American journalism student while trying to evade the authorities and persuade her to leave with him.",
+    "lang": "OmU"
+  },
   "upcoming": [
     {
       "date": "2026-09-09",
@@ -103,16 +111,6 @@ window.CONFIG = {
     }
   ],
   "past": [
-    {
-      "date": "2026-09-03",
-      "title": "Breathless",
-      "director": "Jean-Luc Godard",
-      "year": 1960,
-      "runtime": "90",
-      "synopsis": "After killing a police officer, a young man returns to Paris, where he spends time with an American journalism student while trying to evade the authorities and persuade her to leave with him.",
-      "lang": "OmU",
-      "private": true
-    },
     {
       "date": "2026-08-26",
       "title": "Possession",
