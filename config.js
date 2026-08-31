@@ -1,4 +1,4 @@
-/* published 2026-08-31 02:11 */
+/* published 2026-08-31 02:17 */
 window.CONFIG = {
   "wordmark": "movienights",
   "city": "Berlin",
@@ -20,7 +20,7 @@ window.CONFIG = {
   },
   "upcoming": [
     {
-      "date": "2026-09-09",
+      "date": "",
       "title": "Teorema",
       "director": "Pier Paolo Pasolini",
       "year": 1968,
@@ -34,7 +34,7 @@ window.CONFIG = {
       ]
     },
     {
-      "date": "2026-09-16",
+      "date": "",
       "title": "L'Appartement",
       "director": "Gilles Mimouni",
       "year": 1996,
