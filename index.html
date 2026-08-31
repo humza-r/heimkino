@@ -65,6 +65,8 @@
   .ballot-cell:first-child{ border-left:0; }
   .ballot-cell.on{ background:var(--ink); color:var(--paper); }
   .ballot-cell:active{ opacity:.6; }
+  .ballot.locked .ballot-cell{ cursor:default; }
+  .ballot.locked .ballot-cell:not(.on){ color:var(--faint); }
   .ballot.saving{ animation:ballotpulse 1s ease-in-out infinite; }
   @keyframes ballotpulse{ 50%{ opacity:.4; } }
   .poll-name{ display:flex; align-items:baseline; gap:6px; margin-top:8px; }
@@ -683,19 +685,18 @@
   function pollDatesOf(u){ const p=u&&u.pollDates; return Array.isArray(p)?p:(p?String(p).split(/[;,]/).map(s=>s.trim()).filter(Boolean):[]); }
   function filmMom(u){ const dts=pollDatesOf(u); if(!dts.length || !pledges[u.title]) return 0; let m=0; dts.forEach(dt=>{ const c=(pledges[u.title]&&pledges[u.title][dt])||0; if(c>m) m=c; }); return m; }
   function pollHtml(u){
-    const dts = pollDatesOf(u), mine = pledgeChoice(u.title), c = interestCounts[u.title]||0;
+    const dts = pollDatesOf(u), c = interestCounts[u.title]||0;
+    const raw = pledgeChoice(u.title), mine = dts.indexOf(raw) >= 0 ? raw : '', locked = !!mine;
     const dfmt = dt => esc(fmt(dt,{weekday:'short',day:'numeric'}));
     const count = `<div class="poll-count">${c} interested</div>`;
-    const cells = dts.map(dt=>`<button class="ballot-cell${mine===dt?' on':''}" data-date="${esc(dt)}">${dfmt(dt)}</button>`).join('');
-    const ballot = `<div class="ballot-row"><span class="ballot-cap">when</span><div class="ballot${pendingPoll===u.title?' saving':''}" role="group" aria-label="pick a night">${cells}</div></div>`;
-    const nameForm = `<form class="poll-name" hidden autocomplete="off"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow pn-name" type="text" aria-label="name" enterkeyhint="send" autocapitalize="words" autocorrect="off" spellcheck="false"><button class="lnk pn-go" type="submit">[enter]</button></form>`;
+    const cells = dts.map(dt=>`<button class="ballot-cell${mine===dt?' on':''}"${locked?' disabled':''} data-date="${esc(dt)}">${dfmt(dt)}</button>`).join('');
+    const ballot = `<div class="ballot-row"><span class="ballot-cap">${locked?'your night':'when'}</span><div class="ballot${locked?' locked':''}${pendingPoll===u.title?' saving':''}" role="group" aria-label="pick a night">${cells}</div></div>`;
+    const nameForm = `<form class="poll-name" hidden autocomplete="off"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow pn-name" type="text" aria-label="name" enterkeyhint="send" autocapitalize="words" autocorrect="off" spellcheck="false"><button class="lnk pn-go" type="submit">[pick]</button></form>`;
     return `<div class="poll" data-film="${esc(u.title)}">${count}${ballot}${nameForm}</div>`;
   }
   function optIn(film, date){ interestCounts[film]=(interestCounts[film]||0)+1; markVoted(film); setPledgeChoice(film, date||''); pendingPoll=film; renderUpcoming(); track('interest');
     post('interest', { name:myName(), film, date:date||'' }).then(d=>{ pendingPoll=''; if(d.interest){ interestCounts=d.interest; } renderUpcoming(); })
       .catch(()=>{ pendingPoll=''; interestCounts[film]=Math.max(0,(interestCounts[film]||1)-1); unmarkVoted(film); setPledgeChoice(film,''); renderUpcoming(); }); }
-  function pickDate(film, date){ const cur=pledgeChoice(film), nd = cur===date?'':date; setPledgeChoice(film, nd); pendingPoll=film; renderUpcoming(); track('interest');
-    post('interest', { name:myName(), film, date:nd }).then(d=>{ pendingPoll=''; if(d.interest){ interestCounts=d.interest; } renderUpcoming(); }).catch(()=>{ pendingPoll=''; setPledgeChoice(film, cur); renderUpcoming(); }); }
   function renderUpcoming(){
     const base = (C.upcoming||[]).filter(u=>u && u.title && u !== PICK.promoted).map((u,idx)=>({u,idx}));
     const dated = base.filter(x=>x.u.date).sort((a,b)=> a.u.date<b.u.date?-1:(a.u.date>b.u.date?1:a.idx-b.idx));
@@ -750,8 +751,10 @@
     root.addEventListener('click', e => {
       const cd = e.target.closest('.ballot-cell');
       if (cd){
+        if (cd.disabled) return;
         const poll = cd.closest('.poll'), film = poll.dataset.film, date = cd.dataset.date;
-        if (myName()) return (hasVoted(film) || pledgeChoice(film)) ? pickDate(film, date) : optIn(film, date);
+        if (pledgeChoice(film)) return;                 // one pick per film — already chosen
+        if (myName()) return optIn(film, date);         // one-tap register
         const f = poll.querySelector('.poll-name'); f.hidden=false; f.dataset.date = date; f.querySelector('.pn-name').focus();
         return;
       }
@@ -764,7 +767,7 @@
       if (e.target.classList.contains('poll-name')){
         e.preventDefault(); const f=e.target, poll=f.closest('.poll'), name=f.querySelector('.pn-name').value.trim();
         if(!name) return; setMyName(name); const film=poll.dataset.film, date=f.dataset.date; f.hidden=true;
-        if (hasVoted(film) || pledgeChoice(film)) pickDate(film, date); else optIn(film, date);
+        if (!pledgeChoice(film)) optIn(film, date);
         return;
       }
       if(!e.target.classList.contains('int-form')) return;
