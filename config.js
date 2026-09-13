@@ -1,4 +1,4 @@
-/* published 2026-09-13 23:59 */
+/* published 2026-09-14 00:04 */
 window.CONFIG = {
   "wordmark": "movienights",
   "city": "Berlin",
@@ -111,8 +111,7 @@ window.CONFIG = {
       "runtime": "108",
       "synopsis": "A woman with a titanium plate fitted in her head and murderous intent on her mind embarks on a bizarre journey of identity and unconditional love when she's forced to go on the run.",
       "rec": "Chloe",
-      "lang": "OmU",
-      "private": true
+      "lang": "OmU"
     },
     {
       "date": "2026-09-03",
