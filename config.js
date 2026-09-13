@@ -1,4 +1,4 @@
-/* published 2026-09-14 00:04 */
+/* published 2026-09-14 00:06 */
 window.CONFIG = {
   "wordmark": "movienights",
   "city": "Berlin",
@@ -190,8 +190,6 @@ window.CONFIG = {
       "title": "The Following",
       "director": "Christopher Nolan",
       "year": 1998,
-      "edition": "Mubi",
-      "runtime": "152",
       "synopsis": "A 1998 British independent neo-noir film written, directed, photographed and edited by Christopher Nolan in his feature film directorial debut.",
       "away": true,
       "attendees": [
