@@ -1,4 +1,4 @@
-/* published 2026-09-14 00:21 */
+/* published 2026-09-14 00:28 */
 window.CONFIG = {
   "wordmark": "movienights",
   "city": "Berlin",
@@ -34,7 +34,7 @@ window.CONFIG = {
       "synopsis": "When Max catches a glimpse of the great lost love of his life, he becomes obsessed with rekindling their relationship.",
       "pollDates": [
         "2026-09-25",
-        "2026-09-26"
+        "2026-09-28"
       ]
     },
     {
