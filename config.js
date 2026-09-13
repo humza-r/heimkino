@@ -1,4 +1,4 @@
-/* published 2026-09-13 18:45 */
+/* published 2026-09-13 23:59 */
 window.CONFIG = {
   "wordmark": "movienights",
   "city": "Berlin",
@@ -9,15 +9,7 @@ window.CONFIG = {
     "trailers": "",
     "film": "1955"
   },
-  "next": {
-    "date": "2026-09-03",
-    "title": "Breathless",
-    "director": "Jean-Luc Godard",
-    "year": 1960,
-    "runtime": "90",
-    "synopsis": "After killing a police officer, a young man returns to Paris, where he spends time with an American journalism student while trying to evade the authorities and persuade her to leave with him.",
-    "lang": "OmU"
-  },
+  "next": null,
   "upcoming": [
     {
       "date": "",
@@ -81,17 +73,6 @@ window.CONFIG = {
     },
     {
       "date": "",
-      "title": "Titane",
-      "director": "Julia Ducournau",
-      "year": 2021,
-      "runtime": "108",
-      "synopsis": "A woman with a titanium plate fitted in her head and murderous intent on her mind embarks on a bizarre journey of identity and unconditional love when she's forced to go on the run.",
-      "rec": "Chloe",
-      "lang": "OmU",
-      "seatSelectionEnabled": true
-    },
-    {
-      "date": "",
       "title": "Dinner For Adele",
       "director": "Oldřich Lipský",
       "year": 1978,
@@ -109,9 +90,39 @@ window.CONFIG = {
       "synopsis": "A reserved housekeeper takes a job with an affluent family in Brittany and forms a close friendship with a local postal worker, as class tensions and mutual resentment gradually build toward violence.",
       "lang": "OmU",
       "seatSelectionEnabled": true
+    },
+    {
+      "date": "",
+      "title": "The Master and Margarita",
+      "director": "Aleksandar Petrović",
+      "year": 1972,
+      "runtime": "95",
+      "synopsis": "Maestro Nikolai Masoudov, a talented writer, and his assistant Margaret, are working on a biblical story of Pontius Pilate. Victimized by the harassment at Satans hand, Master's paranoi leads him to being locked up in a mental institution. Margaret is trying to save him regardless of the danger.",
+      "rec": "Milana",
+      "lang": "OmU"
     }
   ],
   "past": [
+    {
+      "date": "2026-09-09",
+      "title": "Titane",
+      "director": "Julia Ducournau",
+      "year": 2021,
+      "runtime": "108",
+      "synopsis": "A woman with a titanium plate fitted in her head and murderous intent on her mind embarks on a bizarre journey of identity and unconditional love when she's forced to go on the run.",
+      "rec": "Chloe",
+      "lang": "OmU",
+      "private": true
+    },
+    {
+      "date": "2026-09-03",
+      "title": "Breathless",
+      "director": "Jean-Luc Godard",
+      "year": 1960,
+      "runtime": "90",
+      "synopsis": "After killing a police officer, a young man returns to Paris, where he spends time with an American journalism student while trying to evade the authorities and persuade her to leave with him.",
+      "lang": "OmU"
+    },
     {
       "date": "2026-08-26",
       "title": "Possession",
