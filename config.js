@@ -1,4 +1,4 @@
-/* published 2026-09-14 00:09 */
+/* published 2026-09-14 00:17 */
 window.CONFIG = {
   "wordmark": "movienights",
   "city": "Berlin",
@@ -112,6 +112,15 @@ window.CONFIG = {
       "synopsis": "A woman with a titanium plate fitted in her head and murderous intent on her mind embarks on a bizarre journey of identity and unconditional love when she's forced to go on the run.",
       "rec": "Chloe",
       "lang": "OmU"
+    },
+    {
+      "date": "2026-09-09",
+      "title": "The Passion of Joan of Arc",
+      "director": "Carl Theodor Dreyer",
+      "year": 1928,
+      "runtime": "82",
+      "synopsis": "Joan of Arc is interrogated, tried and condemned by an ecclesiastical court.",
+      "rec": "Deleuze / Cinema I"
     },
     {
       "date": "2026-09-03",
