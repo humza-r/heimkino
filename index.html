@@ -346,9 +346,7 @@
     const today = todayISO(), n = C.next;
     if (n && n.title && (!n.date || n.date >= today)) return { cur:n, promoted:null, retired:null };
     const retired = (n && n.title && n.date && n.date < today) ? n : null;
-    const dated = (C.upcoming||[]).filter(u=>u && u.title && u.date && u.date >= today).sort((a,b)=> a.date < b.date ? -1 : 1);
-    if (dated.length) return { cur:dated[0], promoted:dated[0], retired:retired };
-    return { cur:null, promoted:null, retired:retired };
+    return { cur:null, promoted:null, retired:retired };   // no next => no banner (upcoming leads)
   }
   const PICK = pickCurrent();
   const CUR = PICK.cur;
@@ -361,17 +359,20 @@
     if (!d.ok) throw new Error(d.error || 'Something went wrong.');
     return d;
   }
+  function deviceType_(){ return /Mobi|Android|iP(hone|od|ad)/.test(navigator.userAgent||'') ? 'mobile' : 'desktop'; }
+  function refBucket_(){ try{ const r=document.referrer; if(!r) return 'direct'; const h=new URL(r).hostname.replace(/^www\./,''); return h===location.hostname ? 'internal' : h; }catch(_){ return ''; } }
+  function returning_(){ try{ if(localStorage.getItem('heimkino:seen')) return 'returning'; localStorage.setItem('heimkino:seen','1'); return 'new'; }catch(_){ return ''; } }
   function track(ev){
     if (!EP) return;
     try{ fetch(EP, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
-      body: JSON.stringify({ action:'event', event:ev, film:(CUR && CUR.title) || '' }) }); }catch(_){}
+      body: JSON.stringify({ action:'event', event:ev, film:(CUR && CUR.title) || '', device:deviceType_(), ref:refBucket_(), ret:returning_() }) }); }catch(_){}
   }
 
   // ---------- page chrome ----------
   function renderChrome(){
     document.title = (CUR ? CUR.title : (C.wordmark || 'Programme'));
     const d = new Date(), p = x => String(x).padStart(2,'0');
-    const foot = $('#foot'); if (foot) foot.textContent = 'updated ' + p(d.getDate()) + '.' + p(d.getMonth()+1) + '.' + String(d.getFullYear()).slice(2);
+    const foot = $('#foot'); if (foot) foot.textContent = 'last updated ' + p(d.getDate()) + '.' + p(d.getMonth()+1) + '.' + String(d.getFullYear()).slice(2);
     renderCountdown();
   }
   function parseHM_(t){
@@ -426,7 +427,7 @@
     const curSec = document.getElementById('current'), admSec = document.getElementById('admission');
     if (!n){
       if (curSec){ curSec.innerHTML = ''; curSec.style.display = 'none'; }
-      if (admSec){ admSec.style.display = 'none'; }
+      if (admSec){ admSec.style.display = ''; }   // keep the code bar available (reveals house note)
       return;
     }
     if (curSec) curSec.style.display = '';
@@ -463,7 +464,6 @@
 
   function renderAdmission(){
     const body = $('#admit-body'); if(!body) return;
-    if (!CUR){ return; }
     if (!EP){ body.innerHTML = `<div class="small">reservations offline</div>`; return; }
 
     const sm = seatMode();
@@ -472,6 +472,19 @@
     const planBlk = m => sm ? `<div class="plan-wrap">${roomPlanHtml(m)}</div>` : '';
     const msg = `<div class="msg" id="admit-msg" role="status" aria-live="polite"></div>`;
     let html = '';
+
+    if (!CUR){
+      // no scheduled screening: the code still opens the house note, kept quiet and out of the way
+      if (sessionCode){
+        html = (noteBlk || `<div class="small">nothing scheduled right now.</div>`) + locBlk;
+      } else {
+        html = `<form id="unlock-form" autocomplete="off"><div class="line"><span class="inl">code</span><span class="gt">&gt;</span><input class="grow" id="code" type="text" required aria-label="Code" enterkeyhint="go" autocapitalize="none" autocorrect="off" spellcheck="false" autocomplete="off"></div><div class="hp" aria-hidden="true"><input id="u-hp" type="text" tabindex="-1" autocomplete="off"></div><div class="acts"><button class="lnk" type="submit" id="unlock-go">[enter]</button></div>${msg}</form>`;
+      }
+      body.innerHTML = html;
+      if (admInited){ const f = $('#code'); if (f && f.focus){ try{ f.focus({ preventScroll:true }); }catch(_){ } } }
+      admInited = true;
+      return;
+    }
 
     if (slip){
       html += `<div class="sec-h">Coming</div><hr class="rule">`
@@ -755,8 +768,11 @@
         if (cd.disabled) return;
         const poll = cd.closest('.poll'), film = poll.dataset.film, date = cd.dataset.date;
         if (pledgeChoice(film)) return;                 // one pick per film, already chosen
-        if (myName()) return optIn(film, date);         // one-tap register
-        const f = poll.querySelector('.poll-name'); f.hidden=false; f.dataset.date = date; f.querySelector('.pn-name').focus();
+        if (myName()) return optIn(film, date);         // known guest: one-tap confirm
+        // first-timer: highlight the tentative night in place and reveal the name row (no re-render)
+        poll.querySelectorAll('.ballot-cell').forEach(c => c.classList.toggle('on', c===cd));
+        const f = poll.querySelector('.poll-name'); f.hidden=false; f.dataset.date = date;
+        const inp = f.querySelector('.pn-name'); if (document.activeElement !== inp) inp.focus();
         return;
       }
       const b = e.target.closest('.int-btn'); if(!b || b.disabled) return;
@@ -833,7 +849,8 @@
   function renderSuggest(){
     const el = $('#suggest'); if(!el) return;
     el.innerHTML = `
-      <button class="lnk" id="wish-toggle" aria-expanded="false">+ suggest a film</button>
+      <div class="sec-h">Suggest a film</div><hr class="rule">
+      <button class="lnk" id="wish-toggle" aria-expanded="false">+ add a suggestion</button>
       <form class="sug-form" id="wish-form" hidden autocomplete="off">
         <div class="line"><span class="inl">film</span><span class="gt">&gt;</span><input class="grow" id="w-film" type="text" required aria-label="Film" enterkeyhint="next" autocapitalize="words" autocorrect="off"></div>
         <div class="line"><span class="inl">director</span><span class="gt">&gt;</span><input class="grow" id="w-dir" type="text" aria-label="Director" enterkeyhint="next" autocapitalize="words" autocorrect="off"></div>
