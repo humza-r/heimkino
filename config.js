@@ -1,4 +1,4 @@
-/* published 2026-09-14 00:06 */
+/* published 2026-09-14 00:09 */
 window.CONFIG = {
   "wordmark": "movienights",
   "city": "Berlin",
@@ -120,6 +120,7 @@ window.CONFIG = {
       "year": 1960,
       "runtime": "90",
       "synopsis": "After killing a police officer, a young man returns to Paris, where he spends time with an American journalism student while trying to evade the authorities and persuade her to leave with him.",
+      "rec": "Fynn",
       "lang": "OmU"
     },
     {
