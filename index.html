@@ -81,8 +81,8 @@
   .topbar{ text-align:right; margin-bottom:calc(var(--u)*2); }
   .topbar .lnk{ font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--soft); }
   .code-entry{ margin-top:calc(var(--u)*1.25); }
-  .code-field{ display:flex; align-items:center; gap:9px; border:1px dashed var(--rule); padding:9px 13px; width:100%; box-sizing:border-box; }
-  .code-field .lock{ color:var(--soft); flex:none; }
+  .code-field{ display:flex; align-items:center; gap:8px; border:1px dashed var(--rule); padding:6px 11px; max-width:250px; width:100%; box-sizing:border-box; }
+  .code-field .lock{ color:var(--soft); flex:none; width:13px; height:13px; }
   .code-field input{ border:0; }
   .code-field input:focus{ outline:none; }
   .code-field.shake{ animation:shake .3s; }
@@ -202,13 +202,15 @@
   .tags{ margin-top:9px; }
   .tag{ display:inline-block; font-size:10px; letter-spacing:0.16em; text-transform:uppercase; color:var(--soft); margin-right:16px; }
   .rec{ margin-top:6px; font-size:12px; color:var(--soft); }
-  .rec span{ color:var(--ink); }
+  .rec span{ color:transparent; text-shadow:0 0 7px var(--ink); -webkit-user-select:none; user-select:none; }
   .att{ margin-top:9px; font-size:12px; color:var(--soft); }
   .peek{ background:none; border:0; padding:0 0 1px; cursor:pointer; color:var(--soft);
     border-bottom:1px dotted var(--rule); font:inherit; -webkit-user-select:none; user-select:none; }
   .peek:hover, .peek:focus-visible{ color:var(--ink); outline:none; }
-  .att-names{ display:none; color:var(--ink); }
-  .att.revealed .att-names{ display:inline; }
+  .att-names{ display:none; }
+  .att.revealed .att-names{ display:inline; color:transparent; text-shadow:0 0 7px var(--ink); -webkit-user-select:none; user-select:none; }
+  .unlocked .rec span{ color:var(--ink); text-shadow:none; -webkit-user-select:auto; user-select:auto; }
+  .unlocked .att.revealed .att-names{ color:var(--ink); text-shadow:none; -webkit-user-select:auto; user-select:auto; }
   .pastsyn{ margin-top:calc(var(--u)*0.75); }
   .syn-peek{ background:none; border:0; padding:0 0 1px; cursor:pointer; color:var(--soft); border-bottom:1px dotted var(--rule); font:inherit; -webkit-user-select:none; user-select:none; }
   .syn-peek:hover, .syn-peek:focus-visible{ color:var(--ink); outline:none; }
@@ -528,7 +530,7 @@
     if (!CUR){
       // no scheduled screening: the code still opens the house note, kept quiet and out of the way
       if (sessionCode){
-        html = (noteBlk || locBlk) ? (noteBlk + locBlk) : `<div class="small">nothing to show.</div>`;
+        html = noteBlk || `<div class="small">nothing to show.</div>`;
       } else {
         html = codeEntry();
       }
@@ -585,7 +587,7 @@
     admInited = true;
   }
 
-  function reveal(g){ gated = g; renderVenue(); renderCurrent(); }
+  function reveal(g){ gated = g; const w=document.querySelector('.wrap'); if(w) w.classList.add('unlocked'); renderVenue(); renderCurrent(); }
 
   async function unlockSession(form){
     const code = form.querySelector('#code').value.trim();
