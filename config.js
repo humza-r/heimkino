@@ -1,4 +1,4 @@
-/* published 2026-09-14 11:39 */
+/* published 2026-09-14 11:42 */
 window.CONFIG = {
   "wordmark": "movienights",
   "city": "Berlin",
