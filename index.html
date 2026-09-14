@@ -509,7 +509,7 @@
     const codeEntry = () => {
       const form = `<form id="unlock-form" class="code-min" hidden autocomplete="off"><span class="inl">code</span><span class="gt">&gt;</span><input class="grow" id="code" type="text" required aria-label="Code" enterkeyhint="go" autocapitalize="none" autocorrect="off" spellcheck="false" autocomplete="off"><button class="lnk code-go" type="submit" id="unlock-go" aria-label="open">\u2192</button><span class="hp" aria-hidden="true"><input id="u-hp" type="text" tabindex="-1" autocomplete="off"></span><span class="msg" id="admit-msg" role="status" aria-live="polite"></span></form>`;
       let trig;
-      if (CODE_STYLE === 'keyhole'){
+      if (CODE_STYLE === 'cursor'){
         trig = `<button type="button" class="code-trigger keyhole" id="code-open" aria-label="enter code"><svg viewBox="0 0 24 30" width="22" height="27" aria-hidden="true"><circle cx="12" cy="10" r="5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M9.5 13.5 L8 23 H16 L14.5 13.5 Z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>`;
       } else if (CODE_STYLE === 'cursor'){
         trig = `<button type="button" class="code-trigger cursor" id="code-open" aria-label="enter code"><span class="blink">\u2588</span></button>`;
