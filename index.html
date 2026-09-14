@@ -81,24 +81,11 @@
   .topbar{ text-align:right; margin-bottom:calc(var(--u)*2); }
   .topbar .lnk{ font-size:11px; letter-spacing:0.1em; text-transform:uppercase; color:var(--soft); }
   .code-entry{ margin-top:calc(var(--u)*1.25); }
-  .code-trigger{ background:none; border:0; padding:0; font:inherit; color:var(--soft); cursor:pointer; display:inline-flex; align-items:center; }
-  .code-trigger:active{ opacity:.6; }
-  /* stub: a little perforated ticket you tear */
-  .code-trigger.stub{ gap:9px; border:1px dashed var(--rule); padding:8px 14px; letter-spacing:0.06em; }
-  .code-trigger.stub .stub-perf{ width:1px; height:16px; border-left:2px dotted var(--soft); }
-  .code-trigger.stub .stub-lbl{ text-transform:uppercase; font-size:11px; letter-spacing:0.14em; }
-  .code-trigger.stub:active{ transform:translateX(2px) rotate(-1deg); }
-  /* keyhole: unlock */
-  .code-trigger.keyhole{ padding:4px; }
-  .code-trigger.keyhole:active{ transform:rotate(-18deg); }
-  /* cursor: a blinking invitation to type */
-  .code-trigger.cursor .blink{ font-size:15px; animation:blink 1.1s steps(1) infinite; }
-  @keyframes blink{ 50%{ opacity:0; } }
-  #unlock-form[hidden]{ display:none; }
-  .code-min{ display:flex; align-items:baseline; gap:8px; }
-  .code-min.reveal{ animation:unfold .22s ease; }
-  @keyframes unfold{ from{ opacity:0; transform:translateY(-4px); } }
-  .code-min.shake{ animation:shake .3s; }
+  .code-field{ display:flex; align-items:center; gap:9px; border:1px dashed var(--rule); padding:9px 13px; max-width:280px; }
+  .code-field .lock{ color:var(--soft); flex:none; }
+  .code-field input{ border:0; }
+  .code-field input:focus{ outline:none; }
+  .code-field.shake{ animation:shake .3s; }
   @keyframes shake{ 25%{ transform:translateX(-4px); } 75%{ transform:translateX(4px); } }
   .code-go{ color:var(--soft); font-size:16px; line-height:1; }
   .present-toggle[aria-pressed="true"]{ color:var(--ink); }
@@ -162,14 +149,14 @@
   .lnk:hover, .lnk:focus-visible{ text-decoration:underline; outline:none; }
   .lnk[disabled]{ color:var(--faint); cursor:default; text-decoration:none; }
   /* generous tap targets for the inline submit + action controls on touch */
-  .int-go, #add-go, .acts .lnk, #confirm-go, #unlock-go, #wish-go, #cal-go{ padding:8px 6px; margin:-8px -6px; font-size:15px; }
+  .int-go, #add-go, .acts .lnk, #confirm-go, #wish-go, #cal-go{ padding:8px 6px; margin:-8px -6px; font-size:15px; }
   /* obvious primary actions + instant tap feedback (network can lag; the tap must register now) */
   button, .lnk, .seat, .dtile{ touch-action:manipulation; -webkit-tap-highlight-color:transparent; }
   .lnk:active{ opacity:.5; }
   .seat:active:not(:disabled), .dtile:active{ opacity:.5; }
-  #unlock-go, #confirm-go, #seat-confirm, .int-go, .pn-go, #wish-go, #add-go{ border:1px solid var(--ink); padding:9px 16px; margin:0; font-size:15px; line-height:1; }
-  #unlock-go[disabled], #confirm-go[disabled], #seat-confirm[disabled], .int-go[disabled], .pn-go[disabled], #wish-go[disabled], #add-go[disabled]{ border-color:var(--faint); color:var(--faint); background:none; }
-  #unlock-go:active, #confirm-go:active, #seat-confirm:active, .int-go:active, .pn-go:active, #wish-go:active, #add-go:active{ background:var(--ink); color:var(--paper); text-decoration:none; opacity:1; }
+  #confirm-go, #seat-confirm, .int-go, .pn-go, #wish-go, #add-go{ border:1px solid var(--ink); padding:9px 16px; margin:0; font-size:15px; line-height:1; }
+  #confirm-go[disabled], #seat-confirm[disabled], .int-go[disabled], .pn-go[disabled], #wish-go[disabled], #add-go[disabled]{ border-color:var(--faint); color:var(--faint); background:none; }
+  #confirm-go:active, #seat-confirm:active, .int-go:active, .pn-go:active, #wish-go:active, #add-go:active{ background:var(--ink); color:var(--paper); text-decoration:none; opacity:1; }
   .acts{ margin-top:calc(var(--u)*2); display:flex; gap:20px; }
 
   /* RSVP name rows */
@@ -264,8 +251,6 @@
 <script>
 (function(){
   const C = window.CONFIG;
-  // Code entry look — try each, then delete the two you don't keep: 'stub' | 'keyhole' | 'cursor'
-  const CODE_STYLE = 'keyhole';
   const EP = (C.endpoint || '').trim();
   const startedAt = Date.now();
   const $ = (s, r=document) => r.querySelector(s);
@@ -506,18 +491,12 @@
     const locBlk  = (gated && gated.venue) ? `<div class="proto proto-loc"><div class="k">address</div><button type="button" class="v loc-copy" id="loc-copy" title="tap to copy">${esc(gated.venue)}</button></div>` : '';
     const planBlk = m => sm ? `<div class="plan-wrap">${roomPlanHtml(m)}</div>` : '';
     const msg = `<div class="msg" id="admit-msg" role="status" aria-live="polite"></div>`;
-    const codeEntry = () => {
-      const form = `<form id="unlock-form" class="code-min" hidden autocomplete="off"><span class="inl">code</span><span class="gt">&gt;</span><input class="grow" id="code" type="text" required aria-label="Code" enterkeyhint="go" autocapitalize="none" autocorrect="off" spellcheck="false" autocomplete="off"><button class="lnk code-go" type="submit" id="unlock-go" aria-label="open">\u2192</button><span class="hp" aria-hidden="true"><input id="u-hp" type="text" tabindex="-1" autocomplete="off"></span><span class="msg" id="admit-msg" role="status" aria-live="polite"></span></form>`;
-      let trig;
-      if (CODE_STYLE === 'cursor'){
-        trig = `<button type="button" class="code-trigger keyhole" id="code-open" aria-label="enter code"><svg viewBox="0 0 24 30" width="22" height="27" aria-hidden="true"><circle cx="12" cy="10" r="5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M9.5 13.5 L8 23 H16 L14.5 13.5 Z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></button>`;
-      } else if (CODE_STYLE === 'cursor'){
-        trig = `<button type="button" class="code-trigger cursor" id="code-open" aria-label="enter code"><span class="blink">\u2588</span></button>`;
-      } else {
-        trig = `<button type="button" class="code-trigger stub" id="code-open" aria-label="enter code"><span class="stub-perf"></span><span class="stub-lbl">code</span></button>`;
-      }
-      return `<div class="code-entry">${trig}${form}</div>`;
-    };
+    const codeEntry = () => `<form id="unlock-form" class="code-field" autocomplete="off">`
+      + `<svg class="lock" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="1" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M8 11 V8 a4 4 0 0 1 8 0 V11" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>`
+      + `<input class="grow" id="code" type="text" required aria-label="code" placeholder="enter code" enterkeyhint="go" autocapitalize="none" autocorrect="off" spellcheck="false" autocomplete="off">`
+      + `<button class="lnk code-go" type="submit" id="unlock-go" aria-label="open">\u2192</button>`
+      + `<span class="hp" aria-hidden="true"><input id="u-hp" type="text" tabindex="-1" autocomplete="off"></span>`
+      + `<span class="msg" id="admit-msg" role="status" aria-live="polite"></span></form>`;
     let html = '';
 
     if (!CUR){
@@ -576,7 +555,7 @@
     }
 
     body.innerHTML = html;
-    if (admInited){ const f = $('#code') || $('.rn'); if (f && f.focus){ try{ f.focus({ preventScroll:true }); }catch(_){ try{ f.focus(); }catch(__){} } } }
+    if (admInited){ const f = $('.rn'); if (f && f.focus){ try{ f.focus({ preventScroll:true }); }catch(_){ try{ f.focus(); }catch(__){} } } }
     admInited = true;
   }
 
@@ -596,7 +575,7 @@
       if (typeof d.confirmed === 'number') agg = { confirmed:d.confirmed, capacity:d.capacity };
       reveal({ venue:d.venue, houseNote:d.houseNote });
       renderAdmission(); renderCurrent(); track('code');
-    }catch(err){ done(); admitMsg('wrong code', 'err'); const f=$('#unlock-form'); if(f){ f.classList.remove('shake'); void f.offsetWidth; f.classList.add('shake'); } }
+    }catch(err){ done(); admitMsg('wrong code', 'err'); const f=$('#unlock-form'); if(f){ f.classList.remove('shake'); void f.offsetWidth; f.classList.add('shake'); const c=$('#code'); if(c) c.focus(); } }
   }
 
   function roomPlanHtml(mode){
@@ -724,7 +703,6 @@
       else if (t.dataset.rm !== undefined){ removeName(parseInt(t.dataset.rm,10)); }
       else if (t.id === 'cancel-res'){ cancelRes(); }
       else if (t.id === 'cal-go'){ track('calendar'); }
-      else if (t.id === 'code-open'){ const f=$('#unlock-form'); if(f){ f.hidden=false; f.classList.add('reveal'); t.style.display='none'; const c=$('#code'); if(c) c.focus(); track('code-open'); } }
       else if (t.id === 'loc-copy'){ const v=(gated&&gated.venue)||''; if(v){ try{ navigator.clipboard.writeText(v).then(()=>{ const o=t.textContent; t.textContent='copied'; setTimeout(()=>{ t.textContent=o; }, 1200); }); }catch(_){} } }
       else if (t.id === 'cal-goog'){ openGcal(); }
       else if (t.dataset.seat){ pickSeat(t.dataset.seat); }
@@ -748,7 +726,7 @@
     const count = `<div class="poll-count">${c} interested</div>`;
     const cells = dts.map(dt=>`<button class="ballot-cell${mine===dt?' on':''}"${locked?' disabled':''} data-date="${esc(dt)}">${dfmt(dt)}</button>`).join('');
     const ballot = `<div class="ballot-row"><span class="ballot-cap">${locked?'preference':'when'}</span><div class="ballot${locked?' locked':''}${pendingPoll===u.title?' saving':''}" role="group" aria-label="pick a night">${cells}</div></div>`;
-    const nameForm = `<form class="poll-name" hidden autocomplete="off"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow pn-name" type="text" aria-label="name" enterkeyhint="send" autocapitalize="words" autocorrect="off" spellcheck="false"><button class="lnk pn-go" type="submit">[pick]</button></form>`;
+    const nameForm = `<form class="poll-name" hidden autocomplete="off"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow pn-name" type="text" aria-label="name" enterkeyhint="send" autocapitalize="words" autocorrect="off" spellcheck="false"><button class="lnk pn-go" type="submit">[confirm]</button></form>`;
     return `<div class="poll" data-film="${esc(u.title)}">${count}${ballot}${nameForm}</div>`;
   }
   function optIn(film, date){ interestCounts[film]=(interestCounts[film]||0)+1; markVoted(film); setPledgeChoice(film, date||''); pendingPoll=film; renderUpcoming(); track('interest');
@@ -776,7 +754,7 @@
             ${u.synopsis ? `<div class="up-syn"><p class="syn">${esc(u.synopsis)}</p><button class="syn-more" aria-expanded="false">more</button></div>` : ''}
             ${(pollDatesOf(u).length && !u.date) ? pollHtml(u) : `<div class="int" data-film="${esc(u.title)}">
               <button class="int-btn"${voted?' disabled':''} aria-expanded="false"><span class="int-label">interested${voted?' \u2713':''}</span><span class="int-rule"></span><span class="int-n">${c}</span></button>
-              <form class="int-form" hidden autocomplete="off"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow ni-name" type="text" aria-label="name" enterkeyhint="send" autocapitalize="words" autocorrect="off" spellcheck="false"><input class="nhp" type="text" tabindex="-1" autocomplete="off" aria-hidden="true"><button class="lnk int-go" type="submit">[enter]</button></form>
+              <form class="int-form" hidden autocomplete="off"><span class="inl">name</span><span class="gt">&gt;</span><input class="grow ni-name" type="text" aria-label="name" enterkeyhint="send" autocapitalize="words" autocorrect="off" spellcheck="false"><input class="nhp" type="text" tabindex="-1" autocomplete="off" aria-hidden="true"><button class="lnk int-go" type="submit">[confirm]</button></form>
               <div class="nmsg" aria-live="polite"></div>
             </div>`}
           </div>`;}).join('')
