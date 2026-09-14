@@ -1,4 +1,4 @@
-/* published 2026-09-14 10:51 */
+/* published 2026-09-14 11:31 */
 window.CONFIG = {
   "wordmark": "movienights",
   "city": "Berlin",
@@ -80,8 +80,14 @@ window.CONFIG = {
       "year": 1995,
       "runtime": "111",
       "synopsis": "A reserved housekeeper takes a job with an affluent family in Brittany and forms a close friendship with a local postal worker, as class tensions and mutual resentment gradually build toward violence.",
+      "rec": "For Soedeh",
       "lang": "OmU",
-      "seatSelectionEnabled": true
+      "seatSelectionEnabled": true,
+      "pollDates": [
+        "2026-09-25",
+        "2026-09-27",
+        "2026-09-28"
+      ]
     },
     {
       "date": "",
