@@ -1,4 +1,4 @@
-/* published 2026-09-14 12:45 */
+/* published 2026-09-14 15:56 */
 window.CONFIG = {
   "wordmark": "movienights",
   "city": "Berlin",
@@ -263,7 +263,9 @@ window.CONFIG = {
     "bench",
     "black chair",
     "chaise",
-    "sofa"
+    "sofa",
+    "floor",
+    "folding chair"
   ],
   "seatSelection": true
 };
