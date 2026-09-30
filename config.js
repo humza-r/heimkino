@@ -1,4 +1,4 @@
-/* published 2026-09-30 06:45 */
+/* published 2026-09-30 11:37 */
 window.CONFIG = {
   "wordmark": "movienights",
   "city": "Berlin",
@@ -9,7 +9,15 @@ window.CONFIG = {
     "trailers": "",
     "film": "1955"
   },
-  "next": null,
+  "next": {
+    "date": "",
+    "title": "Naked Lunch",
+    "director": "David Cronenberg",
+    "year": 1991,
+    "runtime": "115",
+    "synopsis": "Blank-faced bug killer Bill Lee and his dead-eyed wife, Joan, like to get high on Bill’s pest poisons while lounging with Beat poet pals. After meeting the devilish Dr. Benway, Bill gets a drug made from a centipede. Upon indulging, he accidentally kills Joan, takes orders from his typewriter-turned-cockroach, ends up in a constantly mutating Mediterranean city and learns that his hip friends have published his work – which he doesn’t remember writing.",
+    "seatSelectionEnabled": true
+  },
   "upcoming": [
     {
       "date": "",
@@ -19,12 +27,7 @@ window.CONFIG = {
       "edition": "CC",
       "synopsis": "A wealthy Italian household is turned upside down when a handsome stranger arrives, seduces every family member and then disappears. Each has an epiphany of sorts, but none can figure out who the seductive visitor was or why he came.",
       "rec": "Fynn",
-      "seatSelectionEnabled": true,
-      "pollDates": [
-        "2026-09-16",
-        "2026-09-25",
-        "2026-09-28"
-      ]
+      "seatSelectionEnabled": true
     },
     {
       "date": "",
@@ -34,8 +37,7 @@ window.CONFIG = {
       "runtime": "116",
       "synopsis": "When Max catches a glimpse of the great lost love of his life, he becomes obsessed with rekindling their relationship.",
       "pollDates": [
-        "2026-09-25",
-        "2026-09-28"
+        "Wed Oct 14 2026 00:00:00 GMT+0200 (Central European Summer Time)"
       ]
     },
     {
@@ -74,7 +76,7 @@ window.CONFIG = {
       "lang": "OmU"
     },
     {
-      "date": "",
+      "date": "2026-10-07",
       "title": "La Cérémonie",
       "director": "Claude Chabrol",
       "year": 1995,
@@ -82,12 +84,7 @@ window.CONFIG = {
       "synopsis": "A reserved housekeeper takes a job with an affluent family in Brittany and forms a close friendship with a local postal worker, as class tensions and mutual resentment gradually build toward violence.",
       "rec": "For Soedeh",
       "lang": "OmU",
-      "seatSelectionEnabled": true,
-      "pollDates": [
-        "2026-09-25",
-        "2026-09-27",
-        "2026-09-28"
-      ]
+      "seatSelectionEnabled": true
     },
     {
       "date": "",
