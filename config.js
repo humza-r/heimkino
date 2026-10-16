@@ -1,4 +1,4 @@
-/* published 2026-10-16 18:45 */
+/* published 2026-10-17 00:45 */
 window.CONFIG = {
   "wordmark": "movienights",
   "city": "Berlin",
@@ -9,15 +9,7 @@ window.CONFIG = {
     "trailers": "",
     "film": "1955"
   },
-  "next": {
-    "date": "",
-    "title": "Naked Lunch",
-    "director": "David Cronenberg",
-    "year": 1991,
-    "runtime": "115",
-    "synopsis": "Blank-faced bug killer Bill Lee and his dead-eyed wife, Joan, like to get high on Bill’s pest poisons while lounging with Beat poet pals. After meeting the devilish Dr. Benway, Bill gets a drug made from a centipede. Upon indulging, he accidentally kills Joan, takes orders from his typewriter-turned-cockroach, ends up in a constantly mutating Mediterranean city and learns that his hip friends have published his work – which he doesn’t remember writing.",
-    "seatSelectionEnabled": true
-  },
+  "next": null,
   "upcoming": [
     {
       "date": "",
@@ -95,9 +87,26 @@ window.CONFIG = {
       "synopsis": "Maestro Nikolai Masoudov, a talented writer, and his assistant Margaret, are working on a biblical story of Pontius Pilate. Victimized by the harassment at Satans hand, Master's paranoi leads him to being locked up in a mental institution. Margaret is trying to save him regardless of the danger.",
       "rec": "Milana",
       "lang": "OmU"
+    },
+    {
+      "date": "2026-10-21",
+      "title": "Cure",
+      "director": "Kiyosho Kurosawa",
+      "year": 1997,
+      "synopsis": "A string of shocking, seemingly unmotivated murders-each committed by a different person yet bearing the same grisly hallmarks-leads Detective Kenichi Takabe (Koji Yakusho) into a labyrinthine investigation to discover what connects them, and into a disturbing game of cat and mouse.",
+      "seatSelectionEnabled": true
     }
   ],
   "past": [
+    {
+      "date": "2026-09-27",
+      "title": "Naked Lunch",
+      "director": "David Cronenberg",
+      "year": 1991,
+      "runtime": "115",
+      "synopsis": "Blank-faced bug killer Bill Lee and his dead-eyed wife, Joan, like to get high on Bill’s pest poisons while lounging with Beat poet pals. After meeting the devilish Dr. Benway, Bill gets a drug made from a centipede. Upon indulging, he accidentally kills Joan, takes orders from his typewriter-turned-cockroach, ends up in a constantly mutating Mediterranean city and learns that his hip friends have published his work – which he doesn’t remember writing.",
+      "seatSelectionEnabled": true
+    },
     {
       "date": "2026-09-13",
       "title": "Spartacus",
